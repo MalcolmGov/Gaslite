@@ -374,7 +374,7 @@ export default function LandingPage() {
                 className="relative"
               >
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-cyan-400/20 to-blue-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <Card className="relative overflow-visible group hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 border-2 border-blue-500/30 dark:border-blue-400/30 bg-white dark:bg-gray-900 backdrop-blur-xl rounded-2xl">
+                <Card className="relative overflow-visible group hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 border-2 border-blue-400 dark:border-blue-500 bg-white dark:bg-gray-900 backdrop-blur-xl rounded-2xl">
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-400/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <CardContent className="relative pt-12 pb-8 px-6 text-center">
                     <motion.div 
