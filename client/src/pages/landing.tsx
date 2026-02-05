@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import gasCylinderImage from "@/assets/images/gas-cylinder.png";
+import gasCylinderImage from "@/assets/images/gas-cylinder-dark.png";
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
