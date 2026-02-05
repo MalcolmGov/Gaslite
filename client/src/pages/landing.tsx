@@ -356,8 +356,8 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 relative">
-            <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-blue-500/20 via-blue-500 to-blue-500/20" />
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-10 relative">
+            <div className="hidden md:block absolute top-24 left-[20%] right-[20%] h-1 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent rounded-full" />
             
             {[
               { step: 1, icon: Flame, title: "Choose Your Gas", desc: "Select from 9kg, 19kg, or 48kg cylinders", time: "~2 min" },
@@ -370,26 +370,41 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.2 }}
+                whileHover={{ y: -8 }}
+                className="relative"
               >
-                <Card className="relative overflow-hidden group hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 border-border/50 bg-card/50 backdrop-blur-sm">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <CardContent className="relative pt-8 pb-6 text-center">
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                      {item.step}
-                    </div>
-                    <motion.div
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-cyan-400/20 to-blue-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <Card className="relative overflow-visible group hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 border border-blue-500/10 dark:border-white/10 bg-gradient-to-b from-white to-gray-50/80 dark:from-gray-900/80 dark:to-gray-800/50 backdrop-blur-xl rounded-2xl">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-400/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <CardContent className="relative pt-12 pb-8 px-6 text-center">
+                    <motion.div 
+                      className="absolute -top-5 left-1/2 -translate-x-1/2"
+                      whileHover={{ scale: 1.1 }}
                     >
-                      <item.icon className="h-10 w-10 text-primary" />
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full blur-md opacity-50" />
+                        <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-blue-500/30 ring-4 ring-white dark:ring-gray-900">
+                          {item.step}
+                        </div>
+                      </div>
                     </motion.div>
-                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                    <p className="text-muted-foreground mb-4">{item.desc}</p>
                     <motion.div
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
+                      whileHover={{ scale: 1.05, rotate: 3 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                      className="relative w-20 h-20 mx-auto mb-6"
                     >
-                      <Badge variant="secondary" className="bg-green-500/10 text-green-600">{item.time}</Badge>
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-400/20 rounded-2xl blur-lg" />
+                      <div className="relative w-full h-full bg-gradient-to-br from-blue-500/10 to-cyan-400/10 dark:from-blue-500/20 dark:to-cyan-400/20 rounded-2xl flex items-center justify-center border border-blue-500/10">
+                        <item.icon className="h-9 w-9 text-blue-500" />
+                      </div>
+                    </motion.div>
+                    <h3 className="text-xl font-bold mb-3 text-foreground">{item.title}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed mb-5">{item.desc}</p>
+                    <motion.div
+                      animate={{ scale: [1, 1.03, 1] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <Badge className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-4 py-1 font-medium">{item.time}</Badge>
                     </motion.div>
                   </CardContent>
                 </Card>
