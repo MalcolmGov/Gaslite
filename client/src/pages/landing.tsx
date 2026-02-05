@@ -28,6 +28,36 @@ import {
 } from "lucide-react";
 import { SiInstagram, SiFacebook, SiX } from "react-icons/si";
 
+function GasCylinderLogo({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 32" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="cylinderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#3b82f6" />
+          <stop offset="50%" stopColor="#2563eb" />
+          <stop offset="100%" stopColor="#1d4ed8" />
+        </linearGradient>
+        <linearGradient id="valveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#9ca3af" />
+          <stop offset="100%" stopColor="#6b7280" />
+        </linearGradient>
+        <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stopColor="#06b6d4" />
+          <stop offset="100%" stopColor="#22d3ee" />
+        </linearGradient>
+      </defs>
+      <rect x="2" y="6" width="20" height="24" rx="4" fill="url(#cylinderGradient)" />
+      <ellipse cx="12" cy="6" rx="10" ry="3" fill="url(#cylinderGradient)" />
+      <ellipse cx="12" cy="6" rx="10" ry="3" fill="white" fillOpacity="0.3" />
+      <rect x="9" y="1" width="6" height="5" rx="1" fill="url(#valveGradient)" />
+      <circle cx="12" cy="2" r="2" fill="url(#valveGradient)" />
+      <path d="M12 14 C9 18 8 20 12 24 C16 20 15 18 12 14" fill="url(#flameGradient)" />
+      <path d="M12 16 C10.5 18 10 19 12 22 C14 19 13.5 18 12 16" fill="white" fillOpacity="0.6" />
+      <rect x="4" y="8" width="16" height="1" fill="white" fillOpacity="0.2" />
+    </svg>
+  );
+}
+
 function AnimatedCounter({ target, duration = 2000, suffix = "" }: { target: number; duration?: number; suffix?: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
@@ -65,7 +95,7 @@ function FloatingGasCylinder() {
         <div className="absolute bottom-8 left-4 right-4 h-20 bg-white/20 rounded-lg flex items-center justify-center">
           <Flame className="h-10 w-10 text-white" />
         </div>
-        <div className="absolute bottom-2 left-4 right-4 text-center text-xs font-bold text-white/80">GasGo</div>
+        <div className="absolute bottom-2 left-4 right-4 text-center text-xs font-bold text-white/80">Gaslite</div>
       </div>
       <motion.div 
         className="absolute -inset-4 bg-blue-500/20 rounded-full blur-2xl"
@@ -88,8 +118,8 @@ function GlassmorphismOrderCard() {
         <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 dark:from-white/10 dark:to-white/5 backdrop-blur-xl rounded-2xl" />
         <div className="relative p-6 rounded-2xl border border-white/30 dark:border-white/10 shadow-2xl w-72">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center">
-              <Flame className="h-5 w-5 text-white" />
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center p-1.5">
+              <GasCylinderLogo className="w-full h-full" />
             </div>
             <div>
               <p className="font-semibold text-sm">Order Preview</p>
@@ -154,7 +184,7 @@ export default function LandingPage() {
   const testimonials = [
     { name: "Sarah M.", location: "Johannesburg", rating: 5, text: "Incredibly fast delivery! Had gas within 30 minutes of ordering." },
     { name: "Thabo K.", location: "Pretoria", rating: 5, text: "The app is so easy to use. Best gas delivery service in SA!" },
-    { name: "Priya N.", location: "Durban", rating: 5, text: "Reliable, safe, and affordable. Highly recommend GasGo!" },
+    { name: "Priya N.", location: "Durban", rating: 5, text: "Reliable, safe, and affordable. Highly recommend Gaslite!" },
   ];
 
   return (
@@ -172,10 +202,10 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-                <Flame className="h-6 w-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 p-1.5">
+                <GasCylinderLogo className="w-full h-full" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">GasGo</span>
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Gaslite</span>
             </motion.div>
             <div className="hidden md:flex items-center gap-6">
               <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
@@ -377,7 +407,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <Badge className="mb-4 bg-blue-500/10 text-blue-600">Why GasGo</Badge>
+            <Badge className="mb-4 bg-blue-500/10 text-blue-600">Why Gaslite</Badge>
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">Built for <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Trust & Speed</span></h2>
           </motion.div>
 
@@ -564,7 +594,7 @@ export default function LandingPage() {
                 Earn Money <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Your Way</span>
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Become a GasGo driver and enjoy flexible hours, competitive earnings, and the freedom to be your own boss.
+                Become a Gaslite driver and enjoy flexible hours, competitive earnings, and the freedom to be your own boss.
               </p>
               <div className="grid sm:grid-cols-2 gap-6 mb-8">
                 {[
@@ -638,7 +668,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">Ready to Order?</h2>
-            <p className="text-xl text-white/80 mb-8">Join thousands of satisfied customers who trust GasGo for their gas delivery needs.</p>
+            <p className="text-xl text-white/80 mb-8">Join thousands of satisfied customers who trust Gaslite for their gas delivery needs.</p>
             <a href="/api/login">
               <Button size="lg" variant="secondary" className="h-14 px-10 text-lg shadow-xl" data-testid="button-cta-order">
                 Get Started Now
@@ -654,10 +684,10 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center">
-                  <Flame className="h-6 w-6 text-white" />
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center p-1.5">
+                  <GasCylinderLogo className="w-full h-full" />
                 </div>
-                <span className="text-xl font-bold">GasGo</span>
+                <span className="text-xl font-bold">Gaslite</span>
               </div>
               <p className="text-muted-foreground mb-6 max-w-sm">
                 South Africa's fastest and most reliable LPG gas delivery service. Order with confidence.
@@ -702,7 +732,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} GasGo. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Gaslite. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <Badge variant="outline" className="text-xs">SABS Approved</Badge>
               <Badge variant="outline" className="text-xs">SSL Secure</Badge>

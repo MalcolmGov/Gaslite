@@ -1,8 +1,8 @@
-# GasGo - On-Demand LPG Gas Delivery Application
+# Gaslite - On-Demand LPG Gas Delivery Application
 
 ## Overview
 
-GasGo is a premium on-demand LPG gas delivery application designed for the South African market. The platform connects customers who need gas cylinder deliveries with drivers who fulfill those orders. The system supports three user roles: customers (ordering gas), drivers (delivering orders), and admins (managing the platform).
+Gaslite is a premium on-demand LPG gas delivery application designed for the South African market. The platform connects customers who need gas cylinder deliveries with drivers who fulfill those orders. The system supports three user roles: customers (ordering gas), drivers (delivering orders), and admins (managing the platform).
 
 The application features a visually stunning premium landing page with Framer Motion animations, glassmorphism effects, and a modern blue/white/cyan gradient color scheme. Key functionality includes product catalog browsing, order placement with location tracking, driver onboarding with document uploads, and real-time order status management.
 
