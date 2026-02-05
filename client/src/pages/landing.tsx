@@ -374,7 +374,7 @@ export default function LandingPage() {
                 className="relative"
               >
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-cyan-400/20 to-blue-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <Card className="relative overflow-visible group hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 border border-blue-500/10 dark:border-white/10 bg-gradient-to-b from-white to-gray-50/80 dark:from-gray-900/80 dark:to-gray-800/50 backdrop-blur-xl rounded-2xl">
+                <Card className="relative overflow-visible group hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 border-2 border-blue-500/30 dark:border-blue-400/30 bg-white dark:bg-gray-900 backdrop-blur-xl rounded-2xl">
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-400/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <CardContent className="relative pt-12 pb-8 px-6 text-center">
                     <motion.div 
@@ -398,8 +398,8 @@ export default function LandingPage() {
                         <item.icon className="h-9 w-9 text-blue-500" />
                       </div>
                     </motion.div>
-                    <h3 className="text-xl font-bold mb-3 text-foreground">{item.title}</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed mb-5">{item.desc}</p>
+                    <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">{item.title}</h3>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-5">{item.desc}</p>
                     <motion.div
                       animate={{ scale: [1, 1.03, 1] }}
                       transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
