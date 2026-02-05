@@ -112,7 +112,7 @@ function GlassmorphismOrderCard() {
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.5, duration: 0.8 }}
-      className="absolute -right-8 xl:-right-16 top-1/2 -translate-y-1/2 hidden xl:block z-10"
+      className="absolute -right-4 top-1/3 hidden lg:block z-10"
     >
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 dark:from-white/10 dark:to-white/5 backdrop-blur-xl rounded-2xl" />
@@ -679,25 +679,6 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="flex flex-col lg:flex-row items-center justify-between gap-12"
           >
-            <div className="hidden lg:block">
-              <motion.div
-                animate={{ y: [0, -10, 0], rotate: [0, 2, 0, -2, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                className="relative"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 to-cyan-400/30 rounded-3xl blur-2xl" />
-                <div className="relative w-28 h-40">
-                  <div className="absolute inset-0 bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 rounded-t-full rounded-b-lg shadow-2xl">
-                    <div className="absolute top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-gradient-to-b from-gray-300 to-gray-500 rounded-full shadow-inner" />
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-4 bg-gradient-to-b from-gray-400 to-gray-600 rounded-t-md" />
-                    <div className="absolute bottom-6 left-3 right-3 h-16 bg-white/20 rounded-lg flex items-center justify-center">
-                      <Flame className="h-8 w-8 text-white" />
-                    </div>
-                    <div className="absolute bottom-1.5 left-3 right-3 text-center text-[8px] font-bold text-white/80">Gaslite</div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
             <div className="text-center lg:text-left flex-1">
               <Badge className="mb-4 bg-white/10 text-white border-white/20">Download App</Badge>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
