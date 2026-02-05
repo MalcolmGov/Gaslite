@@ -112,7 +112,7 @@ function GlassmorphismOrderCard() {
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.5, duration: 0.8 }}
-      className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block"
+      className="absolute -right-8 xl:-right-16 top-1/2 -translate-y-1/2 hidden xl:block z-10"
     >
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 dark:from-white/10 dark:to-white/5 backdrop-blur-xl rounded-2xl" />
