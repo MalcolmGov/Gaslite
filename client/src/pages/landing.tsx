@@ -731,7 +731,7 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  <span>hello@gasgo.co.za</span>
+                  <span>hello@gaslite.co.za</span>
                 </li>
               </ul>
               <div className="flex items-center gap-3 mt-6">
