@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import gasCylinderImage from "@/assets/images/gas-cylinder-dark.png";
+import gasCylinderImageLight from "@/assets/images/gas-cylinder.png";
+import gasCylinderImageDark from "@/assets/images/gas-cylinder-dark.png";
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -96,9 +97,14 @@ function FloatingGasCylinder() {
         transition={{ duration: 3, repeat: Infinity }}
       />
       <img 
-        src={gasCylinderImage} 
+        src={gasCylinderImageLight} 
         alt="LPG Gas Cylinder" 
-        className="relative w-full h-full object-contain drop-shadow-2xl"
+        className="relative w-full h-full object-contain drop-shadow-2xl dark:hidden rounded-xl"
+      />
+      <img 
+        src={gasCylinderImageDark} 
+        alt="LPG Gas Cylinder" 
+        className="relative w-full h-full object-contain drop-shadow-2xl hidden dark:block rounded-xl"
       />
     </motion.div>
   );
