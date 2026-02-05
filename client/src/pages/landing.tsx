@@ -670,6 +670,87 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section className="py-16 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-cyan-500/20" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-col lg:flex-row items-center justify-between gap-12"
+          >
+            <div className="text-center lg:text-left flex-1">
+              <Badge className="mb-4 bg-white/10 text-white border-white/20">Download App</Badge>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                Get Gaslite on Your Phone
+              </h2>
+              <p className="text-lg text-gray-300 mb-6 max-w-md">
+                Scan the QR code to install our app directly on your device. No app store needed - instant access to gas delivery.
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <CheckCircle className="h-5 w-5 text-green-400" />
+                  <span>Works on iOS & Android</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <CheckCircle className="h-5 w-5 text-green-400" />
+                  <span>No download required</span>
+                </div>
+              </div>
+            </div>
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="relative"
+            >
+              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-3xl blur-xl opacity-30" />
+              <div className="relative bg-white p-6 rounded-2xl shadow-2xl">
+                <div className="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center relative overflow-hidden">
+                  <svg viewBox="0 0 100 100" className="w-full h-full p-2">
+                    <rect fill="#000" x="10" y="10" width="20" height="20" rx="2"/>
+                    <rect fill="#000" x="70" y="10" width="20" height="20" rx="2"/>
+                    <rect fill="#000" x="10" y="70" width="20" height="20" rx="2"/>
+                    <rect fill="#fff" x="14" y="14" width="12" height="12" rx="1"/>
+                    <rect fill="#fff" x="74" y="14" width="12" height="12" rx="1"/>
+                    <rect fill="#fff" x="14" y="74" width="12" height="12" rx="1"/>
+                    <rect fill="#000" x="17" y="17" width="6" height="6"/>
+                    <rect fill="#000" x="77" y="17" width="6" height="6"/>
+                    <rect fill="#000" x="17" y="77" width="6" height="6"/>
+                    <rect fill="#000" x="35" y="10" width="5" height="5"/>
+                    <rect fill="#000" x="45" y="10" width="5" height="5"/>
+                    <rect fill="#000" x="55" y="15" width="5" height="5"/>
+                    <rect fill="#000" x="35" y="20" width="5" height="5"/>
+                    <rect fill="#000" x="50" y="25" width="5" height="5"/>
+                    <rect fill="#000" x="10" y="35" width="5" height="5"/>
+                    <rect fill="#000" x="20" y="40" width="5" height="5"/>
+                    <rect fill="#000" x="10" y="50" width="5" height="5"/>
+                    <rect fill="#000" x="25" y="55" width="5" height="5"/>
+                    <rect fill="#000" x="35" y="35" width="30" height="30" rx="4"/>
+                    <rect fill="#fff" x="40" y="40" width="20" height="20" rx="2"/>
+                    <path d="M45 50 L50 55 L55 45" stroke="#3b82f6" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                    <rect fill="#000" x="75" y="35" width="5" height="5"/>
+                    <rect fill="#000" x="85" y="45" width="5" height="5"/>
+                    <rect fill="#000" x="70" y="55" width="5" height="5"/>
+                    <rect fill="#000" x="80" y="60" width="5" height="5"/>
+                    <rect fill="#000" x="35" y="75" width="5" height="5"/>
+                    <rect fill="#000" x="45" y="80" width="5" height="5"/>
+                    <rect fill="#000" x="55" y="70" width="5" height="5"/>
+                    <rect fill="#000" x="60" y="85" width="5" height="5"/>
+                    <rect fill="#000" x="75" y="75" width="5" height="5"/>
+                    <rect fill="#000" x="85" y="80" width="5" height="5"/>
+                    <rect fill="#000" x="80" y="85" width="5" height="5"/>
+                  </svg>
+                </div>
+                <p className="text-center text-gray-600 text-sm mt-3 font-medium">Scan to install</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
       <section className="py-20 bg-gradient-to-r from-blue-500 to-cyan-400 relative overflow-hidden">
         <motion.div
           className="absolute inset-0 opacity-10"
