@@ -106,60 +106,6 @@ function FloatingGasCylinder() {
   );
 }
 
-function GlassmorphismOrderCard() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 50 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.5, duration: 0.8 }}
-      className="absolute -right-4 top-1/3 hidden lg:block z-10"
-    >
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 dark:from-white/10 dark:to-white/5 backdrop-blur-xl rounded-2xl" />
-        <div className="relative p-6 rounded-2xl border border-white/30 dark:border-white/10 shadow-2xl w-72">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center p-1.5">
-              <GasCylinderLogo className="w-full h-full" />
-            </div>
-            <div>
-              <p className="font-semibold text-sm">Order Preview</p>
-              <p className="text-xs text-muted-foreground">Live tracking</p>
-            </div>
-            <Badge className="ml-auto bg-green-500/20 text-green-600 text-xs">Active</Badge>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">19kg Gas Cylinder</span>
-              <span className="font-medium">R480</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Service Fee</span>
-              <span className="font-medium">R25</span>
-            </div>
-            <div className="h-px bg-border" />
-            <div className="flex items-center justify-between">
-              <span className="font-semibold">Total</span>
-              <span className="font-bold text-primary">R505</span>
-            </div>
-          </div>
-          <div className="mt-4 p-3 bg-blue-500/10 rounded-xl">
-            <div className="flex items-center gap-2 text-sm">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                <Truck className="h-4 w-4 text-primary" />
-              </motion.div>
-              <span className="text-muted-foreground">Arriving in</span>
-              <span className="font-semibold text-primary">~25 min</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0 },
@@ -303,7 +249,7 @@ export default function LandingPage() {
               </motion.div>
             </motion.div>
 
-            <div className="relative hidden lg:block">
+            <div className="hidden lg:flex items-start gap-6">
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -311,15 +257,62 @@ export default function LandingPage() {
                 className="relative"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-400/20 rounded-3xl blur-3xl" />
-                <div className="relative bg-gradient-to-br from-card to-card/80 rounded-3xl p-12 border border-border/50 shadow-2xl">
+                <div className="relative bg-gradient-to-br from-card to-card/80 rounded-3xl p-10 border border-border/50 shadow-2xl">
                   <FloatingGasCylinder />
-                  <div className="mt-8 text-center">
-                    <h3 className="text-2xl font-bold mb-2">Quick & Safe</h3>
-                    <p className="text-muted-foreground">Certified LPG delivery to your door</p>
+                  <div className="mt-6 text-center">
+                    <h3 className="text-xl font-bold mb-1">Quick & Safe</h3>
+                    <p className="text-muted-foreground text-sm">Certified LPG delivery</p>
                   </div>
                 </div>
               </motion.div>
-              <GlassmorphismOrderCard />
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
+              >
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 dark:from-white/10 dark:to-white/5 backdrop-blur-xl rounded-2xl" />
+                  <div className="relative p-5 rounded-2xl border border-white/30 dark:border-white/10 shadow-2xl w-64">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center p-1.5">
+                        <GasCylinderLogo className="w-full h-full" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">Order Preview</p>
+                        <p className="text-xs text-muted-foreground">Live tracking</p>
+                      </div>
+                      <Badge className="ml-auto bg-green-500/20 text-green-600 text-xs">Active</Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">19kg Gas Cylinder</span>
+                        <span className="font-medium">R480</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Service Fee</span>
+                        <span className="font-medium">R25</span>
+                      </div>
+                      <div className="h-px bg-border" />
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-sm">Total</span>
+                        <span className="font-bold text-primary">R505</span>
+                      </div>
+                    </div>
+                    <div className="mt-3 p-2 bg-blue-500/10 rounded-xl">
+                      <div className="flex items-center gap-2 text-xs">
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          <Truck className="h-3 w-3 text-primary" />
+                        </motion.div>
+                        <span className="text-muted-foreground">Arriving in</span>
+                        <span className="font-semibold text-primary">~25 min</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </div>
         </div>
