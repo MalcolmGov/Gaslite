@@ -398,8 +398,8 @@ export default function LandingPage() {
                         <item.icon className="h-9 w-9 text-blue-500" />
                       </div>
                     </motion.div>
-                    <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">{item.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-5">{item.desc}</p>
+                    <h3 className="text-xl font-bold mb-3 text-black dark:text-white">{item.title}</h3>
+                    <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed mb-5">{item.desc}</p>
                     <motion.div
                       animate={{ scale: [1, 1.03, 1] }}
                       transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
