@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import gasCylinderImage from "@/assets/images/gas-cylinder.png";
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -85,22 +86,19 @@ function AnimatedCounter({ target, duration = 2000, suffix = "" }: { target: num
 function FloatingGasCylinder() {
   return (
     <motion.div
-      className="relative w-32 h-48 mx-auto"
-      animate={{ y: [0, -15, 0], rotateY: [0, 5, 0, -5, 0] }}
-      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      className="relative w-36 h-52 mx-auto"
+      animate={{ y: [0, -10, 0] }}
+      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 rounded-t-full rounded-b-lg shadow-2xl">
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-gradient-to-b from-gray-300 to-gray-500 rounded-full shadow-inner" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-6 bg-gradient-to-b from-gray-400 to-gray-600 rounded-t-md" />
-        <div className="absolute bottom-8 left-4 right-4 h-20 bg-white/20 rounded-lg flex items-center justify-center">
-          <Flame className="h-10 w-10 text-white" />
-        </div>
-        <div className="absolute bottom-2 left-4 right-4 text-center text-xs font-bold text-white/80">Gaslite</div>
-      </div>
       <motion.div 
-        className="absolute -inset-4 bg-blue-500/20 rounded-full blur-2xl"
-        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+        className="absolute -inset-6 bg-blue-500/30 rounded-full blur-3xl"
+        animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.6, 0.4] }}
         transition={{ duration: 3, repeat: Infinity }}
+      />
+      <img 
+        src={gasCylinderImage} 
+        alt="LPG Gas Cylinder" 
+        className="relative w-full h-full object-contain drop-shadow-2xl"
       />
     </motion.div>
   );
