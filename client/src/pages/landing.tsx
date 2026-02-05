@@ -26,7 +26,7 @@ import {
   Play,
   Sparkles
 } from "lucide-react";
-import { SiInstagram, SiFacebook, SiTwitter } from "react-icons/si";
+import { SiInstagram, SiFacebook, SiX } from "react-icons/si";
 
 function AnimatedCounter({ target, duration = 2000, suffix = "" }: { target: number; duration?: number; suffix?: string }) {
   const [count, setCount] = useState(0);
@@ -59,7 +59,7 @@ function FloatingGasCylinder() {
       animate={{ y: [0, -15, 0], rotateY: [0, 5, 0, -5, 0] }}
       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 rounded-t-full rounded-b-lg shadow-2xl">
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 rounded-t-full rounded-b-lg shadow-2xl">
         <div className="absolute top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-gradient-to-b from-gray-300 to-gray-500 rounded-full shadow-inner" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-6 bg-gradient-to-b from-gray-400 to-gray-600 rounded-t-md" />
         <div className="absolute bottom-8 left-4 right-4 h-20 bg-white/20 rounded-lg flex items-center justify-center">
@@ -68,7 +68,7 @@ function FloatingGasCylinder() {
         <div className="absolute bottom-2 left-4 right-4 text-center text-xs font-bold text-white/80">GasGo</div>
       </div>
       <motion.div 
-        className="absolute -inset-4 bg-orange-500/20 rounded-full blur-2xl"
+        className="absolute -inset-4 bg-blue-500/20 rounded-full blur-2xl"
         animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
         transition={{ duration: 3, repeat: Infinity }}
       />
@@ -88,7 +88,7 @@ function GlassmorphismOrderCard() {
         <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 dark:from-white/10 dark:to-white/5 backdrop-blur-xl rounded-2xl" />
         <div className="relative p-6 rounded-2xl border border-white/30 dark:border-white/10 shadow-2xl w-72">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center">
               <Flame className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -112,7 +112,7 @@ function GlassmorphismOrderCard() {
               <span className="font-bold text-primary">R505</span>
             </div>
           </div>
-          <div className="mt-4 p-3 bg-orange-500/10 rounded-xl">
+          <div className="mt-4 p-3 bg-blue-500/10 rounded-xl">
             <div className="flex items-center gap-2 text-sm">
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
@@ -160,7 +160,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 z-50 origin-left"
+        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 z-50 origin-left"
         style={{ scaleX: scrollYProgress }}
       />
 
@@ -172,10 +172,10 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/25">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
                 <Flame className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">GasGo</span>
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">GasGo</span>
             </motion.div>
             <div className="hidden md:flex items-center gap-6">
               <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
@@ -190,7 +190,7 @@ export default function LandingPage() {
                 </Button>
               </a>
               <a href="/api/login">
-                <Button size="sm" className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-500/25" data-testid="button-login">
+                <Button size="sm" className="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 shadow-lg shadow-blue-500/25" data-testid="button-login">
                   Sign In
                 </Button>
               </a>
@@ -201,14 +201,14 @@ export default function LandingPage() {
 
       <section ref={heroRef} className="relative min-h-screen flex items-center pt-16 overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-amber-500/5" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-400/5" />
           <motion.div
-            className="absolute top-1/4 -left-32 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl"
+            className="absolute top-1/4 -left-32 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
             animate={{ scale: [1, 1.2, 1], x: [0, 50, 0] }}
             transition={{ duration: 8, repeat: Infinity }}
           />
           <motion.div
-            className="absolute bottom-1/4 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"
+            className="absolute bottom-1/4 -right-32 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl"
             animate={{ scale: [1.2, 1, 1.2], x: [0, -50, 0] }}
             transition={{ duration: 8, repeat: Infinity, delay: 2 }}
           />
@@ -222,13 +222,13 @@ export default function LandingPage() {
               animate={heroInView ? "animate" : "initial"}
               variants={staggerContainer}
             >
-              <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/10 rounded-full">
-                <Sparkles className="h-4 w-4 text-orange-500" />
-                <span className="text-sm font-medium text-orange-600 dark:text-orange-400">South Africa's #1 Gas Delivery</span>
+              <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 rounded-full">
+                <Sparkles className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-medium text-blue-600 dark:text-blue-400">South Africa's #1 Gas Delivery</span>
               </motion.div>
               
               <motion.h1 variants={fadeInUp} className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
-                <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-clip-text text-transparent">Gas Delivery</span>
+                <span className="bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-600 bg-clip-text text-transparent">Gas Delivery</span>
                 <br />
                 <span className="text-foreground">in Minutes</span>
               </motion.h1>
@@ -239,7 +239,7 @@ export default function LandingPage() {
               
               <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4">
                 <a href="/api/login">
-                  <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xl shadow-orange-500/30 h-14 px-8 text-lg" data-testid="button-get-started">
+                  <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 shadow-xl shadow-blue-500/30 h-14 px-8 text-lg" data-testid="button-get-started">
                     Order Now
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -254,7 +254,7 @@ export default function LandingPage() {
                 <div className="flex items-center gap-2">
                   <div className="flex -space-x-2">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 border-2 border-background flex items-center justify-center text-white text-xs font-medium">
+                      <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 border-2 border-background flex items-center justify-center text-white text-xs font-medium">
                         {String.fromCharCode(64 + i)}
                       </div>
                     ))}
@@ -266,7 +266,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    <Star key={i} className="h-4 w-4 fill-cyan-400 text-cyan-400" />
                   ))}
                   <span className="text-sm font-medium ml-1">4.9/5</span>
                 </div>
@@ -280,7 +280,7 @@ export default function LandingPage() {
                 transition={{ delay: 0.3, duration: 0.8 }}
                 className="relative"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-amber-500/20 rounded-3xl blur-3xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-400/20 rounded-3xl blur-3xl" />
                 <div className="relative bg-gradient-to-br from-card to-card/80 rounded-3xl p-12 border border-border/50 shadow-2xl">
                   <FloatingGasCylinder />
                   <div className="mt-8 text-center">
@@ -317,9 +317,9 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-20"
           >
-            <Badge className="mb-4 bg-orange-500/10 text-orange-600 hover:bg-orange-500/20">How It Works</Badge>
+            <Badge className="mb-4 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20">How It Works</Badge>
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
-              Get Gas in <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">3 Simple Steps</span>
+              Get Gas in <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">3 Simple Steps</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               From order to delivery in under an hour. It's that simple.
@@ -327,7 +327,7 @@ export default function LandingPage() {
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8 relative">
-            <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-orange-500/20 via-orange-500 to-orange-500/20" />
+            <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-blue-500/20 via-blue-500 to-blue-500/20" />
             
             {[
               { step: 1, icon: Flame, title: "Choose Your Gas", desc: "Select from 9kg, 19kg, or 48kg cylinders", time: "~2 min" },
@@ -341,15 +341,15 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.2 }}
               >
-                <Card className="relative overflow-hidden group hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 border-border/50 bg-card/50 backdrop-blur-sm">
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Card className="relative overflow-hidden group hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 border-border/50 bg-card/50 backdrop-blur-sm">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <CardContent className="relative pt-8 pb-6 text-center">
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
                       {item.step}
                     </div>
                     <motion.div
                       whileHover={{ scale: 1.1, rotate: 5 }}
-                      className="w-20 h-20 bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                      className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-2xl flex items-center justify-center mx-auto mb-6"
                     >
                       <item.icon className="h-10 w-10 text-primary" />
                     </motion.div>
@@ -377,8 +377,8 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <Badge className="mb-4 bg-orange-500/10 text-orange-600">Why GasGo</Badge>
-            <h2 className="text-4xl sm:text-5xl font-bold mb-6">Built for <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">Trust & Speed</span></h2>
+            <Badge className="mb-4 bg-blue-500/10 text-blue-600">Why GasGo</Badge>
+            <h2 className="text-4xl sm:text-5xl font-bold mb-6">Built for <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Trust & Speed</span></h2>
           </motion.div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
@@ -388,7 +388,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="col-span-2 row-span-2"
             >
-              <Card className="h-full bg-gradient-to-br from-orange-500 to-amber-500 text-white border-0 overflow-hidden group">
+              <Card className="h-full bg-gradient-to-br from-blue-500 to-cyan-400 text-white border-0 overflow-hidden group">
                 <CardContent className="p-8 h-full flex flex-col justify-between relative">
                   <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
                   <div>
@@ -430,9 +430,9 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="h-full hover:shadow-xl hover:shadow-orange-500/5 transition-all duration-300 group border-border/50">
+                <Card className="h-full hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 group border-border/50">
                   <CardContent className="p-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <item.icon className="h-6 w-6 text-primary" />
                     </div>
                     <div className="text-2xl font-bold text-primary mb-1">{item.value}</div>
@@ -454,8 +454,8 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <Badge className="mb-4 bg-orange-500/10 text-orange-600">Pricing</Badge>
-            <h2 className="text-4xl sm:text-5xl font-bold mb-6">Choose Your <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">Gas Size</span></h2>
+            <Badge className="mb-4 bg-blue-500/10 text-blue-600">Pricing</Badge>
+            <h2 className="text-4xl sm:text-5xl font-bold mb-6">Choose Your <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Gas Size</span></h2>
             <p className="text-lg text-muted-foreground">Transparent pricing. No hidden fees.</p>
           </motion.div>
 
@@ -471,16 +471,16 @@ export default function LandingPage() {
               >
                 {product.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                    <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg">Most Popular</Badge>
+                    <Badge className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg">Most Popular</Badge>
                   </div>
                 )}
-                <Card className={`h-full overflow-hidden transition-all duration-300 hover:shadow-2xl ${product.popular ? 'ring-2 ring-primary shadow-xl shadow-orange-500/20' : 'hover:shadow-orange-500/10'}`}>
+                <Card className={`h-full overflow-hidden transition-all duration-300 hover:shadow-2xl ${product.popular ? 'ring-2 ring-primary shadow-xl shadow-blue-500/20' : 'hover:shadow-blue-500/10'}`}>
                   <CardContent className="p-8 text-center">
                     <motion.div
                       whileHover={{ scale: 1.05, rotateY: 10 }}
                       className="w-24 h-32 mx-auto mb-6 relative"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 rounded-t-full rounded-b-lg shadow-xl">
+                      <div className="absolute inset-0 bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 rounded-t-full rounded-b-lg shadow-xl">
                         <div className="absolute top-2 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-400 rounded-full" />
                         <div className="absolute bottom-4 left-2 right-2 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                           <span className="text-white font-bold text-lg">{product.size}</span>
@@ -493,7 +493,7 @@ export default function LandingPage() {
                       <span className="text-sm text-muted-foreground">From</span>
                       <div className="text-4xl font-bold text-primary">R{product.price}</div>
                     </div>
-                    <Button className={`w-full ${product.popular ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600' : ''}`} variant={product.popular ? "default" : "outline"}>
+                    <Button className={`w-full ${product.popular ? 'bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500' : ''}`} variant={product.popular ? "default" : "outline"}>
                       Order Now
                       <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
@@ -513,8 +513,8 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <Badge className="mb-4 bg-orange-500/10 text-orange-600">Testimonials</Badge>
-            <h2 className="text-4xl sm:text-5xl font-bold">Loved by <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">Thousands</span></h2>
+            <Badge className="mb-4 bg-blue-500/10 text-blue-600">Testimonials</Badge>
+            <h2 className="text-4xl sm:text-5xl font-bold">Loved by <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Thousands</span></h2>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -530,12 +530,12 @@ export default function LandingPage() {
                   <CardContent className="p-6">
                     <div className="flex items-center gap-1 mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                        <Star key={i} className="h-4 w-4 fill-cyan-400 text-cyan-400" />
                       ))}
                     </div>
                     <p className="text-muted-foreground mb-6">"{testimonial.text}"</p>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center text-white font-medium">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-medium">
                         {testimonial.name.charAt(0)}
                       </div>
                       <div>
@@ -559,9 +559,9 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <Badge className="mb-4 bg-orange-500/10 text-orange-600">Join Our Team</Badge>
+              <Badge className="mb-4 bg-blue-500/10 text-blue-600">Join Our Team</Badge>
               <h2 className="text-4xl sm:text-5xl font-bold mb-6">
-                Earn Money <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">Your Way</span>
+                Earn Money <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Your Way</span>
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
                 Become a GasGo driver and enjoy flexible hours, competitive earnings, and the freedom to be your own boss.
@@ -574,7 +574,7 @@ export default function LandingPage() {
                   { icon: Shield, title: "Support", desc: "24/7 driver support" },
                 ].map((item) => (
                   <div key={item.title} className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-lg flex items-center justify-center flex-shrink-0">
                       <item.icon className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -585,7 +585,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <a href="/apply">
-                <Button size="lg" className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-500/25" data-testid="button-driver-apply">
+                <Button size="lg" className="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 shadow-lg shadow-blue-500/25" data-testid="button-driver-apply">
                   Apply Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -601,7 +601,7 @@ export default function LandingPage() {
                 <CardContent className="p-8">
                   <h3 className="text-xl font-bold mb-6">Earnings Calculator</h3>
                   <div className="space-y-6">
-                    <div className="p-4 bg-orange-500/10 rounded-xl text-center">
+                    <div className="p-4 bg-blue-500/10 rounded-xl text-center">
                       <p className="text-sm text-muted-foreground mb-2">Estimated Weekly Earnings</p>
                       <div className="text-4xl font-bold text-primary">R3,500 - R7,000</div>
                       <p className="text-xs text-muted-foreground mt-2">Based on 20-40 deliveries per week</p>
@@ -624,7 +624,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-gradient-to-r from-orange-500 to-amber-500 relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-r from-blue-500 to-cyan-400 relative overflow-hidden">
         <motion.div
           className="absolute inset-0 opacity-10"
           animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
@@ -654,7 +654,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center">
                   <Flame className="h-6 w-6 text-white" />
                 </div>
                 <span className="text-xl font-bold">GasGo</span>
@@ -664,7 +664,7 @@ export default function LandingPage() {
               </p>
               <div className="flex items-center gap-3">
                 <Input placeholder="Enter your email" className="max-w-xs" data-testid="input-newsletter" />
-                <Button className="bg-gradient-to-r from-orange-500 to-amber-500" data-testid="button-subscribe">Subscribe</Button>
+                <Button className="bg-gradient-to-r from-blue-500 to-cyan-400" data-testid="button-subscribe">Subscribe</Button>
               </div>
             </div>
             <div>
@@ -696,7 +696,7 @@ export default function LandingPage() {
                   <SiInstagram className="h-5 w-5" />
                 </Button>
                 <Button variant="ghost" size="icon" className="hover:text-primary">
-                  <SiTwitter className="h-5 w-5" />
+                  <SiX className="h-5 w-5" />
                 </Button>
               </div>
             </div>
