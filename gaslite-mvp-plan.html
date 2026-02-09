@@ -709,6 +709,7 @@
             <li>Place orders with delivery address</li>
             <li>Real-time order status tracking</li>
             <li>Order history and reordering</li>
+            <li>Secure card payment at checkout</li>
             <li>Profile management</li>
             <li>Delivery location via GPS/map</li>
           </ul>
@@ -752,7 +753,7 @@
       </div>
 
       <div class="highlight-box" style="margin-top: 24px;">
-        <p><strong>MVP Focus:</strong> The MVP delivers the complete order-to-delivery loop. A customer places an order, a nearby driver accepts and delivers it, and the admin oversees the entire operation. Payment integration and push notifications are deferred to Phase 2.</p>
+        <p><strong>MVP Focus:</strong> The MVP delivers the complete order-to-payment-to-delivery loop. A customer browses products, pays securely via card, a nearby driver accepts and delivers the order, and the admin oversees the entire operation. Push notifications and SMS alerts are deferred to Phase 2.</p>
       </div>
     </div>
   </div>
@@ -871,12 +872,12 @@
           <div class="timeline-content">
             <div class="timeline-date">Week 1 &mdash; Foundation &amp; Customer Experience</div>
             <h4>Core Platform Setup + Customer Portal</h4>
-            <p>Database architecture, authentication system, product catalogue, and customer ordering flow. The customer can browse products, place orders, and view their order history.</p>
+            <p>Database architecture, authentication system, product catalogue, customer ordering flow with card payment integration. The customer can browse products, pay securely, place orders, and view their order history.</p>
             <div class="deliverables">
               <span class="tag tag-blue">Database Schema</span>
               <span class="tag tag-blue">Auth System</span>
               <span class="tag tag-cyan">Product Catalogue</span>
-              <span class="tag tag-cyan">Order Placement</span>
+              <span class="tag tag-cyan">Order &amp; Payment</span>
               <span class="tag tag-green">Customer Dashboard</span>
             </div>
           </div>
@@ -960,7 +961,8 @@
           <ul class="check-list">
             <li>Working authentication with role-based access</li>
             <li>Product catalogue with 3 cylinder sizes</li>
-            <li>Customer order placement flow (end-to-end)</li>
+            <li>Customer order placement with card payment</li>
+            <li>Payment gateway integration (PayFast / Yoco)</li>
             <li>Customer dashboard with order history</li>
             <li>Database schema documentation</li>
             <li>Staging environment URL for review</li>
@@ -1111,6 +1113,7 @@
               <li>3 user portals (Customer, Driver, Admin)</li>
               <li>Cloud database setup and configuration</li>
               <li>File storage for driver documents</li>
+              <li>Card payment integration (PayFast / Yoco)</li>
               <li>Authentication and role-based security</li>
               <li>Production deployment and hosting setup</li>
               <li>2 weeks post-launch bug support</li>
@@ -1247,14 +1250,14 @@
             <span class="tag tag-blue" style="font-size: 12px; padding: 6px 14px;">Phase 2</span>
             <span style="font-size: 12px; color: var(--gray-400);">Month 2-3</span>
           </div>
-          <h3>Payments &amp; Notifications</h3>
+          <h3>Notifications &amp; Engagement</h3>
           <ul class="feature-list">
-            <li>Online payment integration (PayFast / Yoco / SnapScan)</li>
             <li>Push notifications for order updates</li>
             <li>SMS notifications via Twilio or Africa's Talking</li>
             <li>In-app messaging between customer and driver</li>
             <li>Automated email receipts and invoicing</li>
             <li>Promo codes and discount system</li>
+            <li>Additional payment methods (SnapScan, EFT)</li>
           </ul>
         </div>
 
