@@ -119,6 +119,42 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/user/switch-role", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user!.claims!.sub;
+      const { role } = req.body;
+      if (!["customer", "driver", "admin"].includes(role)) {
+        return res.status(400).json({ error: "Invalid role" });
+      }
+      const profile = await storage.updateUserProfile(userId, { role });
+
+      if (role === "driver") {
+        const existingDriver = await storage.getDriverByUserId(userId);
+        if (!existingDriver) {
+          const application = await storage.createDriverApplication({
+            firstName: req.user!.claims!.first_name || "Demo",
+            lastName: req.user!.claims!.last_name || "Driver",
+            email: req.user!.claims!.email || "driver@gaslite.co.za",
+            phone: "+27 82 555 0001",
+            address: "123 Main Road, Cape Town",
+            licenseNumber: "DEMO-LICENSE-001",
+            vehicleRegistration: "CA 123-456",
+          });
+          await storage.createDriver({
+            userId,
+            applicationId: application.id,
+            status: "available",
+          });
+        }
+      }
+
+      res.json(profile);
+    } catch (error) {
+      console.error("Switch role error:", error);
+      res.status(500).json({ error: "Failed to switch role" });
+    }
+  });
+
   // Customer orders
   app.get("/api/orders", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
