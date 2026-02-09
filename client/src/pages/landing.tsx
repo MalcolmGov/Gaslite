@@ -369,7 +369,7 @@ export default function LandingPage() {
                       animate={{ scale: [1, 1.03, 1] }}
                       transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                     >
-                      <Badge className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-4 py-1 font-medium">{item.time}</Badge>
+                      <Badge className="bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-800 px-4 py-1 font-semibold text-sm">{item.time}</Badge>
                     </motion.div>
                   </CardContent>
                 </Card>
