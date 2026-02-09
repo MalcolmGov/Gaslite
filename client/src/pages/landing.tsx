@@ -247,7 +247,7 @@ export default function LandingPage() {
                   <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 dark:from-white/10 dark:to-white/5 backdrop-blur-xl rounded-2xl" />
                   <div className="relative p-5 rounded-2xl border border-white/30 dark:border-white/10 shadow-2xl w-64">
                     <div className="flex items-center gap-3 mb-3">
-                      <GasliteLogoIcon className="h-9 w-auto" />
+                      <GasliteLogoIcon className="h-8 w-8" />
                       <div>
                         <p className="font-semibold text-sm">Order Preview</p>
                         <p className="text-xs text-muted-foreground">Live tracking</p>
@@ -745,7 +745,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <div className="mb-4">
-                <GasliteLogo size="md" />
+                <GasliteLogo size="lg" showTagline />
               </div>
               <p className="text-muted-foreground mb-6 max-w-sm">
                 South Africa's fastest and most reliable LPG gas delivery service. Order with confidence.
