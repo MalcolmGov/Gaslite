@@ -134,7 +134,7 @@ export default function CustomerHome() {
               <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                 <Flame className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">GasGo</span>
+              <span className="text-xl font-bold">Gaslite</span>
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />

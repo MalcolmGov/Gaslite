@@ -805,7 +805,7 @@ export default function LandingPage() {
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  <span>0800 GAS GO</span>
+                  <span>0800 GASLITE</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />

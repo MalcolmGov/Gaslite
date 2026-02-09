@@ -104,7 +104,7 @@ export default function ApplyPage() {
             </div>
             <h2 className="text-2xl font-bold mb-2">Application Submitted!</h2>
             <p className="text-muted-foreground mb-6">
-              Thank you for applying to become a GasGo driver. We will review your application and get back to you within 2-3 business days.
+              Thank you for applying to become a Gaslite driver. We will review your application and get back to you within 2-3 business days.
             </p>
             <a href="/">
               <Button variant="outline" data-testid="button-back-home">
@@ -127,7 +127,7 @@ export default function ApplyPage() {
               <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                 <Flame className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">GasGo</span>
+              <span className="text-xl font-bold">Gaslite</span>
             </a>
             <ThemeToggle />
           </div>
@@ -137,7 +137,7 @@ export default function ApplyPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-            Become a <span className="text-primary">GasGo Driver</span>
+            Become a <span className="text-primary">Gaslite Driver</span>
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Join our team of licensed delivery drivers and earn flexible income delivering gas to customers in your area.

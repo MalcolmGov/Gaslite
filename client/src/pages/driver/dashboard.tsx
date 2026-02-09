@@ -97,7 +97,7 @@ export default function DriverDashboard() {
                 <Flame className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <span className="text-xl font-bold">GasGo</span>
+                <span className="text-xl font-bold">Gaslite</span>
                 <span className="text-sm text-muted-foreground ml-2">Driver</span>
               </div>
             </div>
