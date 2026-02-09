@@ -9,10 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RoleSwitcher } from "@/components/role-switcher";
+import { GasliteLogo } from "@/components/gaslite-logo";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { 
-  Flame, 
   MapPin, 
   Package, 
   Users, 
@@ -120,13 +120,8 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <Flame className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <div>
-                <span className="text-xl font-bold">Gaslite</span>
-                <span className="text-sm text-muted-foreground ml-2">Admin</span>
-              </div>
+              <GasliteLogo size="sm" />
+              <Badge variant="outline">Admin</Badge>
             </div>
             <div className="flex items-center gap-4 flex-wrap">
               <RoleSwitcher currentRole="admin" />

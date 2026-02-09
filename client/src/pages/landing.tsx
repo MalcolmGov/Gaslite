@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GasliteLogo, GasliteLogoIcon } from "@/components/gaslite-logo";
 import { 
   Flame, 
   Truck, 
@@ -30,35 +31,6 @@ import {
 } from "lucide-react";
 import { SiInstagram, SiFacebook, SiX } from "react-icons/si";
 
-function GasCylinderLogo({ className = "w-6 h-6" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 32" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="cylinderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#3b82f6" />
-          <stop offset="50%" stopColor="#2563eb" />
-          <stop offset="100%" stopColor="#1d4ed8" />
-        </linearGradient>
-        <linearGradient id="valveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#9ca3af" />
-          <stop offset="100%" stopColor="#6b7280" />
-        </linearGradient>
-        <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" stopColor="#06b6d4" />
-          <stop offset="100%" stopColor="#22d3ee" />
-        </linearGradient>
-      </defs>
-      <rect x="2" y="6" width="20" height="24" rx="4" fill="url(#cylinderGradient)" />
-      <ellipse cx="12" cy="6" rx="10" ry="3" fill="url(#cylinderGradient)" />
-      <ellipse cx="12" cy="6" rx="10" ry="3" fill="white" fillOpacity="0.3" />
-      <rect x="9" y="1" width="6" height="5" rx="1" fill="url(#valveGradient)" />
-      <circle cx="12" cy="2" r="2" fill="url(#valveGradient)" />
-      <path d="M12 14 C9 18 8 20 12 24 C16 20 15 18 12 14" fill="url(#flameGradient)" />
-      <path d="M12 16 C10.5 18 10 19 12 22 C14 19 13.5 18 12 16" fill="white" fillOpacity="0.6" />
-      <rect x="4" y="8" width="16" height="1" fill="white" fillOpacity="0.2" />
-    </svg>
-  );
-}
 
 function AnimatedCounter({ target, duration = 2000, suffix = "" }: { target: number; duration?: number; suffix?: string }) {
   const [count, setCount] = useState(0);
@@ -152,10 +124,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 p-1.5">
-                <GasCylinderLogo className="w-full h-full" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Gaslite</span>
+              <GasliteLogo size="sm" />
             </motion.div>
             <div className="hidden md:flex items-center gap-6">
               <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
@@ -278,9 +247,7 @@ export default function LandingPage() {
                   <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 dark:from-white/10 dark:to-white/5 backdrop-blur-xl rounded-2xl" />
                   <div className="relative p-5 rounded-2xl border border-white/30 dark:border-white/10 shadow-2xl w-64">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center p-1.5">
-                        <GasCylinderLogo className="w-full h-full" />
-                      </div>
+                      <GasliteLogoIcon className="h-9 w-auto" />
                       <div>
                         <p className="font-semibold text-sm">Order Preview</p>
                         <p className="text-xs text-muted-foreground">Live tracking</p>
@@ -777,11 +744,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center p-1.5">
-                  <GasCylinderLogo className="w-full h-full" />
-                </div>
-                <span className="text-xl font-bold">Gaslite</span>
+              <div className="mb-4">
+                <GasliteLogo size="md" />
               </div>
               <p className="text-muted-foreground mb-6 max-w-sm">
                 South Africa's fastest and most reliable LPG gas delivery service. Order with confidence.

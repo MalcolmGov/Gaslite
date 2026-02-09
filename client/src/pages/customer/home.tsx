@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RoleSwitcher } from "@/components/role-switcher";
+import { GasliteLogo } from "@/components/gaslite-logo";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { 
@@ -131,12 +132,7 @@ export default function CustomerHome() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <Flame className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold">Gaslite</span>
-            </div>
+            <GasliteLogo size="sm" />
             <div className="flex items-center gap-4 flex-wrap">
               <RoleSwitcher currentRole="customer" />
               <ThemeToggle />

@@ -9,11 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GasliteLogo } from "@/components/gaslite-logo";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useUpload } from "@/hooks/use-upload";
 import { 
-  Flame, 
   Upload, 
   CheckCircle, 
   Truck, 
@@ -123,11 +123,8 @@ export default function ApplyPage() {
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <a href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <Flame className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold">Gaslite</span>
+            <a href="/">
+              <GasliteLogo size="sm" />
             </a>
             <ThemeToggle />
           </div>
