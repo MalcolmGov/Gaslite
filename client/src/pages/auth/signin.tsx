@@ -12,18 +12,18 @@ export default function SignInPage() {
   const [, navigate] = useLocation();
   const { login, isLoggingIn } = useAuth();
   const { toast } = useToast();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login({ email, password });
+      await login({ identifier, password });
       navigate("/");
     } catch (err: any) {
       const msg = err?.message || "Login failed";
-      let errorText = "Invalid email or password";
+      let errorText = "Invalid credentials";
       try {
         const parsed = JSON.parse(msg.replace(/^\d+:\s*/, ""));
         if (parsed.error) errorText = parsed.error;
@@ -60,15 +60,15 @@ export default function SignInPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="identifier">Email or Mobile Number</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="identifier"
+                  type="text"
+                  placeholder="you@example.com or 071 234 5678"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   required
-                  data-testid="input-email"
+                  data-testid="input-identifier"
                 />
               </div>
 

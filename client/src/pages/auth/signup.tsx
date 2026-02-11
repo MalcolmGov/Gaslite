@@ -6,9 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Flame, Eye, EyeOff, ArrowLeft, ShoppingBag, Truck, Check } from "lucide-react";
+import { Flame, Eye, EyeOff, ArrowLeft, ShoppingBag, Truck, Check, Mail, Phone } from "lucide-react";
 
 type RoleOption = "customer" | "driver";
+type IdentifierType = "email" | "phone";
 
 function RoleCard({
   role,
@@ -88,7 +89,9 @@ export default function SignUpPage() {
   const { register, isRegistering } = useAuth();
   const { toast } = useToast();
   const [selectedRole, setSelectedRole] = useState<RoleOption | null>(null);
+  const [identifierType, setIdentifierType] = useState<IdentifierType>("phone");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -111,8 +114,15 @@ export default function SignUpPage() {
       return;
     }
 
+    const payload: { email?: string; phone?: string; password: string } = { password };
+    if (identifierType === "email") {
+      payload.email = email;
+    } else {
+      payload.phone = phone;
+    }
+
     try {
-      await register({ email, password });
+      await register(payload);
       navigate("/");
     } catch (err: any) {
       const msg = err?.message || "Registration failed";
@@ -193,18 +203,60 @@ export default function SignUpPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    data-testid="input-email"
-                  />
+                <div className="space-y-3">
+                  <Label>Sign up with</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant={identifierType === "phone" ? "default" : "outline"}
+                      className="flex-1 gap-2"
+                      onClick={() => setIdentifierType("phone")}
+                      data-testid="button-method-phone"
+                    >
+                      <Phone className="h-4 w-4" />
+                      Mobile Number
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={identifierType === "email" ? "default" : "outline"}
+                      className="flex-1 gap-2"
+                      onClick={() => setIdentifierType("email")}
+                      data-testid="button-method-email"
+                    >
+                      <Mail className="h-4 w-4" />
+                      Email
+                    </Button>
+                  </div>
                 </div>
+
+                {identifierType === "email" ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      data-testid="input-email"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Mobile Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="071 234 5678"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                      data-testid="input-phone"
+                    />
+                    <p className="text-xs text-muted-foreground">South African mobile number</p>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>

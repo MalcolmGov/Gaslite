@@ -3,7 +3,8 @@ import { apiRequest } from "@/lib/queryClient";
 
 interface AuthUser {
   id: string;
-  email: string;
+  email: string | null;
+  phone: string | null;
   firstName: string | null;
   lastName: string | null;
 }
@@ -46,7 +47,7 @@ export function useAuth() {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (data: { email: string; password: string }) => {
+    mutationFn: async (data: { identifier: string; password: string }) => {
       const res = await apiRequest("POST", "/api/auth/login", data);
       return res.json();
     },
@@ -56,7 +57,7 @@ export function useAuth() {
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (data: { email: string; password: string; firstName?: string; lastName?: string }) => {
+    mutationFn: async (data: { email?: string; phone?: string; password: string; firstName?: string; lastName?: string }) => {
       const res = await apiRequest("POST", "/api/auth/register", data);
       return res.json();
     },

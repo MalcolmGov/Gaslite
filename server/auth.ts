@@ -4,7 +4,7 @@ import connectPg from "connect-pg-simple";
 import type { Express, Request, Response, NextFunction } from "express";
 import { db } from "./db";
 import { users } from "@shared/models/auth";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 declare module "express-session" {
   interface SessionData {
@@ -14,6 +14,25 @@ declare module "express-session" {
 
 export interface AuthenticatedRequest extends Request {
   userId?: string;
+}
+
+function isEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function normalizePhone(value: string): string {
+  let digits = value.replace(/[\s\-().]/g, "");
+  if (digits.startsWith("+27")) {
+    digits = "0" + digits.slice(3);
+  } else if (digits.startsWith("27") && digits.length === 11) {
+    digits = "0" + digits.slice(2);
+  }
+  return digits;
+}
+
+function isPhone(value: string): boolean {
+  const normalized = normalizePhone(value);
+  return /^0\d{9}$/.test(normalized);
 }
 
 export function setupSession(app: Express) {
@@ -51,22 +70,61 @@ export const isAuthenticated = (req: AuthenticatedRequest, res: Response, next: 
   next();
 };
 
+function userResponse(user: any) {
+  return {
+    id: user.id,
+    email: user.email || null,
+    phone: user.phone || null,
+    firstName: user.firstName,
+    lastName: user.lastName,
+  };
+}
+
 export function registerAuthRoutes(app: Express) {
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
-      const { email, password, firstName, lastName } = req.body;
+      const { email, phone, password, firstName, lastName } = req.body;
 
-      if (!email || !password) {
-        return res.status(400).json({ error: "Email and password are required" });
+      if (!email && !phone) {
+        return res.status(400).json({ error: "Email or mobile number is required" });
+      }
+
+      if (!password) {
+        return res.status(400).json({ error: "Password is required" });
       }
 
       if (password.length < 6) {
         return res.status(400).json({ error: "Password must be at least 6 characters" });
       }
 
-      const existing = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim()));
-      if (existing.length > 0) {
-        return res.status(409).json({ error: "An account with this email already exists" });
+      const normalizedEmail = email ? email.toLowerCase().trim() : null;
+      const normalizedPhone = phone ? normalizePhone(phone.trim()) : null;
+
+      if (normalizedEmail && !isEmail(normalizedEmail)) {
+        return res.status(400).json({ error: "Please enter a valid email address" });
+      }
+
+      if (normalizedPhone && !isPhone(normalizedPhone)) {
+        return res.status(400).json({ error: "Please enter a valid South African mobile number (e.g. 071 234 5678)" });
+      }
+
+      const conditions = [];
+      if (normalizedEmail) conditions.push(eq(users.email, normalizedEmail));
+      if (normalizedPhone) conditions.push(eq(users.phone, normalizedPhone));
+
+      if (conditions.length > 0) {
+        const existing = await db.select().from(users).where(
+          conditions.length === 1 ? conditions[0] : or(...conditions)
+        );
+        if (existing.length > 0) {
+          const match = existing[0];
+          if (normalizedEmail && match.email === normalizedEmail) {
+            return res.status(409).json({ error: "An account with this email already exists" });
+          }
+          if (normalizedPhone && match.phone === normalizedPhone) {
+            return res.status(409).json({ error: "An account with this mobile number already exists" });
+          }
+        }
       }
 
       const passwordHash = await bcrypt.hash(password, 12);
@@ -74,7 +132,8 @@ export function registerAuthRoutes(app: Express) {
       const [user] = await db
         .insert(users)
         .values({
-          email: email.toLowerCase().trim(),
+          email: normalizedEmail,
+          phone: normalizedPhone,
           passwordHash,
           firstName: firstName || null,
           lastName: lastName || null,
@@ -87,12 +146,7 @@ export function registerAuthRoutes(app: Express) {
           console.error("Session save error:", err);
           return res.status(500).json({ error: "Failed to create session" });
         }
-        res.json({
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-        });
+        res.json(userResponse(user));
       });
     } catch (error) {
       console.error("Registration error:", error);
@@ -102,20 +156,33 @@ export function registerAuthRoutes(app: Express) {
 
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const { identifier, password } = req.body;
 
-      if (!email || !password) {
-        return res.status(400).json({ error: "Email and password are required" });
+      if (!identifier || !password) {
+        return res.status(400).json({ error: "Email/mobile number and password are required" });
       }
 
-      const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim()));
+      const trimmed = identifier.trim();
+      let user;
+
+      if (isEmail(trimmed)) {
+        const results = await db.select().from(users).where(eq(users.email, trimmed.toLowerCase()));
+        user = results[0];
+      } else {
+        const normalized = normalizePhone(trimmed);
+        if (isPhone(normalized)) {
+          const results = await db.select().from(users).where(eq(users.phone, normalized));
+          user = results[0];
+        }
+      }
+
       if (!user) {
-        return res.status(401).json({ error: "Invalid email or password" });
+        return res.status(401).json({ error: "Invalid credentials" });
       }
 
       const valid = await bcrypt.compare(password, user.passwordHash);
       if (!valid) {
-        return res.status(401).json({ error: "Invalid email or password" });
+        return res.status(401).json({ error: "Invalid credentials" });
       }
 
       req.session.userId = user.id;
@@ -124,12 +191,7 @@ export function registerAuthRoutes(app: Express) {
           console.error("Session save error:", err);
           return res.status(500).json({ error: "Failed to create session" });
         }
-        res.json({
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-        });
+        res.json(userResponse(user));
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -157,12 +219,7 @@ export function registerAuthRoutes(app: Express) {
       if (!user) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      res.json({
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      });
+      res.json(userResponse(user));
     } catch (error) {
       console.error("Get user error:", error);
       res.status(500).json({ error: "Failed to fetch user" });
