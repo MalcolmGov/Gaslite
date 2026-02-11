@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
 import { GasliteLogo } from "@/components/gaslite-logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -18,7 +19,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { MapPin, Phone, User, ArrowRight, Flame, Truck, Shield, Clock } from "lucide-react";
-import type { User as AuthUser } from "@shared/models/auth";
 import { insertUserProfileSchema } from "@shared/schema";
 
 const customerOnboardingSchema = insertUserProfileSchema
@@ -38,9 +38,10 @@ const benefits = [
   { icon: Clock, title: "Track Live", desc: "Real-time order tracking" },
 ];
 
-export default function CustomerOnboarding({ user }: { user: AuthUser }) {
+export default function CustomerOnboarding() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, logout } = useAuth();
 
   const form = useForm<CustomerOnboardingData>({
     resolver: zodResolver(customerOnboardingSchema),
@@ -75,11 +76,9 @@ export default function CustomerOnboarding({ user }: { user: AuthUser }) {
             <GasliteLogo size="sm" />
             <div className="flex items-center gap-3 flex-wrap">
               <ThemeToggle />
-              <a href="/api/logout">
-                <Button variant="ghost" size="sm" data-testid="button-logout">
-                  Sign Out
-                </Button>
-              </a>
+              <Button variant="ghost" size="sm" data-testid="button-logout" onClick={() => logout()}>
+                Sign Out
+              </Button>
             </div>
           </div>
         </div>

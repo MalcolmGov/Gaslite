@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
 import { useUpload } from "@/hooks/use-upload";
 import { GasliteLogo } from "@/components/gaslite-logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -37,7 +38,6 @@ import {
   Shield,
   Home,
 } from "lucide-react";
-import type { User as AuthUser } from "@shared/models/auth";
 import { insertDriverApplicationSchema, type DriverApplication } from "@shared/schema";
 
 const driverSchema = insertDriverApplicationSchema
@@ -69,6 +69,7 @@ const steps = [
 ];
 
 function ApplicationStatusView({ application }: { application: DriverApplication }) {
+  const { logout } = useAuth();
   const statusConfig = {
     pending: {
       label: "Under Review",
@@ -94,9 +95,7 @@ function ApplicationStatusView({ application }: { application: DriverApplication
             <GasliteLogo size="sm" />
             <div className="flex items-center gap-3 flex-wrap">
               <ThemeToggle />
-              <a href="/api/logout">
-                <Button variant="ghost" size="sm" data-testid="button-logout">Sign Out</Button>
-              </a>
+              <Button variant="ghost" size="sm" data-testid="button-logout" onClick={() => logout()}>Sign Out</Button>
             </div>
           </div>
         </div>
@@ -175,9 +174,10 @@ function ApplicationStatusView({ application }: { application: DriverApplication
   );
 }
 
-export default function DriverOnboarding({ user }: { user: AuthUser }) {
+export default function DriverOnboarding() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, logout } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [licenseDocUrl, setLicenseDocUrl] = useState<string | null>(null);
   const [vehicleDocUrl, setVehicleDocUrl] = useState<string | null>(null);
@@ -284,9 +284,7 @@ export default function DriverOnboarding({ user }: { user: AuthUser }) {
             <GasliteLogo size="sm" />
             <div className="flex items-center gap-3 flex-wrap">
               <ThemeToggle />
-              <a href="/api/logout">
-                <Button variant="ghost" size="sm" data-testid="button-logout">Sign Out</Button>
-              </a>
+              <Button variant="ghost" size="sm" data-testid="button-logout" onClick={() => logout()}>Sign Out</Button>
             </div>
           </div>
         </div>

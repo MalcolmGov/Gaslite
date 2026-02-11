@@ -133,17 +133,17 @@ export default function LandingPage() {
             </div>
             <div className="flex items-center gap-3">
               <ThemeToggle />
-              <a href="/api/login" onClick={() => localStorage.setItem("gaslite_intent", "driver")}>
+              <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")}>
                 <Button variant="ghost" size="sm" data-testid="link-become-driver">
                   Become a Driver
                 </Button>
               </a>
-              <a href="/api/login">
+              <a href="/auth/signin">
                 <Button variant="outline" size="sm" data-testid="button-signin">
                   Sign In
                 </Button>
               </a>
-              <a href="/api/login" onClick={() => localStorage.setItem("gaslite_intent", "customer")}>
+              <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "customer")}>
                 <Button size="sm" className="bg-gradient-to-r from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/25" data-testid="button-signup">
                   Sign Up
                 </Button>
@@ -192,7 +192,7 @@ export default function LandingPage() {
               </motion.p>
               
               <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4">
-                <a href="/api/login" onClick={() => localStorage.setItem("gaslite_intent", "customer")}>
+                <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "customer")}>
                   <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 shadow-xl shadow-blue-500/30 h-14 px-8 text-lg" data-testid="button-get-started">
                     Order Now
                     <ArrowRight className="ml-2 h-5 w-5" />
@@ -599,7 +599,7 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <a href="/api/login" onClick={() => localStorage.setItem("gaslite_intent", "driver")}>
+              <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")}>
                 <Button size="lg" className="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 shadow-lg shadow-blue-500/25" data-testid="button-driver-apply">
                   Apply Now
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -735,7 +735,7 @@ export default function LandingPage() {
           >
             <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">Ready to Order?</h2>
             <p className="text-xl text-white/80 mb-8">Join thousands of satisfied customers who trust Gaslite for their gas delivery needs.</p>
-            <a href="/api/login" onClick={() => localStorage.setItem("gaslite_intent", "customer")}>
+            <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "customer")}>
               <Button size="lg" variant="secondary" className="h-14 px-10 text-lg shadow-xl" data-testid="button-cta-order">
                 Get Started Now
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -765,7 +765,7 @@ export default function LandingPage() {
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li><a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a></li>
                 <li><a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
-                <li><a href="/api/login" onClick={() => localStorage.setItem("gaslite_intent", "driver")} className="hover:text-foreground transition-colors">Become a Driver</a></li>
+                <li><a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")} className="hover:text-foreground transition-colors">Become a Driver</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">Safety</a></li>
               </ul>
             </div>

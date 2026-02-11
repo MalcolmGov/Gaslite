@@ -1,18 +1,7 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import type { Express, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage, seedProducts } from "./storage";
-import { setupAuth, isAuthenticated } from "./replit_integrations/auth/replitAuth";
-
-interface AuthenticatedRequest extends Request {
-  user?: {
-    claims?: {
-      sub: string;
-      email?: string;
-      first_name?: string;
-      last_name?: string;
-    };
-  };
-}
+import { setupSession, registerAuthRoutes, isAuthenticated, type AuthenticatedRequest } from "./auth";
 import multer from "multer";
 import { ObjectStorageService } from "./replit_integrations/object_storage/objectStorage";
 import { z } from "zod";
@@ -29,16 +18,13 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // Setup auth
-  await setupAuth(app);
-  
-  // Seed products
+  setupSession(app);
+  registerAuthRoutes(app);
+
   await seedProducts();
 
-  // Object storage service
   const objectStorageService = new ObjectStorageService();
 
-  // Public routes
   app.get("/api/products", async (req, res) => {
     try {
       const products = await storage.getProducts();
@@ -48,11 +34,10 @@ export async function registerRoutes(
     }
   });
 
-  // Driver application (authenticated - use /api/onboarding/driver instead)
   app.post("/api/driver-applications", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const data = insertDriverApplicationSchema.parse(req.body);
-      data.userId = req.user!.claims!.sub;
+      data.userId = req.userId!;
       const application = await storage.createDriverApplication(data);
       res.json(application);
     } catch (error) {
@@ -60,7 +45,6 @@ export async function registerRoutes(
     }
   });
 
-  // File upload (using presigned URL approach)
   app.post("/api/upload", upload.single("file"), async (req, res) => {
     try {
       if (!req.file) {
@@ -92,7 +76,6 @@ export async function registerRoutes(
     }
   });
 
-  // Presigned URL upload endpoint (for client-side direct uploads)
   app.post("/api/uploads/request-url", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const { name, size, contentType } = req.body;
@@ -118,18 +101,15 @@ export async function registerRoutes(
     }
   });
 
-  // Authenticated routes
   app.get("/api/user/profile", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       let profile = await storage.getUserProfile(userId);
       
       if (!profile) {
         profile = await storage.createUserProfile({
           userId,
           role: "customer",
-          firstName: req.user!.claims!.first_name || null,
-          lastName: req.user!.claims!.last_name || null,
         });
       }
       
@@ -142,7 +122,7 @@ export async function registerRoutes(
 
   app.patch("/api/user/profile", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const profile = await storage.updateUserProfile(userId, req.body);
       res.json(profile);
     } catch (error) {
@@ -150,10 +130,9 @@ export async function registerRoutes(
     }
   });
 
-  // Customer onboarding
   app.post("/api/onboarding/customer", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const { firstName, lastName, phone, address } = req.body;
 
       if (!firstName || !lastName || !phone || !address) {
@@ -181,10 +160,9 @@ export async function registerRoutes(
     }
   });
 
-  // Driver onboarding (submit application)
   app.post("/api/onboarding/driver", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const { firstName, lastName, email, phone, address, licenseNumber, vehicleRegistration, licenseDocumentUrl, vehicleDocumentUrl } = req.body;
 
       if (!firstName || !lastName || !email || !phone || !address || !licenseNumber || !vehicleRegistration) {
@@ -228,10 +206,9 @@ export async function registerRoutes(
     }
   });
 
-  // Get current user's driver application status
   app.get("/api/user/driver-application", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const application = await storage.getDriverApplicationByUserId(userId);
       const driver = await storage.getDriverByUserId(userId);
       res.json({ application: application || null, driver: driver || null });
@@ -242,7 +219,7 @@ export async function registerRoutes(
 
   app.post("/api/user/switch-role", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const { role } = req.body;
       if (!["customer", "driver", "admin"].includes(role)) {
         return res.status(400).json({ error: "Invalid role" });
@@ -274,10 +251,9 @@ export async function registerRoutes(
     }
   });
 
-  // Customer orders
   app.get("/api/orders", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const orders = await storage.getOrdersByCustomer(userId);
       res.json(orders);
     } catch (error) {
@@ -287,7 +263,7 @@ export async function registerRoutes(
 
   app.post("/api/orders", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const { items, deliveryAddress, deliveryNotes } = req.body;
 
       if (!items || !Array.isArray(items) || items.length === 0) {
@@ -298,7 +274,6 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Delivery address required" });
       }
 
-      // Calculate order totals
       const orderItems: InsertOrderItem[] = [];
       let subtotal = 0;
 
@@ -312,7 +287,7 @@ export async function registerRoutes(
         subtotal += totalPrice;
 
         orderItems.push({
-          orderId: "", // Will be set after order creation
+          orderId: "",
           productId: product.id,
           productName: product.name,
           productSize: product.size,
@@ -346,7 +321,7 @@ export async function registerRoutes(
 
   app.get("/api/orders/:orderId", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const orderWithItems = await storage.getOrderWithItems(req.params.orderId);
 
       if (!orderWithItems || orderWithItems.customerId !== userId) {
@@ -359,10 +334,9 @@ export async function registerRoutes(
     }
   });
 
-  // Driver routes - role check middleware
   const isDriver = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const profile = await storage.getUserProfile(userId);
       
       if (!profile || profile.role !== "driver") {
@@ -377,7 +351,7 @@ export async function registerRoutes(
 
   app.get("/api/driver/profile", isAuthenticated, isDriver, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const driver = await storage.getDriverByUserId(userId);
       
       if (!driver) {
@@ -392,7 +366,7 @@ export async function registerRoutes(
 
   app.patch("/api/driver/status", isAuthenticated, isDriver, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const driver = await storage.getDriverByUserId(userId);
       
       if (!driver) {
@@ -413,7 +387,7 @@ export async function registerRoutes(
 
   app.get("/api/driver/orders", isAuthenticated, isDriver, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const driver = await storage.getDriverByUserId(userId);
       
       if (!driver) {
@@ -438,7 +412,7 @@ export async function registerRoutes(
 
   app.post("/api/driver/accept-order/:orderId", isAuthenticated, isDriver, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const driver = await storage.getDriverByUserId(userId);
       
       if (!driver) {
@@ -476,7 +450,7 @@ export async function registerRoutes(
 
   app.patch("/api/driver/orders/:orderId", isAuthenticated, isDriver, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const driver = await storage.getDriverByUserId(userId);
       
       if (!driver) {
@@ -507,10 +481,9 @@ export async function registerRoutes(
     }
   });
 
-  // Admin routes
   const isAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user!.claims!.sub;
+      const userId = req.userId!;
       const profile = await storage.getUserProfile(userId);
       
       if (!profile || profile.role !== "admin") {
@@ -549,7 +522,6 @@ export async function registerRoutes(
       if (status) updateData.status = status;
       if (driverId) {
         updateData.driverId = driverId;
-        // Calculate driver earnings (15% of order total)
         const order = await storage.getOrder(req.params.orderId);
         if (order) {
           updateData.driverEarnings = (Number(order.total) * 0.15).toFixed(2);
@@ -576,7 +548,7 @@ export async function registerRoutes(
     try {
       const { status, reviewNotes } = req.body;
       const applicationId = req.params.applicationId;
-      const reviewerId = req.user!.claims!.sub;
+      const reviewerId = req.userId!;
 
       const application = await storage.getDriverApplication(applicationId);
       if (!application) {

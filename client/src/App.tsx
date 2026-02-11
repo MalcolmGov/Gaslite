@@ -8,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
 import ApplyPage from "@/pages/apply";
+import SignInPage from "@/pages/auth/signin";
+import SignUpPage from "@/pages/auth/signup";
 import CustomerHome from "@/pages/customer/home";
 import DriverDashboard from "@/pages/driver/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -65,6 +67,8 @@ function AuthenticatedRouter() {
       <Switch>
         <Route path="/" component={LandingPage} />
         <Route path="/apply" component={ApplyPage} />
+        <Route path="/auth/signin" component={SignInPage} />
+        <Route path="/auth/signup" component={SignUpPage} />
         <Route component={LandingPage} />
       </Switch>
     );
@@ -74,9 +78,9 @@ function AuthenticatedRouter() {
 
   if (!profile?.onboardingCompleted) {
     if (intent === "driver" || profile?.role === "driver") {
-      return <DriverOnboarding user={user} />;
+      return <DriverOnboarding />;
     }
-    return <CustomerOnboarding user={user} />;
+    return <CustomerOnboarding />;
   }
 
   clearIntent();
