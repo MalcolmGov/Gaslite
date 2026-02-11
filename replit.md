@@ -37,11 +37,11 @@ The frontend follows a page-based structure under `client/src/pages/` with role-
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript
 - **Database ORM**: Drizzle ORM with PostgreSQL
-- **Authentication**: Replit Auth (OpenID Connect) with Passport.js
-- **Session Management**: PostgreSQL-backed sessions via connect-pg-simple
+- **Authentication**: Custom email/phone + password auth with bcrypt hashing, session-based (server/auth.ts)
+- **Session Management**: PostgreSQL-backed sessions via connect-pg-simple, 7-day TTL
 - **File Uploads**: Multer for memory storage, Google Cloud Storage for object persistence
 
-The backend uses a modular structure with routes registered in `server/routes.ts`, database operations abstracted through `server/storage.ts`, and Replit integrations organized under `server/replit_integrations/`.
+The backend uses a modular structure with routes registered in `server/routes.ts`, database operations abstracted through `server/storage.ts`, and auth in `server/auth.ts`.
 
 ### Data Storage
 - **Primary Database**: PostgreSQL accessed via Drizzle ORM
@@ -51,34 +51,37 @@ The backend uses a modular structure with routes registered in `server/routes.ts
 The schema supports a multi-role user system where authentication users extend into role-specific profiles and capabilities.
 
 ### Authentication & Onboarding Flow
-- Replit Auth provides OpenID Connect authentication
-- Sessions stored in PostgreSQL with 1-week TTL
-- User profiles created/updated on login via upsert pattern
+- Custom email/phone + password authentication (bcrypt, 12 rounds) — no external auth providers
+- Users can register with either a **mobile number** or **email address** (both optional, at least one required)
+- South African phone numbers normalized (supports 071..., +2771..., 2771... formats)
+- `users` table: id (UUID), email (nullable, unique), phone (nullable, unique), password_hash
+- Sessions stored in PostgreSQL with 1-week TTL, accessed via `req.session.userId`
+- Auth routes: POST `/api/auth/register`, POST `/api/auth/login` (uses `identifier` field for email or phone), POST `/api/auth/logout`, GET `/api/auth/user`
+- Sign-up page: two-step flow — 1) choose role (customer/driver), 2) choose sign-up method (mobile/email) + password
+- Sign-in page: single `identifier` field accepts email or mobile number
 - Role-based access (customer/driver/admin) determined by userProfiles table
 - **Onboarding gate**: New users must complete onboarding before accessing dashboards
   - Customer onboarding: collects firstName, lastName, phone, delivery address
   - Driver onboarding: 3-step form (personal info → license/vehicle → document uploads), creates driverApplication linked to userId
-- **Intent-based routing**: Landing page sets localStorage "gaslite_intent" (customer/driver) before login redirect; App.tsx reads intent to route to correct onboarding
+- **Intent-based routing**: Sign-up page sets localStorage "gaslite_intent" (customer/driver); App.tsx reads intent to route to correct onboarding
 - **Driver approval workflow**: Driver applicants keep role="customer" until admin approves; admin approval creates driver record and sets role="driver"
 - **Security**: switch-role endpoint requires approved driver record for driver role; driver-applications endpoint requires authentication; driverApplications.userId has unique constraint
 
 ## External Dependencies
 
 ### Third-Party Services
-- **Replit Auth**: OpenID Connect authentication provider
 - **Google Cloud Storage**: File/document storage for driver applications and uploads
 - **PostgreSQL**: Primary database (provisioned via Replit)
 
 ### Key NPM Packages
 - **@tanstack/react-query**: Server state management
 - **drizzle-orm / drizzle-kit**: Database ORM and migrations
+- **bcryptjs**: Password hashing for custom auth
+- **connect-pg-simple + express-session**: Session management
 - **@uppy/core, @uppy/dashboard, @uppy/aws-s3**: File upload handling
 - **framer-motion**: Animation library for premium UI effects
 - **react-hook-form + zod**: Form handling with validation
-- **passport + openid-client**: Authentication middleware
 
 ### Environment Variables Required
 - `DATABASE_URL`: PostgreSQL connection string
 - `SESSION_SECRET`: Secret for session encryption
-- `ISSUER_URL`: OpenID Connect issuer (defaults to Replit)
-- `REPL_ID`: Replit deployment identifier
