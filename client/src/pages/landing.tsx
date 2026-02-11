@@ -138,9 +138,14 @@ export default function LandingPage() {
                   Become a Driver
                 </Button>
               </a>
-              <a href="/api/login" onClick={() => localStorage.setItem("gaslite_intent", "customer")}>
-                <Button size="sm" className="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 shadow-lg shadow-blue-500/25" data-testid="button-login">
+              <a href="/api/login">
+                <Button variant="outline" size="sm" data-testid="button-signin">
                   Sign In
+                </Button>
+              </a>
+              <a href="/api/login" onClick={() => localStorage.setItem("gaslite_intent", "customer")}>
+                <Button size="sm" className="bg-gradient-to-r from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/25" data-testid="button-signup">
+                  Sign Up
                 </Button>
               </a>
             </div>
