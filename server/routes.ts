@@ -135,6 +135,7 @@ export async function registerRoutes(
       
       res.json(profile);
     } catch (error) {
+      console.error("Error fetching profile:", error);
       res.status(500).json({ error: "Failed to fetch profile" });
     }
   });

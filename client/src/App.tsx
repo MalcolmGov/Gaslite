@@ -14,6 +14,7 @@ import AdminDashboard from "@/pages/admin/dashboard";
 import CustomerOnboarding from "@/pages/onboarding/customer";
 import DriverOnboarding from "@/pages/onboarding/driver";
 import { useQuery } from "@tanstack/react-query";
+import { getQueryFn } from "./lib/queryClient";
 import type { UserProfile } from "@shared/schema";
 
 function LoadingScreen() {
@@ -48,8 +49,9 @@ function clearIntent() {
 function AuthenticatedRouter() {
   const { user, isLoading: authLoading } = useAuth();
   
-  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery<UserProfile>({
+  const { data: profile, isLoading: profileLoading } = useQuery<UserProfile | null>({
     queryKey: ["/api/user/profile"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
     enabled: !!user,
     retry: 1,
   });
