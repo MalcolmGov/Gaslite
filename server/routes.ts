@@ -67,11 +67,9 @@ export async function registerRoutes(
         return res.status(400).json({ error: "No file uploaded" });
       }
 
-      // Get presigned upload URL
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
 
-      // Upload the file directly to the presigned URL
       const uploadResponse = await fetch(uploadURL, {
         method: "PUT",
         body: req.file.buffer,
@@ -91,6 +89,32 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Upload error:", error);
       res.status(500).json({ error: "Upload failed" });
+    }
+  });
+
+  // Presigned URL upload endpoint (for client-side direct uploads)
+  app.post("/api/uploads/request-url", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { name, size, contentType } = req.body;
+      if (!name) {
+        return res.status(400).json({ error: "File name is required" });
+      }
+
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+
+      res.json({
+        uploadURL,
+        objectPath,
+        metadata: {
+          name: name || "file",
+          size: size || 0,
+          contentType: contentType || "application/octet-stream",
+        },
+      });
+    } catch (error) {
+      console.error("Request upload URL error:", error);
+      res.status(500).json({ error: "Failed to generate upload URL" });
     }
   });
 
