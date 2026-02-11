@@ -50,11 +50,17 @@ The backend uses a modular structure with routes registered in `server/routes.ts
 
 The schema supports a multi-role user system where authentication users extend into role-specific profiles and capabilities.
 
-### Authentication Flow
+### Authentication & Onboarding Flow
 - Replit Auth provides OpenID Connect authentication
 - Sessions stored in PostgreSQL with 1-week TTL
 - User profiles created/updated on login via upsert pattern
 - Role-based access (customer/driver/admin) determined by userProfiles table
+- **Onboarding gate**: New users must complete onboarding before accessing dashboards
+  - Customer onboarding: collects firstName, lastName, phone, delivery address
+  - Driver onboarding: 3-step form (personal info → license/vehicle → document uploads), creates driverApplication linked to userId
+- **Intent-based routing**: Landing page sets localStorage "gaslite_intent" (customer/driver) before login redirect; App.tsx reads intent to route to correct onboarding
+- **Driver approval workflow**: Driver applicants keep role="customer" until admin approves; admin approval creates driver record and sets role="driver"
+- **Security**: switch-role endpoint requires approved driver record for driver role; driver-applications endpoint requires authentication; driverApplications.userId has unique constraint
 
 ## External Dependencies
 
