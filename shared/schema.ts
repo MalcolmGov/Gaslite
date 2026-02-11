@@ -43,7 +43,7 @@ export const userProfiles = pgTable("user_profiles", {
 // Driver applications table
 export const driverApplications = pgTable("driver_applications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id"),
+  userId: varchar("user_id").unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email").notNull(),

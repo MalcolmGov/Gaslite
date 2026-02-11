@@ -48,10 +48,11 @@ export async function registerRoutes(
     }
   });
 
-  // Driver application (public)
-  app.post("/api/driver-applications", async (req, res) => {
+  // Driver application (authenticated - use /api/onboarding/driver instead)
+  app.post("/api/driver-applications", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const data = insertDriverApplicationSchema.parse(req.body);
+      data.userId = req.user!.claims!.sub;
       const application = await storage.createDriverApplication(data);
       res.json(application);
     } catch (error) {
@@ -100,7 +101,12 @@ export async function registerRoutes(
       let profile = await storage.getUserProfile(userId);
       
       if (!profile) {
-        profile = await storage.createUserProfile({ userId, role: "customer" });
+        profile = await storage.createUserProfile({
+          userId,
+          role: "customer",
+          firstName: req.user!.claims!.first_name || null,
+          lastName: req.user!.claims!.last_name || null,
+        });
       }
       
       res.json(profile);
@@ -119,6 +125,96 @@ export async function registerRoutes(
     }
   });
 
+  // Customer onboarding
+  app.post("/api/onboarding/customer", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user!.claims!.sub;
+      const { firstName, lastName, phone, address } = req.body;
+
+      if (!firstName || !lastName || !phone || !address) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
+      let profile = await storage.getUserProfile(userId);
+      if (!profile) {
+        profile = await storage.createUserProfile({ userId, role: "customer" });
+      }
+
+      const updated = await storage.updateUserProfile(userId, {
+        firstName,
+        lastName,
+        phone,
+        address,
+        role: "customer",
+        onboardingCompleted: true,
+      });
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Customer onboarding error:", error);
+      res.status(500).json({ error: "Failed to complete onboarding" });
+    }
+  });
+
+  // Driver onboarding (submit application)
+  app.post("/api/onboarding/driver", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user!.claims!.sub;
+      const { firstName, lastName, email, phone, address, licenseNumber, vehicleRegistration, licenseDocumentUrl, vehicleDocumentUrl } = req.body;
+
+      if (!firstName || !lastName || !email || !phone || !address || !licenseNumber || !vehicleRegistration) {
+        return res.status(400).json({ error: "All required fields must be filled" });
+      }
+
+      const existingApp = await storage.getDriverApplicationByUserId(userId);
+      if (existingApp) {
+        return res.status(400).json({ error: "You already have a driver application", application: existingApp });
+      }
+
+      const application = await storage.createDriverApplication({
+        userId,
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+        licenseNumber,
+        vehicleRegistration,
+        licenseDocumentUrl: licenseDocumentUrl || null,
+        vehicleDocumentUrl: vehicleDocumentUrl || null,
+      });
+
+      let profile = await storage.getUserProfile(userId);
+      if (!profile) {
+        profile = await storage.createUserProfile({ userId, role: "customer" });
+      }
+      await storage.updateUserProfile(userId, {
+        firstName,
+        lastName,
+        phone,
+        address,
+        onboardingCompleted: true,
+      });
+
+      res.json({ application, message: "Application submitted successfully" });
+    } catch (error) {
+      console.error("Driver onboarding error:", error);
+      res.status(500).json({ error: "Failed to submit driver application" });
+    }
+  });
+
+  // Get current user's driver application status
+  app.get("/api/user/driver-application", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user!.claims!.sub;
+      const application = await storage.getDriverApplicationByUserId(userId);
+      const driver = await storage.getDriverByUserId(userId);
+      res.json({ application: application || null, driver: driver || null });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch application status" });
+    }
+  });
+
   app.post("/api/user/switch-role", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.user!.claims!.sub;
@@ -126,34 +222,26 @@ export async function registerRoutes(
       if (!["customer", "driver", "admin"].includes(role)) {
         return res.status(400).json({ error: "Invalid role" });
       }
-      let existing = await storage.getUserProfile(userId);
-      let profile;
+
+      const existing = await storage.getUserProfile(userId);
       if (!existing) {
-        profile = await storage.createUserProfile({ userId, role });
-      } else {
-        profile = await storage.updateUserProfile(userId, { role });
+        return res.status(400).json({ error: "Profile not found" });
       }
 
       if (role === "driver") {
-        const existingDriver = await storage.getDriverByUserId(userId);
-        if (!existingDriver) {
-          const application = await storage.createDriverApplication({
-            firstName: req.user!.claims!.first_name || "Demo",
-            lastName: req.user!.claims!.last_name || "Driver",
-            email: req.user!.claims!.email || "driver@gaslite.co.za",
-            phone: "+27 82 555 0001",
-            address: "123 Main Road, Cape Town",
-            licenseNumber: "DEMO-LICENSE-001",
-            vehicleRegistration: "CA 123-456",
-          });
-          await storage.createDriver({
-            userId,
-            applicationId: application.id,
-            status: "available",
-          });
+        const driver = await storage.getDriverByUserId(userId);
+        if (!driver) {
+          return res.status(403).json({ error: "Driver access requires an approved application" });
         }
       }
 
+      if (role === "admin") {
+        if (existing.role !== "admin") {
+          return res.status(403).json({ error: "Admin access not authorized" });
+        }
+      }
+
+      const profile = await storage.updateUserProfile(userId, { role });
       res.json(profile);
     } catch (error) {
       console.error("Switch role error:", error);
@@ -477,16 +565,16 @@ export async function registerRoutes(
         reviewedBy: reviewerId,
       });
 
-      // If approved, create a driver record and update user profile
-      if (status === "approved") {
-        // Note: In a real app, you would link this to an actual user account
-        // For now, we create a placeholder driver that can be linked later
-        const driverId = `driver-${Date.now()}`;
-        await storage.createDriver({
-          userId: driverId,
-          applicationId: applicationId,
-          status: "offline",
-        });
+      if (status === "approved" && application.userId) {
+        const existingDriver = await storage.getDriverByUserId(application.userId);
+        if (!existingDriver) {
+          await storage.createDriver({
+            userId: application.userId,
+            applicationId: applicationId,
+            status: "offline",
+          });
+        }
+        await storage.updateUserProfile(application.userId, { role: "driver" });
       }
 
       res.json(updated);

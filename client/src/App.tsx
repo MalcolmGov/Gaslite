@@ -11,6 +11,8 @@ import ApplyPage from "@/pages/apply";
 import CustomerHome from "@/pages/customer/home";
 import DriverDashboard from "@/pages/driver/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
+import CustomerOnboarding from "@/pages/onboarding/customer";
+import DriverOnboarding from "@/pages/onboarding/driver";
 import { useQuery } from "@tanstack/react-query";
 import type { UserProfile } from "@shared/schema";
 
@@ -24,6 +26,23 @@ function LoadingScreen() {
       </div>
     </div>
   );
+}
+
+function getIntent(): "customer" | "driver" | null {
+  const params = new URLSearchParams(window.location.search);
+  const intent = params.get("intent");
+  if (intent === "driver") return "driver";
+  const stored = localStorage.getItem("gaslite_intent");
+  if (stored === "driver") return "driver";
+  if (stored === "customer") return "customer";
+  return null;
+}
+
+function clearIntent() {
+  localStorage.removeItem("gaslite_intent");
+  const url = new URL(window.location.href);
+  url.searchParams.delete("intent");
+  window.history.replaceState({}, "", url.pathname);
 }
 
 function AuthenticatedRouter() {
@@ -47,6 +66,17 @@ function AuthenticatedRouter() {
       </Switch>
     );
   }
+
+  const intent = getIntent();
+
+  if (!profile?.onboardingCompleted) {
+    if (intent === "driver" || profile?.role === "driver") {
+      return <DriverOnboarding user={user} />;
+    }
+    return <CustomerOnboarding user={user} />;
+  }
+
+  clearIntent();
 
   const role = profile?.role || "customer";
 
