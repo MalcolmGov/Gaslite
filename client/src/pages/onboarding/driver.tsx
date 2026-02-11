@@ -38,17 +38,27 @@ import {
   Home,
 } from "lucide-react";
 import type { User as AuthUser } from "@shared/models/auth";
-import type { DriverApplication } from "@shared/schema";
+import { insertDriverApplicationSchema, type DriverApplication } from "@shared/schema";
 
-const driverSchema = z.object({
-  firstName: z.string().min(2, "First name is required"),
-  lastName: z.string().min(2, "Last name is required"),
-  email: z.string().email("Valid email is required"),
-  phone: z.string().min(10, "Valid SA phone number required"),
-  address: z.string().min(5, "Home address is required"),
-  licenseNumber: z.string().min(5, "License number is required"),
-  vehicleRegistration: z.string().min(3, "Vehicle registration is required"),
-});
+const driverSchema = insertDriverApplicationSchema
+  .pick({
+    firstName: true,
+    lastName: true,
+    email: true,
+    phone: true,
+    address: true,
+    licenseNumber: true,
+    vehicleRegistration: true,
+  })
+  .extend({
+    firstName: z.string().min(2, "First name is required"),
+    lastName: z.string().min(2, "Last name is required"),
+    email: z.string().email("Valid email is required"),
+    phone: z.string().min(10, "Valid SA phone number required"),
+    address: z.string().min(5, "Home address is required"),
+    licenseNumber: z.string().min(5, "License number is required"),
+    vehicleRegistration: z.string().min(3, "Vehicle registration is required"),
+  });
 
 type DriverFormData = z.infer<typeof driverSchema>;
 
@@ -80,9 +90,9 @@ function ApplicationStatusView({ application }: { application: DriverApplication
     <div className="min-h-screen bg-background">
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between gap-4 h-16">
             <GasliteLogo size="sm" />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <ThemeToggle />
               <a href="/api/logout">
                 <Button variant="ghost" size="sm" data-testid="button-logout">Sign Out</Button>
@@ -117,28 +127,28 @@ function ApplicationStatusView({ application }: { application: DriverApplication
             </Badge>
             <p className="text-muted-foreground mb-6" data-testid="text-application-status-desc">{status.description}</p>
             <div className="text-left bg-muted/50 rounded-md p-4 space-y-2">
-              <div className="flex justify-between gap-2 text-sm flex-wrap">
+              <div className="flex justify-between gap-4 text-sm flex-wrap">
                 <span className="text-muted-foreground">Name</span>
                 <span className="font-medium" data-testid="text-app-name">{application.firstName} {application.lastName}</span>
               </div>
-              <div className="flex justify-between gap-2 text-sm flex-wrap">
+              <div className="flex justify-between gap-4 text-sm flex-wrap">
                 <span className="text-muted-foreground">Email</span>
                 <span className="font-medium" data-testid="text-app-email">{application.email}</span>
               </div>
-              <div className="flex justify-between gap-2 text-sm flex-wrap">
+              <div className="flex justify-between gap-4 text-sm flex-wrap">
                 <span className="text-muted-foreground">License</span>
                 <span className="font-medium" data-testid="text-app-license">{application.licenseNumber}</span>
               </div>
-              <div className="flex justify-between gap-2 text-sm flex-wrap">
+              <div className="flex justify-between gap-4 text-sm flex-wrap">
                 <span className="text-muted-foreground">Submitted</span>
                 <span className="font-medium" data-testid="text-app-date">
                   {application.createdAt ? new Date(application.createdAt).toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" }) : "N/A"}
                 </span>
               </div>
               {application.reviewNotes && (
-                <div className="flex justify-between gap-2 text-sm flex-wrap">
+                <div className="flex justify-between gap-4 text-sm flex-wrap">
                   <span className="text-muted-foreground">Notes</span>
-                  <span className="font-medium">{application.reviewNotes}</span>
+                  <span className="font-medium" data-testid="text-app-review-notes">{application.reviewNotes}</span>
                 </div>
               )}
             </div>
@@ -234,7 +244,7 @@ export default function DriverOnboarding({ user }: { user: AuthUser }) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground text-sm">Loading your application...</p>
         </div>
       </div>
@@ -270,9 +280,9 @@ export default function DriverOnboarding({ user }: { user: AuthUser }) {
     <div className="min-h-screen bg-background">
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between gap-4 h-16">
             <GasliteLogo size="sm" />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <ThemeToggle />
               <a href="/api/logout">
                 <Button variant="ghost" size="sm" data-testid="button-logout">Sign Out</Button>
@@ -293,14 +303,13 @@ export default function DriverOnboarding({ user }: { user: AuthUser }) {
           </p>
         </div>
 
-        {/* Step Indicator */}
         <div className="flex items-center justify-center gap-2 mb-8">
           {steps.map(({ id, title, icon: Icon }, index) => (
             <div key={id} className="flex items-center gap-2">
               <div className="flex flex-col items-center gap-1.5">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
                   currentStep > id ? "bg-green-500 text-white" :
-                  currentStep === id ? "bg-primary text-primary-foreground" :
+                  currentStep === id ? "bg-foreground text-background" :
                   "bg-muted text-muted-foreground"
                 }`} data-testid={`step-indicator-${id}`}>
                   {currentStep > id ? <CheckCircle className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
@@ -314,20 +323,19 @@ export default function DriverOnboarding({ user }: { user: AuthUser }) {
           ))}
         </div>
 
-        {/* Benefits */}
         <div className="grid grid-cols-3 gap-3 mb-8">
-          <div className="text-center p-3 rounded-md bg-muted/50">
-            <DollarSign className="h-5 w-5 text-primary mx-auto mb-1.5" />
+          <div className="text-center p-3 rounded-md bg-muted/50" data-testid="benefit-earn">
+            <DollarSign className="h-5 w-5 text-muted-foreground mx-auto mb-1.5" />
             <p className="text-xs font-medium">Earn R75-R120</p>
             <p className="text-[10px] text-muted-foreground">per delivery</p>
           </div>
-          <div className="text-center p-3 rounded-md bg-muted/50">
-            <Clock className="h-5 w-5 text-primary mx-auto mb-1.5" />
+          <div className="text-center p-3 rounded-md bg-muted/50" data-testid="benefit-hours">
+            <Clock className="h-5 w-5 text-muted-foreground mx-auto mb-1.5" />
             <p className="text-xs font-medium">Flexible Hours</p>
             <p className="text-[10px] text-muted-foreground">work when you want</p>
           </div>
-          <div className="text-center p-3 rounded-md bg-muted/50">
-            <Truck className="h-5 w-5 text-primary mx-auto mb-1.5" />
+          <div className="text-center p-3 rounded-md bg-muted/50" data-testid="benefit-vehicle">
+            <Truck className="h-5 w-5 text-muted-foreground mx-auto mb-1.5" />
             <p className="text-xs font-medium">Use Your Vehicle</p>
             <p className="text-[10px] text-muted-foreground">be your own boss</p>
           </div>
@@ -477,15 +485,15 @@ export default function DriverOnboarding({ user }: { user: AuthUser }) {
                       <p className="text-sm font-medium">Driver's License Photo/Scan</p>
                       <div className="border-2 border-dashed border-border rounded-md p-6 text-center">
                         {licenseDocUrl ? (
-                          <div className="flex items-center justify-center gap-2 text-green-600">
+                          <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
                             <CheckCircle className="h-5 w-5" />
-                            <span className="text-sm font-medium">License uploaded</span>
+                            <span className="text-sm font-medium" data-testid="text-license-uploaded">License uploaded</span>
                           </div>
                         ) : (
                           <>
                             <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                             <label className="cursor-pointer">
-                              <span className="text-sm text-primary hover:underline font-medium">
+                              <span className="text-sm text-foreground hover:underline font-medium">
                                 {licenseUploading ? "Uploading..." : "Upload license document"}
                               </span>
                               <input
@@ -506,15 +514,15 @@ export default function DriverOnboarding({ user }: { user: AuthUser }) {
                       <p className="text-sm font-medium">Vehicle Registration Document</p>
                       <div className="border-2 border-dashed border-border rounded-md p-6 text-center">
                         {vehicleDocUrl ? (
-                          <div className="flex items-center justify-center gap-2 text-green-600">
+                          <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
                             <CheckCircle className="h-5 w-5" />
-                            <span className="text-sm font-medium">Document uploaded</span>
+                            <span className="text-sm font-medium" data-testid="text-vehicle-uploaded">Document uploaded</span>
                           </div>
                         ) : (
                           <>
                             <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                             <label className="cursor-pointer">
-                              <span className="text-sm text-primary hover:underline font-medium">
+                              <span className="text-sm text-foreground hover:underline font-medium">
                                 {vehicleUploading ? "Uploading..." : "Upload vehicle document"}
                               </span>
                               <input

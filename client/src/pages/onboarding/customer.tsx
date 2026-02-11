@@ -19,13 +19,16 @@ import {
 } from "@/components/ui/form";
 import { MapPin, Phone, User, ArrowRight, Flame, Truck, Shield, Clock } from "lucide-react";
 import type { User as AuthUser } from "@shared/models/auth";
+import { insertUserProfileSchema } from "@shared/schema";
 
-const customerOnboardingSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  phone: z.string().min(10, "Enter a valid SA phone number (e.g. 082 123 4567)").max(15),
-  address: z.string().min(5, "Please enter your full delivery address"),
-});
+const customerOnboardingSchema = insertUserProfileSchema
+  .pick({ firstName: true, lastName: true, phone: true, address: true })
+  .extend({
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    phone: z.string().min(10, "Enter a valid SA phone number (e.g. 082 123 4567)").max(15),
+    address: z.string().min(5, "Please enter your full delivery address"),
+  });
 
 type CustomerOnboardingData = z.infer<typeof customerOnboardingSchema>;
 
@@ -68,9 +71,9 @@ export default function CustomerOnboarding({ user }: { user: AuthUser }) {
     <div className="min-h-screen bg-background">
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between gap-4 h-16">
             <GasliteLogo size="sm" />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <ThemeToggle />
               <a href="/api/logout">
                 <Button variant="ghost" size="sm" data-testid="button-logout">
@@ -95,8 +98,8 @@ export default function CustomerOnboarding({ user }: { user: AuthUser }) {
 
         <div className="grid grid-cols-3 gap-3 mb-8">
           {benefits.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="text-center p-3 rounded-md bg-muted/50">
-              <Icon className="h-5 w-5 text-primary mx-auto mb-1.5" />
+            <div key={title} className="text-center p-3 rounded-md bg-muted/50" data-testid={`benefit-${title.toLowerCase().replace(/\s+/g, "-")}`}>
+              <Icon className="h-5 w-5 text-muted-foreground mx-auto mb-1.5" />
               <p className="text-xs font-medium">{title}</p>
               <p className="text-[10px] text-muted-foreground">{desc}</p>
             </div>

@@ -48,9 +48,10 @@ function clearIntent() {
 function AuthenticatedRouter() {
   const { user, isLoading: authLoading } = useAuth();
   
-  const { data: profile, isLoading: profileLoading } = useQuery<UserProfile>({
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery<UserProfile>({
     queryKey: ["/api/user/profile"],
     enabled: !!user,
+    retry: 1,
   });
 
   if (authLoading || (user && profileLoading)) {
