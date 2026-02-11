@@ -23,7 +23,8 @@ import {
   LogOut,
   Clock,
   Package,
-  ChevronRight
+  ChevronRight,
+  CheckCircle
 } from "lucide-react";
 import type { Product, Order } from "@shared/schema";
 
@@ -46,6 +47,7 @@ export default function CustomerHome() {
 
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
+    refetchInterval: 10000,
   });
 
   const createOrderMutation = useMutation({
@@ -124,6 +126,29 @@ export default function CustomerHome() {
       case "delivered": return "bg-green-500/10 text-green-600";
       case "cancelled": return "bg-red-500/10 text-red-600";
       default: return "bg-muted text-muted-foreground";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "pending": return "Waiting for driver";
+      case "confirmed": return "Order confirmed";
+      case "assigned": return "Driver on the way";
+      case "in_progress": return "Out for delivery";
+      case "delivered": return "Delivered";
+      case "cancelled": return "Cancelled";
+      default: return status;
+    }
+  };
+
+  const getStatusStep = (status: string) => {
+    switch (status) {
+      case "pending": return 1;
+      case "confirmed": return 2;
+      case "assigned": return 3;
+      case "in_progress": return 4;
+      case "delivered": return 5;
+      default: return 0;
     }
   };
 
@@ -268,32 +293,75 @@ export default function CustomerHome() {
                 </Card>
               ) : (
                 <div className="space-y-4">
-                  {orders?.slice(0, 5).map((order) => (
-                    <Card key={order.id} className="hover-elevate overflow-visible">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium">#{order.orderNumber}</span>
-                              <Badge className={getStatusColor(order.status)}>
-                                {order.status.replace("_", " ")}
-                              </Badge>
+                  {orders?.slice(0, 10).map((order) => {
+                    const step = getStatusStep(order.status);
+                    const isActive = order.status !== "delivered" && order.status !== "cancelled";
+                    return (
+                      <Card key={order.id} className={`overflow-visible ${isActive ? "border-primary/30" : ""}`}>
+                        <CardContent className="p-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-medium" data-testid={`text-order-${order.id}`}>#{order.orderNumber}</span>
+                                <Badge className={getStatusColor(order.status)}>
+                                  {getStatusLabel(order.status)}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {order.deliveryAddress}
+                              </p>
                             </div>
-                            <p className="text-sm text-muted-foreground flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {order.deliveryAddress}
-                            </p>
+                            <div className="text-right">
+                              <p className="font-semibold" data-testid={`text-total-${order.id}`}>R{Number(order.total).toFixed(2)}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(order.createdAt!).toLocaleDateString()}
+                              </p>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-semibold">R{Number(order.total).toFixed(2)}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(order.createdAt!).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          {isActive && (
+                            <div className="mt-3 pt-3 border-t border-border">
+                              <div className="flex items-center gap-1">
+                                {["Placed", "Confirmed", "Driver Assigned", "On the Way", "Delivered"].map((label, i) => {
+                                  const stepNum = i + 1;
+                                  const isCompleted = step > stepNum;
+                                  const isCurrent = step === stepNum;
+                                  return (
+                                    <div key={label} className="flex items-center flex-1">
+                                      <div className="flex flex-col items-center flex-1">
+                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                                          isCompleted ? "bg-green-500 text-white" :
+                                          isCurrent ? "bg-primary text-white" :
+                                          "bg-muted text-muted-foreground"
+                                        }`}>
+                                          {isCompleted ? <CheckCircle className="h-3 w-3" /> : stepNum}
+                                        </div>
+                                        <span className={`text-[10px] mt-1 text-center leading-tight ${
+                                          isCurrent ? "text-primary font-medium" : "text-muted-foreground"
+                                        }`}>
+                                          {label}
+                                        </span>
+                                      </div>
+                                      {i < 4 && (
+                                        <div className={`h-0.5 flex-1 mx-1 ${
+                                          step > stepNum ? "bg-green-500" : "bg-muted"
+                                        }`} />
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              {order.estimatedDeliveryTime && order.status !== "delivered" && (
+                                <p className="text-xs text-muted-foreground mt-2 text-center">
+                                  Estimated delivery: ~{order.estimatedDeliveryTime} minutes
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </section>

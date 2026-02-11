@@ -126,7 +126,13 @@ export async function registerRoutes(
       if (!["customer", "driver", "admin"].includes(role)) {
         return res.status(400).json({ error: "Invalid role" });
       }
-      const profile = await storage.updateUserProfile(userId, { role });
+      let existing = await storage.getUserProfile(userId);
+      let profile;
+      if (!existing) {
+        profile = await storage.createUserProfile({ userId, role });
+      } else {
+        profile = await storage.updateUserProfile(userId, { role });
+      }
 
       if (role === "driver") {
         const existingDriver = await storage.getDriverByUserId(userId);
@@ -225,6 +231,21 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/orders/:orderId", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user!.claims!.sub;
+      const orderWithItems = await storage.getOrderWithItems(req.params.orderId);
+
+      if (!orderWithItems || orderWithItems.customerId !== userId) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      res.json(orderWithItems);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch order" });
+    }
+  });
+
   // Driver routes - role check middleware
   const isDriver = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -293,6 +314,53 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/driver/available-orders", isAuthenticated, isDriver, async (req: AuthenticatedRequest, res) => {
+    try {
+      const availableOrders = await storage.getAvailableOrders();
+      res.json(availableOrders);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch available orders" });
+    }
+  });
+
+  app.post("/api/driver/accept-order/:orderId", isAuthenticated, isDriver, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user!.claims!.sub;
+      const driver = await storage.getDriverByUserId(userId);
+      
+      if (!driver) {
+        return res.status(404).json({ error: "Driver profile not found" });
+      }
+
+      if (driver.status !== "available") {
+        return res.status(400).json({ error: "You must be available to accept orders" });
+      }
+
+      const order = await storage.getOrder(req.params.orderId);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      if (order.driverId || order.status !== "pending") {
+        return res.status(400).json({ error: "Order is no longer available" });
+      }
+
+      const driverEarnings = (Number(order.total) * 0.15).toFixed(2);
+      const updated = await storage.updateOrder(order.id, {
+        driverId: driver.id,
+        status: "assigned",
+        driverEarnings,
+        estimatedDeliveryTime: 30,
+      });
+
+      await storage.updateDriver(driver.id, { status: "busy" });
+
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to accept order" });
+    }
+  });
+
   app.patch("/api/driver/orders/:orderId", isAuthenticated, isDriver, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.user!.claims!.sub;
@@ -312,10 +380,10 @@ export async function registerRoutes(
 
       if (status === "delivered") {
         updateData.deliveredAt = new Date();
-        // Update driver stats
         await storage.updateDriver(driver.id, {
           totalDeliveries: (driver.totalDeliveries || 0) + 1,
           totalEarnings: (Number(driver.totalEarnings || 0) + Number(order.driverEarnings || 0)).toFixed(2),
+          status: "available",
         });
       }
 
@@ -429,10 +497,22 @@ export async function registerRoutes(
 
   app.get("/api/admin/drivers", isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const drivers = await storage.getDrivers();
+      const drivers = await storage.getDriversWithApplications();
       res.json(drivers);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch drivers" });
+    }
+  });
+
+  app.get("/api/admin/orders/:orderId/items", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const orderWithItems = await storage.getOrderWithItems(req.params.orderId);
+      if (!orderWithItems) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      res.json(orderWithItems.items);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch order items" });
     }
   });
 

@@ -19,7 +19,8 @@ import {
   CheckCircle,
   XCircle,
   Navigation,
-  Phone
+  Flame,
+  AlertCircle
 } from "lucide-react";
 import type { Order, Driver } from "@shared/schema";
 
@@ -35,6 +36,11 @@ export default function DriverDashboard() {
     queryKey: ["/api/driver/orders"],
   });
 
+  const { data: availableOrders, isLoading: availableLoading } = useQuery<Order[]>({
+    queryKey: ["/api/driver/available-orders"],
+    refetchInterval: 10000,
+  });
+
   const updateStatusMutation = useMutation({
     mutationFn: async ({ status }: { status: string }) => {
       return apiRequest("PATCH", "/api/driver/status", { status });
@@ -48,6 +54,22 @@ export default function DriverDashboard() {
     },
   });
 
+  const acceptOrderMutation = useMutation({
+    mutationFn: async ({ orderId }: { orderId: string }) => {
+      return apiRequest("POST", `/api/driver/accept-order/${orderId}`);
+    },
+    onSuccess: () => {
+      toast({ title: "Order accepted!", description: "Navigate to the delivery address to begin." });
+      queryClient.invalidateQueries({ queryKey: ["/api/driver/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/driver/available-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/driver/profile"] });
+    },
+    onError: (error: any) => {
+      const message = error?.message || "Failed to accept order";
+      toast({ title: "Could not accept order", description: message, variant: "destructive" });
+    },
+  });
+
   const updateOrderMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {
       return apiRequest("PATCH", `/api/driver/orders/${orderId}`, { status });
@@ -55,6 +77,7 @@ export default function DriverDashboard() {
     onSuccess: () => {
       toast({ title: "Order updated" });
       queryClient.invalidateQueries({ queryKey: ["/api/driver/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/driver/available-orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/driver/profile"] });
     },
     onError: () => {
@@ -88,6 +111,8 @@ export default function DriverDashboard() {
     (order) => order.status === "delivered"
   ) || [];
 
+  const isAvailable = driver?.status === "available";
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -115,19 +140,17 @@ export default function DriverDashboard() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">Driver Dashboard</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold" data-testid="text-driver-title">Driver Dashboard</h1>
               <p className="text-muted-foreground">Manage your deliveries and earnings</p>
             </div>
             {driverLoading ? (
               <Skeleton className="h-10 w-32" />
             ) : (
-              <div className="flex items-center gap-2">
-                <Badge className={getStatusColor(driver?.status || "offline")}>
-                  {driver?.status || "offline"}
-                </Badge>
-              </div>
+              <Badge className={getStatusColor(driver?.status || "offline")} data-testid="badge-driver-status">
+                {driver?.status || "offline"}
+              </Badge>
             )}
           </div>
 
@@ -140,7 +163,7 @@ export default function DriverDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Deliveries</p>
-                    <p className="text-2xl font-bold">{driver?.totalDeliveries || 0}</p>
+                    <p className="text-2xl font-bold" data-testid="text-total-deliveries">{driver?.totalDeliveries || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -153,7 +176,7 @@ export default function DriverDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Earnings</p>
-                    <p className="text-2xl font-bold">R{Number(driver?.totalEarnings || 0).toFixed(2)}</p>
+                    <p className="text-2xl font-bold" data-testid="text-total-earnings">R{Number(driver?.totalEarnings || 0).toFixed(2)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -166,7 +189,7 @@ export default function DriverDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Active Orders</p>
-                    <p className="text-2xl font-bold">{activeOrders.length}</p>
+                    <p className="text-2xl font-bold" data-testid="text-active-orders">{activeOrders.length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -175,11 +198,11 @@ export default function DriverDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Status</CardTitle>
-              <CardDescription>Toggle your availability for new orders</CardDescription>
+              <CardTitle>Your Status</CardTitle>
+              <CardDescription>Toggle your availability to receive new delivery requests</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   variant={driver?.status === "available" ? "default" : "outline"}
                   onClick={() => updateStatusMutation.mutate({ status: "available" })}
@@ -213,8 +236,86 @@ export default function DriverDashboard() {
 
           <section>
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Flame className="h-5 w-5 text-orange-500" />
+              Available Orders
+              {(availableOrders?.length || 0) > 0 && (
+                <Badge variant="secondary">{availableOrders!.length} new</Badge>
+              )}
+            </h2>
+            {!isAvailable ? (
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <AlertCircle className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground font-medium">Set yourself to "Available" to see and accept new orders</p>
+                </CardContent>
+              </Card>
+            ) : availableLoading ? (
+              <div className="space-y-4">
+                {[1, 2].map((i) => (
+                  <Card key={i}>
+                    <CardContent className="p-4">
+                      <Skeleton className="h-6 w-32 mb-2" />
+                      <Skeleton className="h-4 w-48" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : !availableOrders?.length ? (
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Package className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">No available orders right now. New orders will appear here automatically.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {availableOrders.map((order) => (
+                  <Card key={order.id} className="overflow-visible border-primary/20">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium" data-testid={`text-order-number-${order.id}`}>#{order.orderNumber}</span>
+                            <Badge className="bg-yellow-500/10 text-yellow-600">New Order</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {order.deliveryAddress}
+                          </p>
+                          {order.deliveryNotes && (
+                            <p className="text-sm text-muted-foreground italic">
+                              Note: {order.deliveryNotes}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-4 text-sm">
+                            <span className="font-medium text-primary">
+                              Order Total: R{Number(order.total).toFixed(2)}
+                            </span>
+                            <span className="text-green-600 font-medium">
+                              You earn: R{(Number(order.total) * 0.15).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => acceptOrderMutation.mutate({ orderId: order.id })}
+                          disabled={acceptOrderMutation.isPending}
+                          data-testid={`button-accept-${order.id}`}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          {acceptOrderMutation.isPending ? "Accepting..." : "Accept Order"}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <Package className="h-5 w-5 text-primary" />
-              Active Orders
+              My Active Deliveries
             </h2>
             {ordersLoading ? (
               <div className="space-y-4">
@@ -229,9 +330,9 @@ export default function DriverDashboard() {
               </div>
             ) : activeOrders.length === 0 ? (
               <Card>
-                <CardContent className="p-8 text-center">
-                  <Truck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No active orders. Set yourself as available to receive orders.</p>
+                <CardContent className="p-6 text-center">
+                  <Truck className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">No active deliveries. Accept an order above to get started.</p>
                 </CardContent>
               </Card>
             ) : (
@@ -241,10 +342,10 @@ export default function DriverDashboard() {
                     <CardContent className="p-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="space-y-2">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium">#{order.orderNumber}</span>
                             <Badge className={getOrderStatusColor(order.status)}>
-                              {order.status.replace("_", " ")}
+                              {order.status === "assigned" ? "Ready to Start" : "In Progress"}
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -282,6 +383,7 @@ export default function DriverDashboard() {
                               disabled={updateOrderMutation.isPending}
                               data-testid={`button-start-${order.id}`}
                             >
+                              <Truck className="h-4 w-4 mr-1" />
                               Start Delivery
                             </Button>
                           )}
@@ -293,7 +395,7 @@ export default function DriverDashboard() {
                               data-testid={`button-complete-${order.id}`}
                             >
                               <CheckCircle className="h-4 w-4 mr-1" />
-                              Complete
+                              Mark Delivered
                             </Button>
                           )}
                         </div>
@@ -308,26 +410,29 @@ export default function DriverDashboard() {
           <section>
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-600" />
-              Completed Today
+              Completed Deliveries
             </h2>
             {completedOrders.length === 0 ? (
               <Card>
-                <CardContent className="p-8 text-center">
-                  <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No completed deliveries yet today.</p>
+                <CardContent className="p-6 text-center">
+                  <CheckCircle className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">No completed deliveries yet.</p>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-2">
-                {completedOrders.slice(0, 5).map((order) => (
+                {completedOrders.slice(0, 10).map((order) => (
                   <Card key={order.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="font-medium">#{order.orderNumber}</span>
-                          <p className="text-sm text-muted-foreground">{order.deliveryAddress}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium">#{order.orderNumber}</span>
+                            <Badge className="bg-green-500/10 text-green-600">Delivered</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">{order.deliveryAddress}</p>
                         </div>
-                        <span className="font-medium text-green-600">
+                        <span className="font-medium text-green-600" data-testid={`text-earnings-${order.id}`}>
                           +R{Number(order.driverEarnings || 0).toFixed(2)}
                         </span>
                       </div>

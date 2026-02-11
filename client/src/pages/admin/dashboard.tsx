@@ -15,22 +15,26 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { 
   MapPin, 
   Package, 
-  Users, 
   Truck, 
   LogOut,
-  Clock,
   CheckCircle,
   XCircle,
   FileText,
   DollarSign,
-  TrendingUp
+  ChevronDown,
+  ChevronUp,
+  Flame,
+  User
 } from "lucide-react";
 import type { Order, DriverApplication, Driver } from "@shared/schema";
+
+type DriverWithApplication = Driver & { application?: DriverApplication };
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState("orders");
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/admin/orders"],
@@ -40,7 +44,7 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/driver-applications"],
   });
 
-  const { data: drivers, isLoading: driversLoading } = useQuery<Driver[]>({
+  const { data: drivers, isLoading: driversLoading } = useQuery<DriverWithApplication[]>({
     queryKey: ["/api/admin/drivers"],
   });
 
@@ -114,6 +118,18 @@ export default function AdminDashboard() {
 
   const availableDrivers = drivers?.filter((d) => d.status === "available") || [];
 
+  const getDriverName = (driverId: string) => {
+    const driver = drivers?.find((d) => d.id === driverId);
+    if (driver?.application) {
+      return `${driver.application.firstName} ${driver.application.lastName}`;
+    }
+    return `Driver ${driverId.slice(0, 8)}`;
+  };
+
+  const pendingOrders = orders?.filter((o) => o.status === "pending") || [];
+  const activeOrders = orders?.filter((o) => ["confirmed", "assigned", "in_progress"].includes(o.status)) || [];
+  const completedOrders = orders?.filter((o) => o.status === "delivered") || [];
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -142,7 +158,7 @@ export default function AdminDashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold" data-testid="text-admin-title">Admin Dashboard</h1>
             <p className="text-muted-foreground">Manage orders, drivers, and applications</p>
           </div>
 
@@ -155,7 +171,7 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Orders</p>
-                    <p className="text-2xl font-bold">{stats?.totalOrders || 0}</p>
+                    <p className="text-2xl font-bold" data-testid="text-total-orders">{stats?.totalOrders || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -167,8 +183,8 @@ export default function AdminDashboard() {
                     <DollarSign className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Revenue</p>
-                    <p className="text-2xl font-bold">R{(stats?.totalRevenue || 0).toFixed(2)}</p>
+                    <p className="text-sm text-muted-foreground">Revenue</p>
+                    <p className="text-2xl font-bold" data-testid="text-total-revenue">R{(stats?.totalRevenue || 0).toFixed(2)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -181,7 +197,7 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Active Drivers</p>
-                    <p className="text-2xl font-bold">{stats?.activeDrivers || 0}</p>
+                    <p className="text-2xl font-bold" data-testid="text-active-drivers">{stats?.activeDrivers || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -194,7 +210,7 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Pending Applications</p>
-                    <p className="text-2xl font-bold">{stats?.pendingApplications || 0}</p>
+                    <p className="text-2xl font-bold" data-testid="text-pending-apps">{stats?.pendingApplications || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -206,6 +222,9 @@ export default function AdminDashboard() {
               <TabsTrigger value="orders" data-testid="tab-orders">
                 <Package className="h-4 w-4 mr-2" />
                 Orders
+                {pendingOrders.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">{pendingOrders.length}</Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger value="applications" data-testid="tab-applications">
                 <FileText className="h-4 w-4 mr-2" />
@@ -221,7 +240,9 @@ export default function AdminDashboard() {
               <Card>
                 <CardHeader>
                   <CardTitle>All Orders</CardTitle>
-                  <CardDescription>Manage and track all customer orders</CardDescription>
+                  <CardDescription>
+                    {orders?.length || 0} total orders — {pendingOrders.length} pending, {activeOrders.length} active, {completedOrders.length} delivered
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {ordersLoading ? (
@@ -240,62 +261,83 @@ export default function AdminDashboard() {
                       {orders?.map((order) => (
                         <Card key={order.id} className="overflow-visible">
                           <CardContent className="p-4">
-                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                              <div className="space-y-2">
+                            <div className="flex flex-col gap-4">
+                              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div className="space-y-2 flex-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-medium" data-testid={`text-order-${order.id}`}>#{order.orderNumber}</span>
+                                    <Badge className={getOrderStatusColor(order.status)}>
+                                      {order.status.replace("_", " ")}
+                                    </Badge>
+                                    {order.driverId && (
+                                      <Badge variant="outline">
+                                        <User className="h-3 w-3 mr-1" />
+                                        {getDriverName(order.driverId)}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" />
+                                    {order.deliveryAddress}
+                                  </p>
+                                  <div className="flex items-center gap-4 text-sm flex-wrap">
+                                    <span className="font-medium">R{Number(order.total).toFixed(2)}</span>
+                                    <span className="text-muted-foreground">
+                                      {new Date(order.createdAt!).toLocaleString()}
+                                    </span>
+                                    {order.deliveryNotes && (
+                                      <span className="text-muted-foreground italic">Note: {order.deliveryNotes}</span>
+                                    )}
+                                  </div>
+                                </div>
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-medium">#{order.orderNumber}</span>
-                                  <Badge className={getOrderStatusColor(order.status)}>
-                                    {order.status.replace("_", " ")}
-                                  </Badge>
-                                  {order.driverId && (
-                                    <Badge variant="outline">Driver Assigned</Badge>
-                                  )}
-                                </div>
-                                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                  <MapPin className="h-3 w-3" />
-                                  {order.deliveryAddress}
-                                </p>
-                                <div className="flex items-center gap-4 text-sm">
-                                  <span className="font-medium">Total: R{Number(order.total).toFixed(2)}</span>
-                                  <span className="text-muted-foreground">
-                                    {new Date(order.createdAt!).toLocaleString()}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <Select
-                                  value={order.status}
-                                  onValueChange={(value) => updateOrderMutation.mutate({ orderId: order.id, status: value })}
-                                >
-                                  <SelectTrigger className="w-[140px]" data-testid={`select-status-${order.id}`}>
-                                    <SelectValue placeholder="Status" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="confirmed">Confirmed</SelectItem>
-                                    <SelectItem value="assigned">Assigned</SelectItem>
-                                    <SelectItem value="in_progress">In Progress</SelectItem>
-                                    <SelectItem value="delivered">Delivered</SelectItem>
-                                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                {!order.driverId && availableDrivers.length > 0 && (
                                   <Select
-                                    onValueChange={(value) => updateOrderMutation.mutate({ orderId: order.id, driverId: value, status: "assigned" })}
+                                    value={order.status}
+                                    onValueChange={(value) => updateOrderMutation.mutate({ orderId: order.id, status: value })}
                                   >
-                                    <SelectTrigger className="w-[160px]" data-testid={`select-driver-${order.id}`}>
-                                      <SelectValue placeholder="Assign Driver" />
+                                    <SelectTrigger className="w-[140px]" data-testid={`select-status-${order.id}`}>
+                                      <SelectValue placeholder="Status" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      {availableDrivers.map((driver) => (
-                                        <SelectItem key={driver.id} value={driver.id}>
-                                          Driver {driver.id.slice(0, 8)}
-                                        </SelectItem>
-                                      ))}
+                                      <SelectItem value="pending">Pending</SelectItem>
+                                      <SelectItem value="confirmed">Confirmed</SelectItem>
+                                      <SelectItem value="assigned">Assigned</SelectItem>
+                                      <SelectItem value="in_progress">In Progress</SelectItem>
+                                      <SelectItem value="delivered">Delivered</SelectItem>
+                                      <SelectItem value="cancelled">Cancelled</SelectItem>
                                     </SelectContent>
                                   </Select>
-                                )}
+                                  {!order.driverId && availableDrivers.length > 0 && (
+                                    <Select
+                                      onValueChange={(value) => updateOrderMutation.mutate({ orderId: order.id, driverId: value, status: "assigned" })}
+                                    >
+                                      <SelectTrigger className="w-[160px]" data-testid={`select-driver-${order.id}`}>
+                                        <SelectValue placeholder="Assign Driver" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {availableDrivers.map((driver) => (
+                                          <SelectItem key={driver.id} value={driver.id}>
+                                            {driver.application
+                                              ? `${driver.application.firstName} ${driver.application.lastName}`
+                                              : `Driver ${driver.id.slice(0, 8)}`}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  )}
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                                    data-testid={`button-expand-${order.id}`}
+                                  >
+                                    {expandedOrder === order.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                  </Button>
+                                </div>
                               </div>
+                              {expandedOrder === order.id && (
+                                <OrderItemsDetail orderId={order.id} />
+                              )}
                             </div>
                           </CardContent>
                         </Card>
@@ -331,8 +373,8 @@ export default function AdminDashboard() {
                           <CardContent className="p-4">
                             <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                               <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">{app.firstName} {app.lastName}</span>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-medium" data-testid={`text-applicant-${app.id}`}>{app.firstName} {app.lastName}</span>
                                   <Badge className={getApplicationStatusColor(app.status)}>
                                     {app.status}
                                   </Badge>
@@ -344,7 +386,10 @@ export default function AdminDashboard() {
                                   <p>Vehicle: {app.vehicleRegistration}</p>
                                 </div>
                                 <p className="text-sm text-muted-foreground">Address: {app.address}</p>
-                                <div className="flex gap-2 mt-2">
+                                {app.reviewNotes && (
+                                  <p className="text-sm text-muted-foreground italic">Review notes: {app.reviewNotes}</p>
+                                )}
+                                <div className="flex gap-2 mt-2 flex-wrap">
                                   {app.licenseDocumentUrl && (
                                     <Button
                                       size="sm"
@@ -425,21 +470,31 @@ export default function AdminDashboard() {
                       {drivers?.map((driver) => (
                         <Card key={driver.id} className="overflow-visible">
                           <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between flex-wrap gap-4">
                               <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
                                   <Truck className="h-6 w-6 text-primary" />
                                 </div>
                                 <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">Driver {driver.id.slice(0, 8)}</span>
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-medium" data-testid={`text-driver-name-${driver.id}`}>
+                                      {driver.application
+                                        ? `${driver.application.firstName} ${driver.application.lastName}`
+                                        : `Driver ${driver.id.slice(0, 8)}`}
+                                    </span>
                                     <Badge className={getDriverStatusColor(driver.status)}>
                                       {driver.status}
                                     </Badge>
                                   </div>
-                                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                                     <span>{driver.totalDeliveries} deliveries</span>
                                     <span>R{Number(driver.totalEarnings || 0).toFixed(2)} earned</span>
+                                    {driver.application && (
+                                      <>
+                                        <span>{driver.application.phone}</span>
+                                        <span>{driver.application.vehicleRegistration}</span>
+                                      </>
+                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -455,6 +510,46 @@ export default function AdminDashboard() {
           </Tabs>
         </div>
       </main>
+    </div>
+  );
+}
+
+function OrderItemsDetail({ orderId }: { orderId: string }) {
+  const { data: items, isLoading } = useQuery<Array<{
+    id: string;
+    productName: string;
+    productSize: string;
+    quantity: number;
+    unitPrice: string;
+    totalPrice: string;
+  }>>({
+    queryKey: [`/api/admin/orders/${orderId}/items`],
+  });
+
+  if (isLoading) {
+    return <Skeleton className="h-16 w-full" />;
+  }
+
+  if (!items?.length) {
+    return <p className="text-sm text-muted-foreground">No items found</p>;
+  }
+
+  return (
+    <div className="border-t border-border pt-3 mt-1">
+      <p className="text-sm font-medium mb-2">Order Items:</p>
+      <div className="space-y-2">
+        {items.map((item) => (
+          <div key={item.id} className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <Flame className="h-4 w-4 text-primary" />
+              <span>{item.productName}</span>
+              <span className="text-muted-foreground">({item.productSize})</span>
+              <span className="text-muted-foreground">x{item.quantity}</span>
+            </div>
+            <span className="font-medium">R{Number(item.totalPrice).toFixed(2)}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -56,6 +56,12 @@ export interface IStorage {
   createOrder(order: InsertOrder, items: InsertOrderItem[]): Promise<OrderWithItems>;
   updateOrder(id: string, order: Partial<Order>): Promise<Order | undefined>;
 
+  // Available orders for drivers
+  getAvailableOrders(): Promise<Order[]>;
+
+  // Drivers with application info
+  getDriversWithApplications(): Promise<(Driver & { application?: DriverApplication })[]>;
+
   // Stats
   getAdminStats(): Promise<{
     totalOrders: number;
@@ -190,6 +196,29 @@ export class DatabaseStorage implements IStorage {
   async updateOrder(id: string, order: Partial<Order>): Promise<Order | undefined> {
     const [updated] = await db.update(orders).set({ ...order, updatedAt: new Date() }).where(eq(orders.id, id)).returning();
     return updated;
+  }
+
+  // Available orders for drivers
+  async getAvailableOrders(): Promise<Order[]> {
+    return db.select().from(orders)
+      .where(
+        and(
+          eq(orders.status, "pending"),
+          sql`${orders.driverId} IS NULL`
+        )
+      )
+      .orderBy(desc(orders.createdAt));
+  }
+
+  // Drivers with application info
+  async getDriversWithApplications(): Promise<(Driver & { application?: DriverApplication })[]> {
+    const allDrivers = await db.select().from(drivers).orderBy(desc(drivers.createdAt));
+    const result = [];
+    for (const driver of allDrivers) {
+      const [application] = await db.select().from(driverApplications).where(eq(driverApplications.id, driver.applicationId));
+      result.push({ ...driver, application: application || undefined });
+    }
+    return result;
   }
 
   // Stats
