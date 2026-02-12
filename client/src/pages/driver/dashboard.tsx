@@ -27,41 +27,32 @@ import {
   CreditCard,
   Banknote,
   ArrowRight,
-  Bell,
-  BellRing,
-  Volume2,
-  ExternalLink
+  Volume2
 } from "lucide-react";
 import type { Order, Driver } from "@shared/schema";
 
 type OrderWithDistance = Order & { distance?: number | null };
 
-function useOrderNotifications(orders: OrderWithDistance[] | undefined, isOnline: boolean) {
+function useOrderNotifications(
+  orders: OrderWithDistance[] | undefined,
+  isOnline: boolean,
+  showToast: (opts: { title: string; description: string }) => void,
+) {
   const previousOrderIdsRef = useRef<Set<string>>(new Set());
-  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
-    typeof window !== "undefined" && "Notification" in window ? Notification.permission : "default"
-  );
+  const hasInteractedRef = useRef(false);
 
   useEffect(() => {
-    if ("Notification" in window) {
-      setNotificationPermission(Notification.permission);
-    }
-  });
-
-  const requestPermission = useCallback(async () => {
-    try {
-      if ("Notification" in window) {
-        const result = await Notification.requestPermission();
-        setNotificationPermission(result);
-        return result;
-      }
-    } catch {
-      // Notification API blocked (e.g. iframe context)
-    }
-    return "denied" as NotificationPermission;
+    const markInteracted = () => { hasInteractedRef.current = true; };
+    window.addEventListener("click", markInteracted, { once: true });
+    window.addEventListener("keydown", markInteracted, { once: true });
+    return () => {
+      window.removeEventListener("click", markInteracted);
+      window.removeEventListener("keydown", markInteracted);
+    };
   }, []);
 
   const playAlert = useCallback(() => {
+    if (!hasInteractedRef.current) return;
     try {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
       const osc = ctx.createOscillator();
@@ -76,7 +67,7 @@ function useOrderNotifications(orders: OrderWithDistance[] | undefined, isOnline
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.5);
     } catch {
-      // fallback silent
+      // silent fallback
     }
   }, []);
 
@@ -95,24 +86,30 @@ function useOrderNotifications(orders: OrderWithDistance[] | undefined, isOnline
       if (newOrders.length > 0) {
         playAlert();
 
-        if ("Notification" in window && Notification.permission === "granted") {
-          newOrders.forEach(order => {
-            const distance = order.distance != null ? ` (${order.distance.toFixed(1)} km)` : "";
-            new Notification("New Gaslite Order!", {
-              body: `${order.deliveryAddress}${distance}\nR${Number(order.total).toFixed(2)} - Earn R${(Number(order.total) * 0.15).toFixed(2)}`,
-              icon: "/favicon.ico",
-              tag: `order-${order.id}`,
-              requireInteraction: true,
-            });
-          });
-        }
+        newOrders.forEach(order => {
+          const distance = order.distance != null ? `${order.distance.toFixed(1)} km away` : "";
+          const earnings = `Earn R${(Number(order.total) * 0.15).toFixed(2)}`;
+          const desc = [order.deliveryAddress, distance, `R${Number(order.total).toFixed(2)}`, earnings].filter(Boolean).join(" · ");
+
+          showToast({ title: "New Order Available!", description: desc });
+
+          try {
+            if ("Notification" in window && Notification.permission === "granted") {
+              new Notification("New Gaslite Order!", {
+                body: `${order.deliveryAddress}${distance ? ` (${distance})` : ""}\nR${Number(order.total).toFixed(2)} - ${earnings}`,
+                icon: "/favicon.ico",
+                tag: `order-${order.id}`,
+              });
+            }
+          } catch {
+            // browser notification not available
+          }
+        });
       }
     }
 
     previousOrderIdsRef.current = currentIds;
-  }, [orders, isOnline, playAlert]);
-
-  return { notificationPermission, requestPermission };
+  }, [orders, isOnline, playAlert, showToast]);
 }
 
 const STATUS_STEPS = ["assigned", "picked_up", "in_transit", "delivered"] as const;
@@ -304,7 +301,7 @@ export default function DriverDashboard() {
     toast({ title: "You're offline" });
   }, [updateStatusMutation, stopLocationSharing, toast]);
 
-  const { notificationPermission, requestPermission } = useOrderNotifications(availableOrders, isOnline);
+  useOrderNotifications(availableOrders, isOnline, toast);
 
   const activeOrders = assignedOrders?.filter(
     (order) =>
@@ -497,60 +494,6 @@ export default function DriverDashboard() {
               </div>
             </CardContent>
           </Card>
-
-          {isOnline && notificationPermission !== "granted" && (
-            <Card className="overflow-visible border-yellow-500/30">
-              <CardContent className="py-4">
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center">
-                      <Bell className="h-5 w-5 text-yellow-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Enable notifications</p>
-                      <p className="text-xs text-muted-foreground">
-                        {notificationPermission === "denied"
-                          ? "Notifications are blocked. Open this app in a new browser tab to enable them."
-                          : "Get instant alerts when new orders come in so you never miss a delivery"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {notificationPermission !== "denied" && (
-                      <Button
-                        size="sm"
-                        onClick={async () => {
-                          const result = await requestPermission();
-                          if (result === "granted") {
-                            toast({ title: "Notifications enabled", description: "You'll get alerts when new orders arrive." });
-                          } else if (result === "denied") {
-                            toast({
-                              title: "Notifications blocked",
-                              description: "Open this app in a new browser tab to enable notifications.",
-                              variant: "destructive",
-                            });
-                          }
-                        }}
-                        data-testid="button-enable-notifications"
-                      >
-                        <BellRing className="h-4 w-4 mr-2" />
-                        Enable
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(window.location.href, "_blank")}
-                      data-testid="button-open-new-tab"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Open in New Tab
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {activeOrders.length > 0 && (
             <section>
