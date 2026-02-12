@@ -18,8 +18,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { MapPin, Phone, User, ArrowRight, Flame, Truck, Shield, Clock } from "lucide-react";
+import { Phone, User, ArrowRight, Flame, Truck, Shield, Clock } from "lucide-react";
 import { insertUserProfileSchema } from "@shared/schema";
+import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
 
 const customerOnboardingSchema = insertUserProfileSchema
   .pick({ firstName: true, lastName: true, phone: true, address: true })
@@ -169,10 +170,12 @@ export default function CustomerOnboarding() {
                     <FormItem>
                       <FormLabel>Default Delivery Address</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input placeholder="42 Long Street, Cape Town, 8001" className="pl-9" {...field} data-testid="input-onboard-address" />
-                        </div>
+                        <GooglePlacesAutocomplete
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="42 Long Street, Cape Town, 8001"
+                          data-testid="input-onboard-address"
+                        />
                       </FormControl>
                       <p className="text-xs text-muted-foreground">You can change this for each order.</p>
                       <FormMessage />

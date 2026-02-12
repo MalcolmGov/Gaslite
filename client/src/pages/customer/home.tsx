@@ -33,6 +33,7 @@ import {
   Car,
   Banknote
 } from "lucide-react";
+import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
 import type { Product, Order } from "@shared/schema";
 
 const driverIcon = L.divIcon({
@@ -619,11 +620,10 @@ export default function CustomerHome() {
                         <div className="space-y-4">
                           <div className="space-y-2">
                             <Label htmlFor="address">Delivery Address</Label>
-                            <Input
-                              id="address"
-                              placeholder="Enter your full address"
+                            <GooglePlacesAutocomplete
                               value={deliveryAddress}
-                              onChange={(e) => setDeliveryAddress(e.target.value)}
+                              onChange={setDeliveryAddress}
+                              placeholder="Start typing your delivery address..."
                               data-testid="input-address"
                             />
                           </div>

@@ -80,6 +80,7 @@ The schema supports a multi-role user system where authentication users extend i
 
 ### Third-Party Services
 - **Google Cloud Storage**: File/document storage for driver applications and uploads
+- **Google Maps Places API**: Address autocomplete for delivery addresses (restricted to South Africa)
 - **PostgreSQL**: Primary database (provisioned via Replit)
 
 ### Key NPM Packages
@@ -94,3 +95,4 @@ The schema supports a multi-role user system where authentication users extend i
 ### Environment Variables Required
 - `DATABASE_URL`: PostgreSQL connection string
 - `SESSION_SECRET`: Secret for session encryption
+- `GOOGLE_MAPS_API_KEY`: Google Maps API key (requires Places API and Maps JavaScript API enabled)

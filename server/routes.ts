@@ -25,6 +25,14 @@ export async function registerRoutes(
 
   const objectStorageService = new ObjectStorageService();
 
+  app.get("/api/config/maps-key", (req, res) => {
+    const key = process.env.GOOGLE_MAPS_API_KEY;
+    if (!key) {
+      return res.status(404).json({ error: "Maps API key not configured" });
+    }
+    res.json({ key });
+  });
+
   app.get("/api/products", async (req, res) => {
     try {
       const products = await storage.getProducts();
