@@ -258,6 +258,7 @@ export async function seedProducts() {
   if (existingProducts.length === 0) {
     const defaultProducts: InsertProduct[] = [
       { name: "9kg Gas Cylinder", size: "9kg", price: "280.00", description: "Standard household gas cylinder" },
+      { name: "14kg Gas Cylinder", size: "14kg", price: "380.00", description: "Medium household gas cylinder" },
       { name: "19kg Gas Cylinder", size: "19kg", price: "480.00", description: "Medium size gas cylinder" },
       { name: "48kg Gas Cylinder", size: "48kg", price: "950.00", description: "Large commercial gas cylinder" },
     ];
