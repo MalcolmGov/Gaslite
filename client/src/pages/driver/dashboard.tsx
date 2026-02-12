@@ -26,8 +26,7 @@ import {
   LocateFixed,
   CreditCard,
   Banknote,
-  ArrowRight,
-  Volume2
+  ArrowRight
 } from "lucide-react";
 import type { Order, Driver } from "@shared/schema";
 
@@ -39,33 +38,43 @@ function useOrderNotifications(
   showToast: (opts: { title: string; description: string }) => void,
 ) {
   const previousOrderIdsRef = useRef<Set<string>>(new Set());
-  const hasInteractedRef = useRef(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
-  useEffect(() => {
-    const markInteracted = () => { hasInteractedRef.current = true; };
-    window.addEventListener("click", markInteracted, { once: true });
-    window.addEventListener("keydown", markInteracted, { once: true });
-    return () => {
-      window.removeEventListener("click", markInteracted);
-      window.removeEventListener("keydown", markInteracted);
-    };
+  const warmUpAudio = useCallback(() => {
+    try {
+      if (!audioCtxRef.current || audioCtxRef.current.state === "closed") {
+        const AC = window.AudioContext || (window as any).webkitAudioContext;
+        if (AC) audioCtxRef.current = new AC();
+      }
+      if (audioCtxRef.current?.state === "suspended") {
+        audioCtxRef.current.resume();
+      }
+    } catch {
+      // audio not available
+    }
   }, []);
 
   const playAlert = useCallback(() => {
-    if (!hasInteractedRef.current) return;
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.15);
-      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.3);
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.5);
+      const ctx = audioCtxRef.current;
+      if (!ctx || ctx.state !== "running") return;
+
+      const playTone = (freq: number, startTime: number, duration: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.4, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      };
+
+      const now = ctx.currentTime;
+      playTone(880, now, 0.2);
+      playTone(1100, now + 0.25, 0.2);
+      playTone(1320, now + 0.5, 0.3);
     } catch {
       // silent fallback
     }
@@ -110,6 +119,8 @@ function useOrderNotifications(
 
     previousOrderIdsRef.current = currentIds;
   }, [orders, isOnline, playAlert, showToast]);
+
+  return { warmUpAudio };
 }
 
 const STATUS_STEPS = ["assigned", "picked_up", "in_transit", "delivered"] as const;
@@ -270,6 +281,7 @@ export default function DriverDashboard() {
   });
 
   const handleGoOnline = useCallback(async () => {
+    warmUpAudio();
     setIsTogglingOnline(true);
     try {
       const permission = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -293,7 +305,7 @@ export default function DriverDashboard() {
     } finally {
       setIsTogglingOnline(false);
     }
-  }, [updateStatusMutation, toast]);
+  }, [updateStatusMutation, toast, warmUpAudio]);
 
   const handleGoOffline = useCallback(() => {
     updateStatusMutation.mutate({ status: "offline" });
@@ -301,7 +313,7 @@ export default function DriverDashboard() {
     toast({ title: "You're offline" });
   }, [updateStatusMutation, stopLocationSharing, toast]);
 
-  useOrderNotifications(availableOrders, isOnline, toast);
+  const { warmUpAudio } = useOrderNotifications(availableOrders, isOnline, toast);
 
   const activeOrders = assignedOrders?.filter(
     (order) =>
@@ -568,6 +580,18 @@ export default function DriverDashboard() {
                           </span>
                         )}
                       </div>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        Placed {new Date(order.createdAt!).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })} at {new Date(order.createdAt!).toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" })}
+                        {" · "}
+                        {(() => {
+                          const mins = Math.floor((Date.now() - new Date(order.createdAt!).getTime()) / 60000);
+                          if (mins < 1) return "just now";
+                          if (mins < 60) return `${mins} min ago`;
+                          const hrs = Math.floor(mins / 60);
+                          return `${hrs}h ${mins % 60}m ago`;
+                        })()}
+                      </p>
 
                       <div className="flex gap-2 flex-wrap pt-2">
                         <Button
@@ -662,6 +686,18 @@ export default function DriverDashboard() {
                               {order.paymentMethod === "card" ? "Card" : "Cash"}
                             </Badge>
                           </div>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1" data-testid={`text-order-time-${order.id}`}>
+                            <Clock className="h-3 w-3" />
+                            Placed {new Date(order.createdAt!).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })} at {new Date(order.createdAt!).toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" })}
+                            {" · "}
+                            {(() => {
+                              const mins = Math.floor((Date.now() - new Date(order.createdAt!).getTime()) / 60000);
+                              if (mins < 1) return "just now";
+                              if (mins < 60) return `${mins} min ago`;
+                              const hrs = Math.floor(mins / 60);
+                              return `${hrs}h ${mins % 60}m ago`;
+                            })()}
+                          </p>
                         </div>
                         <Button
                           onClick={() => acceptOrderMutation.mutate({ orderId: order.id })}

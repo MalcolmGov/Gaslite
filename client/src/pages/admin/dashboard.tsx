@@ -24,7 +24,10 @@ import {
   ChevronDown,
   ChevronUp,
   Flame,
-  User
+  User,
+  Clock,
+  AlertTriangle,
+  Timer
 } from "lucide-react";
 import type { Order, DriverApplication, Driver } from "@shared/schema";
 
@@ -38,6 +41,7 @@ export default function AdminDashboard() {
 
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/admin/orders"],
+    refetchInterval: 30000,
   });
 
   const { data: applications, isLoading: applicationsLoading } = useQuery<DriverApplication[]>({
@@ -86,12 +90,28 @@ export default function AdminDashboard() {
     },
   });
 
+  const SLA_THRESHOLD_MINUTES = 60;
+
+  const getOrderAgeMinutes = (order: Order) => {
+    if (!order.createdAt) return 0;
+    return Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 60000);
+  };
+
+  const getOrderSlaStatus = (order: Order): "within" | "warning" | "breached" => {
+    if (order.status === "delivered" || order.status === "cancelled") return "within";
+    const age = getOrderAgeMinutes(order);
+    if (age > SLA_THRESHOLD_MINUTES) return "breached";
+    if (age > 30) return "warning";
+    return "within";
+  };
+
   const getOrderStatusColor = (status: string) => {
     switch (status) {
       case "pending": return "bg-yellow-500/10 text-yellow-600";
       case "confirmed": return "bg-blue-500/10 text-blue-600";
       case "assigned": return "bg-purple-500/10 text-purple-600";
-      case "in_progress": return "bg-orange-500/10 text-orange-600";
+      case "picked_up": return "bg-indigo-500/10 text-indigo-600";
+      case "in_transit": return "bg-orange-500/10 text-orange-600";
       case "delivered": return "bg-green-500/10 text-green-600";
       case "cancelled": return "bg-red-500/10 text-red-600";
       default: return "bg-muted text-muted-foreground";
@@ -127,8 +147,10 @@ export default function AdminDashboard() {
   };
 
   const pendingOrders = orders?.filter((o) => o.status === "pending") || [];
-  const activeOrders = orders?.filter((o) => ["confirmed", "assigned", "in_progress"].includes(o.status)) || [];
+  const activeOrders = orders?.filter((o) => ["confirmed", "assigned", "picked_up", "in_transit"].includes(o.status)) || [];
   const completedOrders = orders?.filter((o) => o.status === "delivered") || [];
+  const slaBreachedOrders = orders?.filter((o) => getOrderSlaStatus(o) === "breached") || [];
+  const slaWarningOrders = orders?.filter((o) => getOrderSlaStatus(o) === "warning") || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -217,6 +239,47 @@ export default function AdminDashboard() {
             </Card>
           </div>
 
+          {(slaBreachedOrders.length > 0 || slaWarningOrders.length > 0) && (
+            <Card className={`overflow-visible ${slaBreachedOrders.length > 0 ? "border-red-500/40" : "border-yellow-500/30"}`}>
+              <CardContent className="py-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${slaBreachedOrders.length > 0 ? "bg-red-500/10" : "bg-yellow-500/10"}`}>
+                    <AlertTriangle className={`h-5 w-5 ${slaBreachedOrders.length > 0 ? "text-red-600" : "text-yellow-600"}`} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">SLA Monitor (Target: {SLA_THRESHOLD_MINUTES} min delivery)</p>
+                    <p className="text-xs text-muted-foreground">
+                      {slaBreachedOrders.length > 0 && <span className="text-red-600 font-medium">{slaBreachedOrders.length} breached (&gt;{SLA_THRESHOLD_MINUTES} min)</span>}
+                      {slaBreachedOrders.length > 0 && slaWarningOrders.length > 0 && " · "}
+                      {slaWarningOrders.length > 0 && <span className="text-yellow-600 font-medium">{slaWarningOrders.length} at risk (&gt;30 min)</span>}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {[...slaBreachedOrders, ...slaWarningOrders].slice(0, 5).map((order) => {
+                    const age = getOrderAgeMinutes(order);
+                    const sla = getOrderSlaStatus(order);
+                    return (
+                      <div key={order.id} className={`flex items-center justify-between gap-2 text-sm p-2 rounded-md ${sla === "breached" ? "bg-red-500/5" : "bg-yellow-500/5"}`}>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium">#{order.orderNumber}</span>
+                          <Badge className={getOrderStatusColor(order.status)}>
+                            {order.status.replace("_", " ")}
+                          </Badge>
+                          <span className="text-muted-foreground text-xs">{order.deliveryAddress}</span>
+                        </div>
+                        <Badge className={sla === "breached" ? "bg-red-500/10 text-red-600" : "bg-yellow-500/10 text-yellow-600"} data-testid={`badge-sla-${order.id}`}>
+                          <Timer className="h-3 w-3 mr-1" />
+                          {age >= 60 ? `${Math.floor(age / 60)}h ${age % 60}m` : `${age}m`}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="orders" data-testid="tab-orders">
@@ -275,6 +338,29 @@ export default function AdminDashboard() {
                                         {getDriverName(order.driverId)}
                                       </Badge>
                                     )}
+                                    {(() => {
+                                      const sla = getOrderSlaStatus(order);
+                                      const age = getOrderAgeMinutes(order);
+                                      if (sla === "breached") return (
+                                        <Badge className="bg-red-500/10 text-red-600" data-testid={`badge-sla-order-${order.id}`}>
+                                          <AlertTriangle className="h-3 w-3 mr-1" />
+                                          SLA Breached ({age >= 60 ? `${Math.floor(age / 60)}h ${age % 60}m` : `${age}m`})
+                                        </Badge>
+                                      );
+                                      if (sla === "warning") return (
+                                        <Badge className="bg-yellow-500/10 text-yellow-600" data-testid={`badge-sla-order-${order.id}`}>
+                                          <Timer className="h-3 w-3 mr-1" />
+                                          At Risk ({age}m)
+                                        </Badge>
+                                      );
+                                      if (order.status === "delivered" || order.status === "cancelled") return (
+                                        <Badge className="bg-green-500/10 text-green-600">
+                                          <CheckCircle className="h-3 w-3 mr-1" />
+                                          Within SLA
+                                        </Badge>
+                                      );
+                                      return null;
+                                    })()}
                                   </div>
                                   <p className="text-sm text-muted-foreground flex items-center gap-1">
                                     <MapPin className="h-3 w-3" />
@@ -282,8 +368,9 @@ export default function AdminDashboard() {
                                   </p>
                                   <div className="flex items-center gap-4 text-sm flex-wrap">
                                     <span className="font-medium">R{Number(order.total).toFixed(2)}</span>
-                                    <span className="text-muted-foreground">
-                                      {new Date(order.createdAt!).toLocaleString()}
+                                    <span className="text-muted-foreground flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      {new Date(order.createdAt!).toLocaleDateString("en-ZA", { day: "numeric", month: "short" })} {new Date(order.createdAt!).toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit" })}
                                     </span>
                                     {order.deliveryNotes && (
                                       <span className="text-muted-foreground italic">Note: {order.deliveryNotes}</span>
@@ -302,7 +389,8 @@ export default function AdminDashboard() {
                                       <SelectItem value="pending">Pending</SelectItem>
                                       <SelectItem value="confirmed">Confirmed</SelectItem>
                                       <SelectItem value="assigned">Assigned</SelectItem>
-                                      <SelectItem value="in_progress">In Progress</SelectItem>
+                                      <SelectItem value="picked_up">Picked Up</SelectItem>
+                                      <SelectItem value="in_transit">In Transit</SelectItem>
                                       <SelectItem value="delivered">Delivered</SelectItem>
                                       <SelectItem value="cancelled">Cancelled</SelectItem>
                                     </SelectContent>
