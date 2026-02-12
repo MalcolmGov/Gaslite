@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ import {
   Banknote
 } from "lucide-react";
 import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
-import type { Product, Order } from "@shared/schema";
+import type { Product, Order, UserProfile } from "@shared/schema";
 
 const driverIcon = L.divIcon({
   className: "driver-marker",
@@ -72,6 +72,16 @@ export default function CustomerHome() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryNotes, setDeliveryNotes] = useState("");
+
+  const { data: profile } = useQuery<UserProfile>({
+    queryKey: ["/api/user/profile"],
+  });
+
+  useEffect(() => {
+    if (profile?.address && !deliveryAddress) {
+      setDeliveryAddress(profile.address);
+    }
+  }, [profile?.address]);
 
   const { data: products, isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
@@ -135,6 +145,19 @@ export default function CustomerHome() {
       }
       return prev.filter((item) => item.product.id !== productId);
     });
+  };
+
+  const updateCartQuantity = (productId: string, quantity: number) => {
+    const qty = Math.max(0, Math.floor(quantity));
+    if (qty === 0) {
+      setCart((prev) => prev.filter((item) => item.product.id !== productId));
+    } else {
+      setCart((prev) =>
+        prev.map((item) =>
+          item.product.id === productId ? { ...item, quantity: qty } : item
+        )
+      );
+    }
   };
 
   const cartTotal = cart.reduce(
@@ -574,21 +597,54 @@ export default function CustomerHome() {
                     <>
                       <div className="space-y-3">
                         {cart.map((item) => (
-                          <div key={item.product.id} className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                                <Flame className="h-5 w-5 text-primary" />
+                          <div key={item.product.id} className="space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                                  <Flame className="h-5 w-5 text-primary" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium truncate" data-testid={`text-cart-item-name-${item.product.id}`}>{item.product.name}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    R{Number(item.product.price).toFixed(2)} each
+                                  </p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="text-sm font-medium">{item.product.name}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {item.quantity} x R{Number(item.product.price).toFixed(2)}
-                                </p>
-                              </div>
+                              <p className="font-medium shrink-0" data-testid={`text-cart-item-total-${item.product.id}`}>
+                                R{(Number(item.product.price) * item.quantity).toFixed(2)}
+                              </p>
                             </div>
-                            <p className="font-medium">
-                              R{(Number(item.product.price) * item.quantity).toFixed(2)}
-                            </p>
+                            <div className="flex items-center gap-2 ml-13">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => removeFromCart(item.product.id)}
+                                data-testid={`button-cart-decrease-${item.product.id}`}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <Input
+                                type="number"
+                                min="1"
+                                value={item.quantity}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value, 10);
+                                  if (!isNaN(val)) updateCartQuantity(item.product.id, val);
+                                }}
+                                className="w-16 h-8 text-center text-sm"
+                                data-testid={`input-cart-quantity-${item.product.id}`}
+                              />
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => addToCart(item.product)}
+                                data-testid={`button-cart-increase-${item.product.id}`}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
                         ))}
                       </div>
