@@ -13,6 +13,9 @@ import { RoleSwitcher } from "@/components/role-switcher";
 import { GasliteLogo } from "@/components/gaslite-logo";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { 
   Flame, 
   MapPin, 
@@ -24,13 +27,41 @@ import {
   Clock,
   Package,
   ChevronRight,
-  CheckCircle
+  CheckCircle,
+  Phone,
+  User,
+  Car,
+  Banknote
 } from "lucide-react";
 import type { Product, Order } from "@shared/schema";
+
+const driverIcon = L.divIcon({
+  className: "driver-marker",
+  html: '<div style="width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
+const deliveryIcon = L.divIcon({
+  className: "delivery-marker",
+  html: '<div style="width:16px;height:16px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
 
 interface CartItem {
   product: Product;
   quantity: number;
+}
+
+interface TrackingData {
+  orderId: string;
+  status: string;
+  estimatedDeliveryTime: number | null;
+  pickedUpAt: string | null;
+  driverLocation: { latitude: number; longitude: number } | null;
+  driverInfo: { firstName: string; lastName: string; phone: string; vehicleRegistration: string } | null;
+  deliveryLocation: { latitude: number; longitude: number } | null;
 }
 
 export default function CustomerHome() {
@@ -48,6 +79,16 @@ export default function CustomerHome() {
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
     refetchInterval: 10000,
+  });
+
+  const activeOrder = orders?.find(
+    (o) => o.status === "assigned" || o.status === "picked_up" || o.status === "in_transit"
+  );
+
+  const { data: trackingData } = useQuery<TrackingData>({
+    queryKey: ["/api/orders", activeOrder?.id, "tracking"],
+    enabled: !!activeOrder,
+    refetchInterval: 5000,
   });
 
   const createOrderMutation = useMutation({
@@ -122,7 +163,8 @@ export default function CustomerHome() {
       case "pending": return "bg-yellow-500/10 text-yellow-600";
       case "confirmed": return "bg-blue-500/10 text-blue-600";
       case "assigned": return "bg-purple-500/10 text-purple-600";
-      case "in_progress": return "bg-orange-500/10 text-orange-600";
+      case "picked_up": return "bg-orange-500/10 text-orange-600";
+      case "in_transit": return "bg-orange-500/10 text-orange-600";
       case "delivered": return "bg-green-500/10 text-green-600";
       case "cancelled": return "bg-red-500/10 text-red-600";
       default: return "bg-muted text-muted-foreground";
@@ -133,8 +175,9 @@ export default function CustomerHome() {
     switch (status) {
       case "pending": return "Waiting for driver";
       case "confirmed": return "Order confirmed";
-      case "assigned": return "Driver on the way";
-      case "in_progress": return "Out for delivery";
+      case "assigned": return "Driver assigned";
+      case "picked_up": return "Gas picked up";
+      case "in_transit": return "On the way";
       case "delivered": return "Delivered";
       case "cancelled": return "Cancelled";
       default: return status;
@@ -144,13 +187,23 @@ export default function CustomerHome() {
   const getStatusStep = (status: string) => {
     switch (status) {
       case "pending": return 1;
-      case "confirmed": return 2;
-      case "assigned": return 3;
-      case "in_progress": return 4;
+      case "assigned": return 2;
+      case "picked_up": return 3;
+      case "in_transit": return 4;
       case "delivered": return 5;
       default: return 0;
     }
   };
+
+  const stepLabels = ["Order Placed", "Driver Assigned", "Gas Picked Up", "On the Way", "Delivered"];
+
+  const mapCenter: [number, number] = trackingData?.driverLocation
+    ? [trackingData.driverLocation.latitude, trackingData.driverLocation.longitude]
+    : trackingData?.deliveryLocation
+      ? [trackingData.deliveryLocation.latitude, trackingData.deliveryLocation.longitude]
+      : [-26.2041, 28.0473];
+
+  const hasMapData = trackingData && (trackingData.driverLocation || trackingData.deliveryLocation);
 
   return (
     <div className="min-h-screen bg-background">
@@ -229,19 +282,17 @@ export default function CustomerHome() {
                                   <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-8 w-8"
                                     onClick={() => removeFromCart(product.id)}
                                     data-testid={`button-remove-${product.id}`}
                                   >
                                     <Minus className="h-4 w-4" />
                                   </Button>
-                                  <span className="w-8 text-center font-medium">
+                                  <span className="w-8 text-center font-medium" data-testid={`text-qty-${product.id}`}>
                                     {cartItem.quantity}
                                   </span>
                                   <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-8 w-8"
                                     onClick={() => addToCart(product)}
                                     data-testid={`button-add-${product.id}`}
                                   >
@@ -267,6 +318,133 @@ export default function CustomerHome() {
                 </div>
               )}
             </section>
+
+            {activeOrder && (
+              <section data-testid="section-live-tracking">
+                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Truck className="h-5 w-5 text-primary" />
+                  Live Tracking - #{activeOrder.orderNumber}
+                </h2>
+
+                <div className="space-y-4">
+                  {hasMapData && (
+                    <Card className="overflow-visible">
+                      <CardContent className="p-0">
+                        <div className="rounded-md overflow-hidden" style={{ height: "300px" }} data-testid="map-tracking">
+                          <MapContainer
+                            center={mapCenter}
+                            zoom={14}
+                            style={{ height: "100%", width: "100%" }}
+                            scrollWheelZoom={false}
+                          >
+                            <TileLayer
+                              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
+                            {trackingData.driverLocation && (
+                              <Marker
+                                position={[trackingData.driverLocation.latitude, trackingData.driverLocation.longitude]}
+                                icon={driverIcon}
+                              >
+                                <Popup>
+                                  <span data-testid="popup-driver-location">Driver Location</span>
+                                </Popup>
+                              </Marker>
+                            )}
+                            {trackingData.deliveryLocation && (
+                              <Marker
+                                position={[trackingData.deliveryLocation.latitude, trackingData.deliveryLocation.longitude]}
+                                icon={deliveryIcon}
+                              >
+                                <Popup>
+                                  <span data-testid="popup-delivery-location">Delivery Location</span>
+                                </Popup>
+                              </Marker>
+                            )}
+                          </MapContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  <Card className="overflow-visible">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-1">
+                        {stepLabels.map((label, i) => {
+                          const stepNum = i + 1;
+                          const currentStep = getStatusStep(activeOrder.status);
+                          const isCompleted = currentStep > stepNum;
+                          const isCurrent = currentStep === stepNum;
+                          return (
+                            <div key={label} className="flex items-center flex-1" data-testid={`step-${stepNum}`}>
+                              <div className="flex flex-col items-center flex-1">
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                                  isCompleted ? "bg-green-500 text-white" :
+                                  isCurrent ? "bg-primary text-white" :
+                                  "bg-muted text-muted-foreground"
+                                }`}>
+                                  {isCompleted ? <CheckCircle className="h-3 w-3" /> : stepNum}
+                                </div>
+                                <span className={`text-[10px] mt-1 text-center leading-tight ${
+                                  isCurrent ? "text-primary font-medium" : "text-muted-foreground"
+                                }`}>
+                                  {label}
+                                </span>
+                              </div>
+                              {i < 4 && (
+                                <div className={`h-0.5 flex-1 mx-1 ${
+                                  currentStep > stepNum ? "bg-green-500" : "bg-muted"
+                                }`} />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {trackingData?.estimatedDeliveryTime && (
+                        <p className="text-xs text-muted-foreground mt-2 text-center" data-testid="text-estimated-time">
+                          Estimated delivery: ~{trackingData.estimatedDeliveryTime} minutes
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {trackingData?.driverInfo && (
+                    <Card className="overflow-visible" data-testid="card-driver-info">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between gap-4 flex-wrap">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                              <User className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium" data-testid="text-driver-name">
+                                {trackingData.driverInfo.firstName} {trackingData.driverInfo.lastName}
+                              </p>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                                <span className="flex items-center gap-1" data-testid="text-driver-phone">
+                                  <Phone className="h-3 w-3" />
+                                  {trackingData.driverInfo.phone}
+                                </span>
+                                <span className="flex items-center gap-1" data-testid="text-driver-vehicle">
+                                  <Car className="h-3 w-3" />
+                                  {trackingData.driverInfo.vehicleRegistration}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <a href={`tel:${trackingData.driverInfo.phone}`} data-testid="link-call-driver">
+                            <Button size="sm" variant="outline">
+                              <Phone className="h-4 w-4 mr-1" />
+                              Call
+                            </Button>
+                          </a>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </section>
+            )}
 
             <section>
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -303,8 +481,12 @@ export default function CustomerHome() {
                             <div className="space-y-1">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-medium" data-testid={`text-order-${order.id}`}>#{order.orderNumber}</span>
-                                <Badge className={getStatusColor(order.status)}>
+                                <Badge className={getStatusColor(order.status)} data-testid={`badge-status-${order.id}`}>
                                   {getStatusLabel(order.status)}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs" data-testid={`badge-payment-${order.id}`}>
+                                  <Banknote className="h-3 w-3 mr-1" />
+                                  Cash on Delivery
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -322,7 +504,7 @@ export default function CustomerHome() {
                           {isActive && (
                             <div className="mt-3 pt-3 border-t border-border">
                               <div className="flex items-center gap-1">
-                                {["Placed", "Confirmed", "Driver Assigned", "On the Way", "Delivered"].map((label, i) => {
+                                {stepLabels.map((label, i) => {
                                   const stepNum = i + 1;
                                   const isCompleted = step > stepNum;
                                   const isCurrent = step === stepNum;
@@ -454,6 +636,10 @@ export default function CustomerHome() {
                               onChange={(e) => setDeliveryNotes(e.target.value)}
                               data-testid="input-notes"
                             />
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Banknote className="h-4 w-4" />
+                            <span data-testid="text-payment-method">Payment: Cash on Delivery</span>
                           </div>
                           <Button
                             className="w-full"
