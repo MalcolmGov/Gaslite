@@ -8,7 +8,8 @@ export * from "./models/auth";
 
 // Enums
 export const userRoleEnum = pgEnum("user_role", ["customer", "driver", "admin"]);
-export const orderStatusEnum = pgEnum("order_status", ["pending", "confirmed", "assigned", "in_progress", "delivered", "cancelled"]);
+export const orderStatusEnum = pgEnum("order_status", ["pending", "confirmed", "assigned", "picked_up", "in_transit", "delivered", "cancelled"]);
+export const paymentMethodEnum = pgEnum("payment_method", ["cash", "card"]);
 export const driverApplicationStatusEnum = pgEnum("driver_application_status", ["pending", "approved", "rejected"]);
 export const driverStatusEnum = pgEnum("driver_status", ["available", "busy", "offline"]);
 
@@ -88,8 +89,10 @@ export const orders = pgTable("orders", {
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   serviceFee: decimal("service_fee", { precision: 10, scale: 2 }).notNull(),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: paymentMethodEnum("payment_method").default("cash").notNull(),
   driverEarnings: decimal("driver_earnings", { precision: 10, scale: 2 }),
-  estimatedDeliveryTime: integer("estimated_delivery_time"), // in minutes
+  estimatedDeliveryTime: integer("estimated_delivery_time"),
+  pickedUpAt: timestamp("picked_up_at"),
   deliveredAt: timestamp("delivered_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
