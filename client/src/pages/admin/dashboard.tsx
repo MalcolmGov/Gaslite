@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RoleSwitcher } from "@/components/role-switcher";
 import { GasliteLogo } from "@/components/gaslite-logo";
@@ -27,7 +28,13 @@ import {
   User,
   Clock,
   AlertTriangle,
-  Timer
+  Timer,
+  Mail,
+  Phone,
+  Car,
+  CalendarDays,
+  Eye,
+  Filter
 } from "lucide-react";
 import type { Order, DriverApplication, Driver } from "@shared/schema";
 
@@ -38,6 +45,9 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState("orders");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [applicationFilter, setApplicationFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+  const [rejectingAppId, setRejectingAppId] = useState<string | null>(null);
+  const [rejectNotes, setRejectNotes] = useState("");
 
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/admin/orders"],
@@ -46,6 +56,7 @@ export default function AdminDashboard() {
 
   const { data: applications, isLoading: applicationsLoading } = useQuery<DriverApplication[]>({
     queryKey: ["/api/admin/driver-applications"],
+    refetchInterval: 30000,
   });
 
   const { data: drivers, isLoading: driversLoading } = useQuery<DriverWithApplication[]>({
@@ -79,14 +90,17 @@ export default function AdminDashboard() {
     mutationFn: async ({ applicationId, status, notes }: { applicationId: string; status: string; notes?: string }) => {
       return apiRequest("PATCH", `/api/admin/driver-applications/${applicationId}`, { status, reviewNotes: notes });
     },
-    onSuccess: () => {
-      toast({ title: "Application reviewed" });
+    onSuccess: (_, variables) => {
+      const action = variables.status === "approved" ? "approved" : "rejected";
+      toast({ title: `Application ${action}` });
+      setRejectingAppId(null);
+      setRejectNotes("");
       queryClient.invalidateQueries({ queryKey: ["/api/admin/driver-applications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/drivers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
     },
     onError: () => {
-      toast({ title: "Failed to review application", variant: "destructive" });
+      toast({ title: "Failed to review application", description: "Please try again.", variant: "destructive" });
     },
   });
 
@@ -151,6 +165,14 @@ export default function AdminDashboard() {
   const completedOrders = orders?.filter((o) => o.status === "delivered") || [];
   const slaBreachedOrders = orders?.filter((o) => getOrderSlaStatus(o) === "breached") || [];
   const slaWarningOrders = orders?.filter((o) => getOrderSlaStatus(o) === "warning") || [];
+
+  const pendingApplications = applications?.filter((a) => a.status === "pending") || [];
+  const filteredApplications = (applications || [])
+    .filter((a) => applicationFilter === "all" || a.status === applicationFilter)
+    .sort((a, b) => {
+      const statusOrder: Record<string, number> = { pending: 0, approved: 1, rejected: 2 };
+      return (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3);
+    });
 
   return (
     <div className="min-h-screen bg-background">
@@ -292,6 +314,9 @@ export default function AdminDashboard() {
               <TabsTrigger value="applications" data-testid="tab-applications">
                 <FileText className="h-4 w-4 mr-2" />
                 Applications
+                {pendingApplications.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">{pendingApplications.length}</Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger value="drivers" data-testid="tab-drivers">
                 <Truck className="h-4 w-4 mr-2" />
@@ -439,8 +464,28 @@ export default function AdminDashboard() {
             <TabsContent value="applications" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Driver Applications</CardTitle>
-                  <CardDescription>Review and approve driver applications</CardDescription>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <CardTitle>Driver Applications</CardTitle>
+                      <CardDescription>
+                        {applications?.length || 0} total — {pendingApplications.length} pending review
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Filter className="h-4 w-4 text-muted-foreground" />
+                      <Select value={applicationFilter} onValueChange={(v) => setApplicationFilter(v as any)}>
+                        <SelectTrigger className="w-[140px]" data-testid="select-app-filter">
+                          <SelectValue placeholder="Filter" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {applicationsLoading ? (
@@ -449,80 +494,174 @@ export default function AdminDashboard() {
                         <Skeleton key={i} className="h-32" />
                       ))}
                     </div>
-                  ) : applications?.length === 0 ? (
+                  ) : filteredApplications.length === 0 ? (
                     <div className="text-center py-8">
                       <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground">No applications yet</p>
+                      <p className="text-muted-foreground">
+                        {applicationFilter === "all" ? "No applications yet" : `No ${applicationFilter} applications`}
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {applications?.map((app) => (
-                        <Card key={app.id} className="overflow-visible">
-                          <CardContent className="p-4">
-                            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-medium" data-testid={`text-applicant-${app.id}`}>{app.firstName} {app.lastName}</span>
-                                  <Badge className={getApplicationStatusColor(app.status)}>
-                                    {app.status}
-                                  </Badge>
+                      {filteredApplications.map((app) => (
+                        <Card key={app.id} className={`overflow-visible ${app.status === "pending" ? "border-yellow-500/30" : ""}`}>
+                          <CardContent className="p-5">
+                            <div className="space-y-4">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                    app.status === "pending" ? "bg-yellow-500/10" :
+                                    app.status === "approved" ? "bg-green-500/10" :
+                                    "bg-red-500/10"
+                                  }`}>
+                                    <User className={`h-5 w-5 ${
+                                      app.status === "pending" ? "text-yellow-600" :
+                                      app.status === "approved" ? "text-green-600" :
+                                      "text-red-600"
+                                    }`} />
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="font-semibold text-base" data-testid={`text-applicant-${app.id}`}>
+                                        {app.firstName} {app.lastName}
+                                      </span>
+                                      <Badge className={getApplicationStatusColor(app.status)} data-testid={`badge-app-status-${app.id}`}>
+                                        {app.status}
+                                      </Badge>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                      <CalendarDays className="h-3 w-3" />
+                                      Applied {app.createdAt ? new Date(app.createdAt).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" }) : "N/A"}
+                                      {app.reviewedAt && (
+                                        <span className="ml-2">
+                                          — Reviewed {new Date(app.reviewedAt).toLocaleDateString("en-ZA", { day: "numeric", month: "short" })}
+                                        </span>
+                                      )}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div className="grid sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
-                                  <p>Email: {app.email}</p>
-                                  <p>Phone: {app.phone}</p>
-                                  <p>License: {app.licenseNumber}</p>
-                                  <p>Vehicle: {app.vehicleRegistration}</p>
-                                </div>
-                                <p className="text-sm text-muted-foreground">Address: {app.address}</p>
-                                {app.reviewNotes && (
-                                  <p className="text-sm text-muted-foreground italic">Review notes: {app.reviewNotes}</p>
+                                {app.status === "pending" && (
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => reviewApplicationMutation.mutate({ applicationId: app.id, status: "approved" })}
+                                      disabled={reviewApplicationMutation.isPending}
+                                      data-testid={`button-approve-${app.id}`}
+                                    >
+                                      <CheckCircle className="h-4 w-4 mr-1" />
+                                      Approve
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => { setRejectingAppId(app.id); setRejectNotes(""); }}
+                                      disabled={reviewApplicationMutation.isPending}
+                                      data-testid={`button-reject-${app.id}`}
+                                    >
+                                      <XCircle className="h-4 w-4 mr-1" />
+                                      Reject
+                                    </Button>
+                                  </div>
                                 )}
-                                <div className="flex gap-2 mt-2 flex-wrap">
-                                  {app.licenseDocumentUrl && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => window.open(app.licenseDocumentUrl!, '_blank')}
-                                      data-testid={`button-view-license-${app.id}`}
-                                    >
-                                      <FileText className="h-4 w-4 mr-1" />
-                                      View License
-                                    </Button>
-                                  )}
-                                  {app.vehicleDocumentUrl && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => window.open(app.vehicleDocumentUrl!, '_blank')}
-                                      data-testid={`button-view-vehicle-${app.id}`}
-                                    >
-                                      <FileText className="h-4 w-4 mr-1" />
-                                      View Vehicle Doc
-                                    </Button>
-                                  )}
+                              </div>
+
+                              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="text-muted-foreground">Email:</span>
+                                  <span className="font-medium" data-testid={`text-app-email-${app.id}`}>{app.email}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="text-muted-foreground">Phone:</span>
+                                  <span className="font-medium" data-testid={`text-app-phone-${app.id}`}>{app.phone}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="text-muted-foreground">Address:</span>
+                                  <span className="font-medium">{app.address}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="text-muted-foreground">License:</span>
+                                  <span className="font-medium" data-testid={`text-app-license-${app.id}`}>{app.licenseNumber}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Car className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="text-muted-foreground">Vehicle:</span>
+                                  <span className="font-medium" data-testid={`text-app-vehicle-${app.id}`}>{app.vehicleRegistration}</span>
                                 </div>
                               </div>
-                              {app.status === "pending" && (
-                                <div className="flex gap-2">
+
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {app.licenseDocumentUrl ? (
                                   <Button
                                     size="sm"
-                                    onClick={() => reviewApplicationMutation.mutate({ applicationId: app.id, status: "approved" })}
-                                    disabled={reviewApplicationMutation.isPending}
-                                    data-testid={`button-approve-${app.id}`}
+                                    variant="outline"
+                                    onClick={() => window.open(app.licenseDocumentUrl!, '_blank')}
+                                    data-testid={`button-view-license-${app.id}`}
                                   >
-                                    <CheckCircle className="h-4 w-4 mr-1" />
-                                    Approve
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    License Document
                                   </Button>
+                                ) : (
+                                  <Badge variant="outline" className="text-muted-foreground">No license document</Badge>
+                                )}
+                                {app.vehicleDocumentUrl ? (
                                   <Button
                                     size="sm"
-                                    variant="destructive"
-                                    onClick={() => reviewApplicationMutation.mutate({ applicationId: app.id, status: "rejected" })}
-                                    disabled={reviewApplicationMutation.isPending}
-                                    data-testid={`button-reject-${app.id}`}
+                                    variant="outline"
+                                    onClick={() => window.open(app.vehicleDocumentUrl!, '_blank')}
+                                    data-testid={`button-view-vehicle-${app.id}`}
                                   >
-                                    <XCircle className="h-4 w-4 mr-1" />
-                                    Reject
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    Vehicle Document
                                   </Button>
+                                ) : (
+                                  <Badge variant="outline" className="text-muted-foreground">No vehicle document</Badge>
+                                )}
+                              </div>
+
+                              {app.reviewNotes && (
+                                <div className="bg-muted/50 rounded-md p-3 text-sm">
+                                  <span className="text-muted-foreground font-medium">Review Notes:</span>
+                                  <p className="mt-1">{app.reviewNotes}</p>
+                                </div>
+                              )}
+
+                              {rejectingAppId === app.id && (
+                                <div className="border border-red-500/20 rounded-md p-4 space-y-3 bg-red-500/5">
+                                  <p className="text-sm font-medium">Provide a reason for rejection (optional):</p>
+                                  <Textarea
+                                    placeholder="e.g. Missing vehicle documentation, invalid license number..."
+                                    value={rejectNotes}
+                                    onChange={(e) => setRejectNotes(e.target.value)}
+                                    className="text-sm"
+                                    data-testid={`textarea-reject-notes-${app.id}`}
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => {
+                                        reviewApplicationMutation.mutate(
+                                          { applicationId: app.id, status: "rejected", notes: rejectNotes || undefined }
+                                        );
+                                      }}
+                                      disabled={reviewApplicationMutation.isPending}
+                                      data-testid={`button-confirm-reject-${app.id}`}
+                                    >
+                                      Confirm Rejection
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => { setRejectingAppId(null); setRejectNotes(""); }}
+                                      data-testid={`button-cancel-reject-${app.id}`}
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
                                 </div>
                               )}
                             </div>

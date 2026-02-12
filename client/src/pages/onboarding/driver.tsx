@@ -73,15 +73,15 @@ function ApplicationStatusView({ application }: { application: DriverApplication
   const statusConfig = {
     pending: {
       label: "Under Review",
-      description: "Our team is reviewing your application. This typically takes 1-2 business days. We'll notify you once a decision is made.",
+      description: "Our team is reviewing your application. This typically takes 1-2 business days. You'll see an update here once a decision is made.",
     },
     approved: {
       label: "Approved",
-      description: "Congratulations! Your application has been approved. You can now start accepting deliveries.",
+      description: "Your application has been approved! You're now a registered Gaslite driver. Go online to start receiving delivery requests and earning money.",
     },
     rejected: {
       label: "Not Approved",
-      description: "Unfortunately, your application was not approved at this time. Please contact support for more details.",
+      description: "Unfortunately, your application was not approved at this time.",
     },
   };
 
@@ -152,12 +152,28 @@ function ApplicationStatusView({ application }: { application: DriverApplication
               )}
             </div>
             {application.status === "approved" && (
-              <a href="/">
-                <Button className="mt-6 w-full" data-testid="button-go-to-dashboard">
-                  Go to Driver Dashboard
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </a>
+              <div className="mt-6 space-y-3">
+                <div className="bg-green-500/10 border border-green-500/20 rounded-md p-4 text-sm text-green-700 dark:text-green-400">
+                  <div className="flex items-center gap-2 font-medium mb-1">
+                    <Truck className="h-4 w-4" />
+                    You're ready to deliver!
+                  </div>
+                  <p>Go online on your dashboard to start receiving orders from customers near you. Earn money with every delivery.</p>
+                </div>
+                <a href="/">
+                  <Button className="w-full" data-testid="button-start-delivering">
+                    <Truck className="h-4 w-4 mr-2" />
+                    Start Delivering
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </a>
+              </div>
+            )}
+            {application.status === "rejected" && application.reviewNotes && (
+              <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-md p-4 text-sm text-left">
+                <span className="font-medium text-red-700 dark:text-red-400">Reason:</span>
+                <p className="mt-1 text-muted-foreground">{application.reviewNotes}</p>
+              </div>
             )}
             {application.status === "pending" && (
               <a href="/">
@@ -184,6 +200,7 @@ export default function DriverOnboarding() {
 
   const { data: appStatus, isLoading: appStatusLoading } = useQuery<{ application: DriverApplication | null; driver: any }>({
     queryKey: ["/api/user/driver-application"],
+    refetchInterval: 15000,
   });
 
   const { uploadFile: uploadLicense, isUploading: licenseUploading } = useUpload({
