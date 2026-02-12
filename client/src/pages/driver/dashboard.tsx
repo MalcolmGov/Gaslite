@@ -29,7 +29,8 @@ import {
   ArrowRight,
   Bell,
   BellRing,
-  Volume2
+  Volume2,
+  ExternalLink
 } from "lucide-react";
 import type { Order, Driver } from "@shared/schema";
 
@@ -48,12 +49,16 @@ function useOrderNotifications(orders: OrderWithDistance[] | undefined, isOnline
   });
 
   const requestPermission = useCallback(async () => {
-    if ("Notification" in window) {
-      const result = await Notification.requestPermission();
-      setNotificationPermission(result);
-      return result;
+    try {
+      if ("Notification" in window) {
+        const result = await Notification.requestPermission();
+        setNotificationPermission(result);
+        return result;
+      }
+    } catch {
+      // Notification API blocked (e.g. iframe context)
     }
-    return "default" as NotificationPermission;
+    return "denied" as NotificationPermission;
   }, []);
 
   const playAlert = useCallback(() => {
@@ -503,17 +508,45 @@ export default function DriverDashboard() {
                     </div>
                     <div>
                       <p className="font-medium text-sm">Enable notifications</p>
-                      <p className="text-xs text-muted-foreground">Get instant alerts when new orders come in so you never miss a delivery</p>
+                      <p className="text-xs text-muted-foreground">
+                        {notificationPermission === "denied"
+                          ? "Notifications are blocked. Open this app in a new browser tab to enable them."
+                          : "Get instant alerts when new orders come in so you never miss a delivery"}
+                      </p>
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={requestPermission}
-                    data-testid="button-enable-notifications"
-                  >
-                    <BellRing className="h-4 w-4 mr-2" />
-                    Enable
-                  </Button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {notificationPermission !== "denied" && (
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          const result = await requestPermission();
+                          if (result === "granted") {
+                            toast({ title: "Notifications enabled", description: "You'll get alerts when new orders arrive." });
+                          } else if (result === "denied") {
+                            toast({
+                              title: "Notifications blocked",
+                              description: "Open this app in a new browser tab to enable notifications.",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                        data-testid="button-enable-notifications"
+                      >
+                        <BellRing className="h-4 w-4 mr-2" />
+                        Enable
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(window.location.href, "_blank")}
+                      data-testid="button-open-new-tab"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open in New Tab
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
