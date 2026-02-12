@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Flame, Eye, EyeOff, ArrowLeft, ShoppingBag, Truck, Check, Mail, Phone } from "lucide-react";
+import { Flame, Eye, EyeOff, ArrowLeft, ShoppingBag, Truck, Check, Mail, Phone, Zap, MapPin, Shield, Clock, DollarSign, Users } from "lucide-react";
 
 type RoleOption = "customer" | "driver";
 type IdentifierType = "email" | "phone";
@@ -23,15 +23,29 @@ function RoleCard({
   const config = {
     customer: {
       icon: ShoppingBag,
-      title: "Sign up as Customer",
-      description: "Order LPG gas cylinders delivered straight to your door.",
-      perks: ["Browse 9kg, 19kg & 48kg cylinders", "Track your delivery in real time", "Safe & reliable service"],
+      accentFrom: "from-blue-500",
+      accentTo: "to-cyan-400",
+      title: "Customer",
+      subtitle: "Order gas delivery",
+      description: "Get LPG gas cylinders delivered straight to your door in under 60 minutes.",
+      perks: [
+        { icon: Flame, text: "Browse 9kg, 14kg, 19kg & 48kg cylinders" },
+        { icon: MapPin, text: "Track your delivery in real time" },
+        { icon: Shield, text: "Safe & reliable service" },
+      ],
     },
     driver: {
       icon: Truck,
-      title: "Sign up as Driver",
-      description: "Earn money delivering gas cylinders in your area.",
-      perks: ["Flexible hours, be your own boss", "Earn per delivery within 10km", "Quick & simple onboarding"],
+      accentFrom: "from-emerald-500",
+      accentTo: "to-teal-400",
+      title: "Driver",
+      subtitle: "Earn delivering gas",
+      description: "Earn money delivering gas cylinders in your area on your own schedule.",
+      perks: [
+        { icon: Clock, text: "Flexible hours, be your own boss" },
+        { icon: DollarSign, text: "Earn per delivery within 10km" },
+        { icon: Zap, text: "Quick & simple onboarding" },
+      ],
     },
   };
 
@@ -39,48 +53,55 @@ function RoleCard({
   const Icon = c.icon;
 
   return (
-    <Card
-      className={`cursor-pointer transition-all duration-200 ${
+    <button
+      type="button"
+      className={`w-full text-left rounded-md transition-all duration-300 group relative overflow-visible ${
         selected
-          ? "ring-2 ring-blue-500 border-blue-500"
+          ? "ring-2 ring-primary shadow-lg scale-[1.02]"
           : "hover-elevate"
       }`}
       onClick={onSelect}
       data-testid={`card-role-${role}`}
     >
-      <CardContent className="p-5">
-        <div className="flex items-start gap-4">
-          <div
-            className={`flex-shrink-0 w-11 h-11 rounded-md flex items-center justify-center ${
-              selected
-                ? "bg-blue-500 text-white"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            <Icon className="h-5 w-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold text-base">{c.title}</h3>
-              {selected && (
-                <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                  <Check className="h-3 w-3 text-white" />
+      <Card className="overflow-visible border-0 shadow-none bg-transparent">
+        <CardContent className="p-0">
+          <div className={`absolute inset-0 rounded-md bg-gradient-to-br ${c.accentFrom} ${c.accentTo} opacity-[0.06] ${selected ? "opacity-[0.12]" : "group-hover:opacity-[0.1]"} transition-opacity`} />
+          <div className="relative p-5">
+            <div className="flex items-start gap-4">
+              <div
+                className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br ${c.accentFrom} ${c.accentTo} text-white shadow-md transition-transform duration-300 ${
+                  selected ? "scale-110" : "group-hover:scale-105"
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <h3 className="font-semibold text-base">{c.title}</h3>
+                    <p className="text-xs text-muted-foreground">{c.subtitle}</p>
+                  </div>
+                  {selected && (
+                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                      <Check className="h-3.5 w-3.5 text-primary-foreground" />
+                    </div>
+                  )}
                 </div>
-              )}
+                <p className="text-sm text-muted-foreground mt-2">{c.description}</p>
+                <div className="mt-3 space-y-2">
+                  {c.perks.map((perk) => (
+                    <div key={perk.text} className="flex items-center gap-2.5 text-sm">
+                      <perk.icon className={`h-3.5 w-3.5 flex-shrink-0 ${selected ? "text-primary" : "text-muted-foreground"}`} />
+                      <span className="text-muted-foreground">{perk.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">{c.description}</p>
-            <ul className="mt-3 space-y-1.5">
-              {c.perks.map((perk) => (
-                <li key={perk} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Check className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
-                  <span>{perk}</span>
-                </li>
-              ))}
-            </ul>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </button>
   );
 }
 
@@ -136,191 +157,253 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              if (selectedRole) {
-                setSelectedRole(null);
-              } else {
-                navigate("/");
-              }
-            }}
-            data-testid="button-back"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </div>
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyan-500/5 dark:bg-cyan-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/[0.02] rounded-full blur-3xl" />
+      </div>
 
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <Flame className="h-8 w-8 text-blue-500" />
-            <span className="text-2xl font-bold">Gaslite</span>
+      <div className="relative flex items-center justify-center min-h-screen p-4">
+        <div className="w-full max-w-md space-y-6">
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                if (selectedRole) {
+                  setSelectedRole(null);
+                } else {
+                  navigate("/");
+                }
+              }}
+              data-testid="button-back"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
           </div>
-          {!selectedRole ? (
-            <>
-              <h1 className="text-xl font-semibold" data-testid="text-page-title">How would you like to use Gaslite?</h1>
-              <p className="text-sm text-muted-foreground">Choose an option to get started</p>
-            </>
-          ) : (
-            <>
-              <h1 className="text-xl font-semibold" data-testid="text-page-title">
-                {selectedRole === "driver" ? "Create your driver account" : "Create your account"}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {selectedRole === "driver"
-                  ? "Sign up to start earning as a Gaslite driver"
-                  : "Sign up to order gas delivery to your door"}
-              </p>
-            </>
-          )}
-        </div>
 
-        {!selectedRole ? (
-          <div className="space-y-3">
-            <RoleCard role="customer" selected={false} onSelect={() => handleSelectRole("customer")} />
-            <RoleCard role="driver" selected={false} onSelect={() => handleSelectRole("driver")} />
-
-            <div className="pt-2 text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <button
-                onClick={() => navigate("/auth/signin")}
-                className="text-blue-500 font-medium hover:underline"
-                data-testid="link-signin"
-              >
-                Sign in
-              </button>
+          <div className="text-center space-y-3">
+            <div className="flex items-center justify-center gap-2.5 mb-1">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <Flame className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-2xl font-bold tracking-tight">Gaslite</span>
             </div>
+            {!selectedRole ? (
+              <>
+                <h1 className="text-2xl font-bold tracking-tight" data-testid="text-page-title">
+                  Get started with Gaslite
+                </h1>
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                  Choose how you'd like to use the platform
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-2xl font-bold tracking-tight" data-testid="text-page-title">
+                  {selectedRole === "driver" ? "Create your driver account" : "Create your account"}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {selectedRole === "driver"
+                    ? "Sign up to start earning as a Gaslite driver"
+                    : "Sign up to order gas delivery to your door"}
+                </p>
+              </>
+            )}
           </div>
-        ) : (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="mb-4">
-                <RoleCard role={selectedRole} selected={true} onSelect={() => {}} />
+
+          {!selectedRole ? (
+            <div className="space-y-4">
+              <RoleCard role="customer" selected={false} onSelect={() => handleSelectRole("customer")} />
+              <RoleCard role="driver" selected={false} onSelect={() => handleSelectRole("driver")} />
+
+              <div className="flex items-center gap-3 py-2">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">or</span>
+                <div className="flex-1 h-px bg-border" />
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-3">
-                  <Label>Sign up with</Label>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant={identifierType === "phone" ? "default" : "outline"}
-                      className="flex-1 gap-2"
-                      onClick={() => setIdentifierType("phone")}
-                      data-testid="button-method-phone"
-                    >
-                      <Phone className="h-4 w-4" />
-                      Mobile Number
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={identifierType === "email" ? "default" : "outline"}
-                      className="flex-1 gap-2"
-                      onClick={() => setIdentifierType("email")}
-                      data-testid="button-method-email"
-                    >
-                      <Mail className="h-4 w-4" />
-                      Email
-                    </Button>
-                  </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  Already have an account?{" "}
+                  <button
+                    onClick={() => navigate("/auth/signin")}
+                    className="text-primary font-semibold hover:underline underline-offset-2"
+                    data-testid="link-signin"
+                  >
+                    Sign in
+                  </button>
+                </p>
+              </div>
+
+              <div className="flex items-center justify-center gap-6 pt-2">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Users className="h-3.5 w-3.5" />
+                  <span>10,000+ users</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Shield className="h-3.5 w-3.5" />
+                  <span>SABS certified</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>Under 60 min</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Card className="shadow-xl shadow-primary/5 border-border/50">
+              <CardContent className="pt-6">
+                <div className="mb-5">
+                  <RoleCard role={selectedRole} selected={true} onSelect={() => {}} />
                 </div>
 
-                {identifierType === "email" ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      data-testid="input-email"
-                    />
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Mobile Number</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="071 234 5678"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      required
-                      data-testid="input-phone"
-                    />
-                    <p className="text-xs text-muted-foreground">South African mobile number</p>
-                  </div>
-                )}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground uppercase tracking-wider">enter your details</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-3">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground">Sign up with</Label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant={identifierType === "phone" ? "default" : "outline"}
+                        className="flex-1 gap-2"
+                        onClick={() => setIdentifierType("phone")}
+                        data-testid="button-method-phone"
+                      >
+                        <Phone className="h-4 w-4" />
+                        Mobile
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={identifierType === "email" ? "default" : "outline"}
+                        className="flex-1 gap-2"
+                        onClick={() => setIdentifierType("email")}
+                        data-testid="button-method-email"
+                      >
+                        <Mail className="h-4 w-4" />
+                        Email
+                      </Button>
+                    </div>
+                  </div>
+
+                  {identifierType === "email" ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email address</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="you@example.com"
+                          className="pl-9"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          data-testid="input-email"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Mobile number</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="phone"
+                          type="tel"
+                          placeholder="071 234 5678"
+                          className="pl-9"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          required
+                          data-testid="input-phone"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">South African mobile number</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="At least 6 characters"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
+                        data-testid="input-password"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0"
+                        onClick={() => setShowPassword(!showPassword)}
+                        data-testid="button-toggle-password"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm password</Label>
                     <Input
-                      id="password"
+                      id="confirmPassword"
                       type={showPassword ? "text" : "password"}
-                      placeholder="At least 6 characters"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Confirm your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       minLength={6}
-                      data-testid="input-password"
+                      data-testid="input-confirm-password"
                     />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0"
-                      onClick={() => setShowPassword(!showPassword)}
-                      data-testid="button-toggle-password"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
                   </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 border-blue-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg shadow-blue-500/20"
+                    size="lg"
+                    disabled={isRegistering}
+                    data-testid="button-signup"
+                  >
+                    {isRegistering ? "Creating account..." : "Create Account"}
+                  </Button>
+
+                  <p className="text-[11px] text-center text-muted-foreground">
+                    By creating an account, you agree to our Terms of Service and Privacy Policy.
+                  </p>
+                </form>
+
+                <div className="flex items-center gap-3 mt-5">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground">or</span>
+                  <div className="flex-1 h-px bg-border" />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    data-testid="input-confirm-password"
-                  />
+                <div className="mt-4 text-center text-sm text-muted-foreground">
+                  Already have an account?{" "}
+                  <button
+                    onClick={() => navigate("/auth/signin")}
+                    className="text-primary font-semibold hover:underline underline-offset-2"
+                    data-testid="link-signin"
+                  >
+                    Sign in
+                  </button>
                 </div>
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isRegistering}
-                  data-testid="button-signup"
-                >
-                  {isRegistering ? "Creating account..." : "Create Account"}
-                </Button>
-              </form>
-
-              <div className="mt-6 text-center text-sm text-muted-foreground">
-                Already have an account?{" "}
-                <button
-                  onClick={() => navigate("/auth/signin")}
-                  className="text-blue-500 font-medium hover:underline"
-                  data-testid="link-signin"
-                >
-                  Sign in
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
