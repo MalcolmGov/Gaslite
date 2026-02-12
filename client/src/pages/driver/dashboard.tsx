@@ -26,11 +26,89 @@ import {
   LocateFixed,
   CreditCard,
   Banknote,
-  ArrowRight
+  ArrowRight,
+  Bell,
+  BellRing,
+  Volume2
 } from "lucide-react";
 import type { Order, Driver } from "@shared/schema";
 
 type OrderWithDistance = Order & { distance?: number | null };
+
+function useOrderNotifications(orders: OrderWithDistance[] | undefined, isOnline: boolean) {
+  const previousOrderIdsRef = useRef<Set<string>>(new Set());
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
+    typeof window !== "undefined" && "Notification" in window ? Notification.permission : "default"
+  );
+
+  useEffect(() => {
+    if ("Notification" in window) {
+      setNotificationPermission(Notification.permission);
+    }
+  });
+
+  const requestPermission = useCallback(async () => {
+    if ("Notification" in window) {
+      const result = await Notification.requestPermission();
+      setNotificationPermission(result);
+      return result;
+    }
+    return "default" as NotificationPermission;
+  }, []);
+
+  const playAlert = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.15);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.5);
+    } catch {
+      // fallback silent
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isOnline || !orders) {
+      previousOrderIdsRef.current = new Set(orders?.map(o => o.id) || []);
+      return;
+    }
+
+    const currentIds = new Set(orders.map(o => o.id));
+    const prevIds = previousOrderIdsRef.current;
+
+    if (prevIds.size > 0) {
+      const newOrders = orders.filter(o => !prevIds.has(o.id));
+
+      if (newOrders.length > 0) {
+        playAlert();
+
+        if ("Notification" in window && Notification.permission === "granted") {
+          newOrders.forEach(order => {
+            const distance = order.distance != null ? ` (${order.distance.toFixed(1)} km)` : "";
+            new Notification("New Gaslite Order!", {
+              body: `${order.deliveryAddress}${distance}\nR${Number(order.total).toFixed(2)} - Earn R${(Number(order.total) * 0.15).toFixed(2)}`,
+              icon: "/favicon.ico",
+              tag: `order-${order.id}`,
+              requireInteraction: true,
+            });
+          });
+        }
+      }
+    }
+
+    previousOrderIdsRef.current = currentIds;
+  }, [orders, isOnline, playAlert]);
+
+  return { notificationPermission, requestPermission };
+}
 
 const STATUS_STEPS = ["assigned", "picked_up", "in_transit", "delivered"] as const;
 const STATUS_LABELS: Record<string, string> = {
@@ -97,9 +175,12 @@ export default function DriverDashboard() {
     queryKey: ["/api/driver/orders"],
   });
 
+  const isOnline = driver?.status === "available" || driver?.status === "busy";
+
   const { data: availableOrders, isLoading: availableLoading } = useQuery<OrderWithDistance[]>({
     queryKey: ["/api/driver/available-orders"],
-    refetchInterval: 10000,
+    refetchInterval: isOnline ? 5000 : false,
+    enabled: isOnline,
   });
 
   const sendLocation = useCallback(async () => {
@@ -200,7 +281,7 @@ export default function DriverDashboard() {
         longitude: permission.coords.longitude,
       });
       updateStatusMutation.mutate({ status: "available" });
-      toast({ title: "You're online!", description: "GPS location sharing active." });
+      toast({ title: "You're online!", description: "GPS location sharing active. You'll be notified of new orders." });
     } catch {
       toast({
         title: "Location required",
@@ -218,14 +299,13 @@ export default function DriverDashboard() {
     toast({ title: "You're offline" });
   }, [updateStatusMutation, stopLocationSharing, toast]);
 
-  const isOnline = driver?.status === "available" || driver?.status === "busy";
+  const { notificationPermission, requestPermission } = useOrderNotifications(availableOrders, isOnline);
 
   const activeOrders = assignedOrders?.filter(
     (order) =>
       order.status === "assigned" ||
       order.status === "picked_up" ||
-      order.status === "in_transit" ||
-      order.status === "in_progress"
+      order.status === "in_transit"
   ) || [];
 
   const completedOrders = assignedOrders?.filter(
@@ -257,7 +337,6 @@ export default function DriverDashboard() {
           </Button>
         );
       case "in_transit":
-      case "in_progress":
         return (
           <Button
             onClick={() => updateOrderMutation.mutate({ orderId: order.id, status: "delivered" })}
@@ -414,6 +493,32 @@ export default function DriverDashboard() {
             </CardContent>
           </Card>
 
+          {isOnline && notificationPermission !== "granted" && (
+            <Card className="overflow-visible border-yellow-500/30">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center">
+                      <Bell className="h-5 w-5 text-yellow-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Enable notifications</p>
+                      <p className="text-xs text-muted-foreground">Get instant alerts when new orders come in so you never miss a delivery</p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={requestPermission}
+                    data-testid="button-enable-notifications"
+                  >
+                    <BellRing className="h-4 w-4 mr-2" />
+                    Enable
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {activeOrders.length > 0 && (
             <section>
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -435,7 +540,7 @@ export default function DriverDashboard() {
                                 ? "bg-purple-500/10 text-purple-600"
                                 : order.status === "picked_up"
                                 ? "bg-blue-500/10 text-blue-600"
-                                : order.status === "in_transit" || order.status === "in_progress"
+                                : order.status === "in_transit"
                                 ? "bg-orange-500/10 text-orange-600"
                                 : "bg-muted text-muted-foreground"
                             }
