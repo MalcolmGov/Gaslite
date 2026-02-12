@@ -2,9 +2,18 @@
 
 ## Overview
 
-Gaslite is a premium on-demand LPG gas delivery application designed for the South African market. The platform connects customers who need gas cylinder deliveries with drivers who fulfill those orders. The system supports three user roles: customers (ordering gas), drivers (delivering orders), and admins (managing the platform).
+Gaslite is a premium on-demand LPG gas delivery application designed for the South African market. The platform connects customers who need gas cylinder deliveries with drivers who fulfill those orders, using Uber-style real-time delivery tracking. The system supports three user roles: customers (ordering gas), drivers (delivering orders), and admins (managing the platform).
 
-The application features a visually stunning premium landing page with Framer Motion animations, glassmorphism effects, and a modern blue/white/cyan gradient color scheme. Key functionality includes product catalog browsing, order placement with location tracking, driver onboarding with document uploads, and real-time order status management.
+The application features a visually stunning premium landing page with Framer Motion animations, glassmorphism effects, and a modern blue/white/cyan gradient color scheme. Key functionality includes product catalog browsing, order placement with location tracking, driver onboarding with document uploads, real-time GPS tracking with live maps, and Uber-style delivery status management.
+
+### Uber-Style Delivery Tracking
+- Order status flow: pending → assigned → picked_up → in_transit → delivered
+- Driver GPS location sharing when online (15-second polling)
+- Proximity-based order matching (Haversine formula, 10km radius)
+- Live Leaflet/OpenStreetMap tracking map for customers showing driver location
+- Driver info card with name, phone, vehicle registration during delivery
+- Payment method support (cash on delivery primary)
+- Status transition validation on backend
 
 ### Landing Page Features
 - Epic hero section with animated 3D gas cylinder and glassmorphism order preview card
