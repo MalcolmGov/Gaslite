@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { DemoWalkthrough } from "@/components/demo-walkthrough";
 import gasCylinderImageLight from "@/assets/images/gas-cylinder.png";
 import gasCylinderImageDark from "@/assets/images/gas-cylinder-dark.png";
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
@@ -96,6 +97,7 @@ export default function LandingPage() {
   const { scrollYProgress } = useScroll();
   const heroRef = useRef<HTMLDivElement>(null);
   const heroInView = useInView(heroRef, { once: true });
+  const [demoOpen, setDemoOpen] = useState(false);
 
   const products = [
     { size: "9kg", name: "Compact Cylinder", price: 280, popular: false, description: "Perfect for small households" },
@@ -198,7 +200,7 @@ export default function LandingPage() {
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </a>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg group" data-testid="button-watch-demo">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg group" data-testid="button-watch-demo" onClick={() => setDemoOpen(true)}>
                   <Play className="mr-2 h-5 w-5 group-hover:text-primary transition-colors" />
                   Watch Demo
                 </Button>
@@ -803,6 +805,8 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      <DemoWalkthrough open={demoOpen} onOpenChange={setDemoOpen} />
     </div>
   );
 }
