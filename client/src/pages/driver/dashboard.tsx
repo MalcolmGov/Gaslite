@@ -280,6 +280,8 @@ export default function DriverDashboard() {
     },
   });
 
+  const { warmUpAudio } = useOrderNotifications(availableOrders, isOnline, toast);
+
   const handleGoOnline = useCallback(async () => {
     warmUpAudio();
     setIsTogglingOnline(true);
@@ -312,8 +314,6 @@ export default function DriverDashboard() {
     stopLocationSharing();
     toast({ title: "You're offline" });
   }, [updateStatusMutation, stopLocationSharing, toast]);
-
-  const { warmUpAudio } = useOrderNotifications(availableOrders, isOnline, toast);
 
   const activeOrders = assignedOrders?.filter(
     (order) =>
