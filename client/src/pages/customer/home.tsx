@@ -31,7 +31,10 @@ import {
   Phone,
   User,
   Car,
-  Banknote
+  Banknote,
+  CreditCard,
+  Shield,
+  Lock
 } from "lucide-react";
 import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
 import type { Product, Order, UserProfile } from "@shared/schema";
@@ -72,6 +75,7 @@ export default function CustomerHome() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryNotes, setDeliveryNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
 
   const { data: profile } = useQuery<UserProfile>({
     queryKey: ["/api/user/profile"],
@@ -103,15 +107,16 @@ export default function CustomerHome() {
   });
 
   const createOrderMutation = useMutation({
-    mutationFn: async (data: { items: { productId: string; quantity: number }[]; deliveryAddress: string; deliveryNotes?: string }) => {
+    mutationFn: async (data: { items: { productId: string; quantity: number }[]; deliveryAddress: string; deliveryNotes?: string; paymentMethod: string }) => {
       return apiRequest("POST", "/api/orders", data);
     },
     onSuccess: () => {
       toast({ title: "Order placed!", description: "Your order has been submitted successfully." });
       setCart([]);
       setShowCheckout(false);
-      setDeliveryAddress("");
+      setDeliveryAddress(profile?.address || "");
       setDeliveryNotes("");
+      setPaymentMethod("cash");
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
     },
     onError: () => {
@@ -164,8 +169,12 @@ export default function CustomerHome() {
     (sum, item) => sum + Number(item.product.price) * item.quantity,
     0
   );
-  const serviceFee = cartTotal > 0 ? 25 : 0;
-  const total = cartTotal + serviceFee;
+  const serviceFee = cartTotal > 0 ? 29 : 0;
+  const beforeCardFee = cartTotal + serviceFee;
+  const cardProcessingFee = paymentMethod === "card"
+    ? Math.round(beforeCardFee * 0.026 * 1.15 * 100) / 100
+    : 0;
+  const total = beforeCardFee + cardProcessingFee;
 
   const handlePlaceOrder = () => {
     if (!deliveryAddress.trim()) {
@@ -179,6 +188,7 @@ export default function CustomerHome() {
       })),
       deliveryAddress,
       deliveryNotes: deliveryNotes || undefined,
+      paymentMethod,
     });
   };
 
@@ -651,15 +661,21 @@ export default function CustomerHome() {
                       <div className="border-t border-border pt-4 space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Subtotal</span>
-                          <span>R{cartTotal.toFixed(2)}</span>
+                          <span data-testid="text-subtotal">R{cartTotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Service Fee</span>
-                          <span>R{serviceFee.toFixed(2)}</span>
+                          <span className="text-muted-foreground">Delivery Fee</span>
+                          <span data-testid="text-delivery-fee">R{serviceFee.toFixed(2)}</span>
                         </div>
+                        {paymentMethod === "card" && cardProcessingFee > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Card Processing Fee</span>
+                            <span data-testid="text-card-fee">R{cardProcessingFee.toFixed(2)}</span>
+                          </div>
+                        )}
                         <div className="flex justify-between font-semibold text-lg pt-2 border-t border-border">
                           <span>Total</span>
-                          <span className="text-primary">R{total.toFixed(2)}</span>
+                          <span className="text-primary" data-testid="text-total">R{total.toFixed(2)}</span>
                         </div>
                       </div>
                       {!showCheckout ? (
@@ -693,10 +709,67 @@ export default function CustomerHome() {
                               data-testid="input-notes"
                             />
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Banknote className="h-4 w-4" />
-                            <span data-testid="text-payment-method">Payment: Cash on Delivery</span>
+                          <div className="space-y-2">
+                            <Label>Payment Method</Label>
+                            <div className="grid grid-cols-2 gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className={`flex items-center justify-center gap-2 toggle-elevate ${paymentMethod === "cash" ? "toggle-elevated border-primary" : ""}`}
+                                onClick={() => setPaymentMethod("cash")}
+                                data-testid="button-pay-cash"
+                              >
+                                <Banknote className="h-4 w-4" />
+                                Cash
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className={`flex items-center justify-center gap-2 toggle-elevate ${paymentMethod === "card" ? "toggle-elevated border-primary" : ""}`}
+                                onClick={() => setPaymentMethod("card")}
+                                data-testid="button-pay-card"
+                              >
+                                <CreditCard className="h-4 w-4" />
+                                Card
+                              </Button>
+                            </div>
+                            {paymentMethod === "card" && (
+                              <p className="text-xs text-muted-foreground" data-testid="text-card-fee-info">
+                                Card processing fee: 2.6% + 15% VAT applies
+                              </p>
+                            )}
                           </div>
+                          {paymentMethod === "card" && (
+                            <div className="space-y-3 p-3 border border-border rounded-md bg-muted/30">
+                              <div className="flex items-center gap-2 text-sm font-medium">
+                                <Lock className="h-4 w-4 text-primary" />
+                                <span>Card Details (Demo)</span>
+                              </div>
+                              <Input
+                                placeholder="4242 4242 4242 4242"
+                                maxLength={19}
+                                data-testid="input-card-number"
+                                className="font-mono"
+                              />
+                              <div className="grid grid-cols-2 gap-2">
+                                <Input
+                                  placeholder="MM/YY"
+                                  maxLength={5}
+                                  data-testid="input-card-expiry"
+                                />
+                                <Input
+                                  placeholder="CVV"
+                                  maxLength={3}
+                                  type="password"
+                                  data-testid="input-card-cvv"
+                                />
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Shield className="h-3 w-3" />
+                                <span>Secure mock payment — no real charges</span>
+                              </div>
+                            </div>
+                          )}
                           <Button
                             className="w-full"
                             size="lg"
@@ -704,7 +777,11 @@ export default function CustomerHome() {
                             disabled={createOrderMutation.isPending}
                             data-testid="button-place-order"
                           >
-                            {createOrderMutation.isPending ? "Placing Order..." : "Place Order"}
+                            {createOrderMutation.isPending
+                              ? "Placing Order..."
+                              : paymentMethod === "card"
+                                ? `Pay R${total.toFixed(2)} by Card`
+                                : "Place Order — Cash on Delivery"}
                           </Button>
                           <Button
                             className="w-full"

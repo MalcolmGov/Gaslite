@@ -88,6 +88,7 @@ export const orders = pgTable("orders", {
   deliveryNotes: text("delivery_notes"),
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   serviceFee: decimal("service_fee", { precision: 10, scale: 2 }).notNull(),
+  cardProcessingFee: decimal("card_processing_fee", { precision: 10, scale: 2 }).default("0"),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   paymentMethod: paymentMethodEnum("payment_method").default("cash").notNull(),
   driverEarnings: decimal("driver_earnings", { precision: 10, scale: 2 }),

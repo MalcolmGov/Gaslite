@@ -272,7 +272,7 @@ export async function registerRoutes(
   app.post("/api/orders", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.userId!;
-      const { items, deliveryAddress, deliveryNotes } = req.body;
+      const { items, deliveryAddress, deliveryNotes, paymentMethod } = req.body;
 
       if (!items || !Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ error: "Order must have items" });
@@ -281,6 +281,8 @@ export async function registerRoutes(
       if (!deliveryAddress) {
         return res.status(400).json({ error: "Delivery address required" });
       }
+
+      const method = paymentMethod === "card" ? "card" : "cash";
 
       const orderItems: InsertOrderItem[] = [];
       let subtotal = 0;
@@ -305,8 +307,12 @@ export async function registerRoutes(
         });
       }
 
-      const serviceFee = 25;
-      const total = subtotal + serviceFee;
+      const serviceFee = 29;
+      const beforeCardFee = subtotal + serviceFee;
+      const cardProcessingFee = method === "card"
+        ? Math.round(beforeCardFee * 0.026 * 1.15 * 100) / 100
+        : 0;
+      const total = beforeCardFee + cardProcessingFee;
 
       const order = await storage.createOrder(
         {
@@ -315,7 +321,9 @@ export async function registerRoutes(
           deliveryNotes: deliveryNotes || null,
           subtotal: subtotal.toFixed(2),
           serviceFee: serviceFee.toFixed(2),
+          cardProcessingFee: cardProcessingFee.toFixed(2),
           total: total.toFixed(2),
+          paymentMethod: method,
         },
         orderItems
       );

@@ -472,6 +472,26 @@ export default function DriverDashboard() {
           </div>
 
           <Card className="overflow-visible">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                    <CreditCard className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Platform Subscription</p>
+                    <p className="text-2xl font-bold" data-testid="text-subscription-fee">R39.00<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                  </div>
+                </div>
+                <Badge variant="outline" data-testid="badge-subscription-status">Active</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Deducted from your earnings during weekly/monthly settlement. See <a href="/driver/terms" className="underline text-primary">Terms &amp; Conditions</a>.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-visible">
             <CardHeader>
               <CardTitle>Go Online</CardTitle>
               <CardDescription>Toggle your availability to receive delivery requests</CardDescription>

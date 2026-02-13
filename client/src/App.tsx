@@ -15,6 +15,7 @@ import DriverDashboard from "@/pages/driver/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
 import CustomerOnboarding from "@/pages/onboarding/customer";
 import DriverOnboarding from "@/pages/onboarding/driver";
+import DriverTerms from "@/pages/driver/terms";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "./lib/queryClient";
 import type { UserProfile } from "@shared/schema";
@@ -69,6 +70,7 @@ function AuthenticatedRouter() {
         <Route path="/apply" component={ApplyPage} />
         <Route path="/auth/signin" component={SignInPage} />
         <Route path="/auth/signup" component={SignUpPage} />
+        <Route path="/driver/terms" component={DriverTerms} />
         <Route component={LandingPage} />
       </Switch>
     );
@@ -92,6 +94,7 @@ function AuthenticatedRouter() {
       <Switch>
         <Route path="/" component={AdminDashboard} />
         <Route path="/apply" component={ApplyPage} />
+        <Route path="/driver/terms" component={DriverTerms} />
         <Route component={AdminDashboard} />
       </Switch>
     );
@@ -102,6 +105,7 @@ function AuthenticatedRouter() {
       <Switch>
         <Route path="/" component={DriverDashboard} />
         <Route path="/apply" component={ApplyPage} />
+        <Route path="/driver/terms" component={DriverTerms} />
         <Route component={DriverDashboard} />
       </Switch>
     );
@@ -111,6 +115,7 @@ function AuthenticatedRouter() {
     <Switch>
       <Route path="/" component={CustomerHome} />
       <Route path="/apply" component={ApplyPage} />
+      <Route path="/driver/terms" component={DriverTerms} />
       <Route component={CustomerHome} />
     </Switch>
   );

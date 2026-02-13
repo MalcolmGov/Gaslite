@@ -25,22 +25,22 @@ const steps = [
     number: 1,
     title: "Browse & Order",
     subtitle: "Choose your gas cylinder",
-    description: "Pick from our range of LPG cylinders — 9kg, 14kg, 19kg, or 48kg. Add to cart, enter your delivery address with Google Maps autocomplete, and place your order in seconds.",
+    description: "Pick from our range of LPG cylinders — 9kg, 19kg, or 48kg. Add to cart, enter your delivery address with Google Maps autocomplete, and place your order in seconds.",
     icon: ShoppingBag,
     accentFrom: "from-blue-500",
     accentTo: "to-cyan-400",
     features: [
-      { icon: Flame, text: "4 cylinder sizes available" },
+      { icon: Flame, text: "3 cylinder sizes available" },
       { icon: MapPin, text: "Address autocomplete powered by Google" },
-      { icon: CreditCard, text: "Cash on delivery — no card needed" },
+      { icon: CreditCard, text: "Pay by cash or card" },
     ],
     visual: (
       <div className="relative p-4">
         <div className="bg-muted/50 rounded-lg p-4 space-y-3">
           {[
-            { name: "9kg Cylinder", price: "R280", size: "9kg" },
-            { name: "14kg Cylinder", price: "R380", size: "14kg" },
-            { name: "19kg Cylinder", price: "R480", size: "19kg" },
+            { name: "9kg Cylinder", price: "R233", size: "9kg" },
+            { name: "19kg Cylinder", price: "R523", size: "19kg" },
+            { name: "48kg Cylinder", price: "R1,316", size: "48kg" },
           ].map((item) => (
             <div key={item.name} className="flex items-center justify-between bg-background rounded-md p-3">
               <div className="flex items-center gap-3">
@@ -185,7 +185,7 @@ const steps = [
     number: 4,
     title: "Delivered!",
     subtitle: "Gas at your door",
-    description: "Your driver arrives with your gas cylinder. Pay cash on delivery — no card or app payment needed. It's that simple.",
+    description: "Your driver arrives with your gas cylinder. Pay by cash on delivery or card — it's that simple.",
     icon: Package,
     accentFrom: "from-violet-500",
     accentTo: "to-purple-400",
@@ -210,7 +210,7 @@ const steps = [
               </div>
               <div className="flex items-center gap-1.5">
                 <CreditCard className="h-3.5 w-3.5" />
-                <span>R480 cash</span>
+                <span>R523 cash</span>
               </div>
             </div>
             <div className="flex gap-1 mt-3">

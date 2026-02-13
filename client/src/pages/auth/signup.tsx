@@ -29,7 +29,7 @@ function RoleCard({
       subtitle: "Order gas delivery",
       description: "Get LPG gas cylinders delivered straight to your door in under 60 minutes.",
       perks: [
-        { icon: Flame, text: "Browse 9kg, 14kg, 19kg & 48kg cylinders" },
+        { icon: Flame, text: "Browse 9kg, 19kg & 48kg cylinders" },
         { icon: MapPin, text: "Track your delivery in real time" },
         { icon: Shield, text: "Safe & reliable service" },
       ],

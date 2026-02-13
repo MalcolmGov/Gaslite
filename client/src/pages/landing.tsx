@@ -100,9 +100,9 @@ export default function LandingPage() {
   const [demoOpen, setDemoOpen] = useState(false);
 
   const products = [
-    { size: "9kg", name: "Compact Cylinder", price: 280, popular: false, description: "Perfect for small households" },
-    { size: "19kg", name: "Standard Cylinder", price: 480, popular: true, description: "Most popular for families" },
-    { size: "48kg", name: "Commercial Cylinder", price: 950, popular: false, description: "Ideal for businesses" },
+    { size: "9kg", name: "Compact Cylinder", price: 233, popular: false, description: "Perfect for small households" },
+    { size: "19kg", name: "Standard Cylinder", price: 523, popular: true, description: "Most popular for families" },
+    { size: "48kg", name: "Commercial Cylinder", price: 1316, popular: false, description: "Ideal for businesses" },
   ];
 
   const testimonials = [
@@ -264,16 +264,16 @@ export default function LandingPage() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">19kg Gas Cylinder</span>
-                        <span className="font-medium">R480</span>
+                        <span className="font-medium">R523</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Service Fee</span>
-                        <span className="font-medium">R25</span>
+                        <span className="text-muted-foreground">Delivery Fee</span>
+                        <span className="font-medium">R29</span>
                       </div>
                       <div className="h-px bg-border" />
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-sm">Total</span>
-                        <span className="font-bold text-primary">R505</span>
+                        <span className="font-bold text-primary">R552</span>
                       </div>
                     </div>
                     <div className="mt-3 p-2 bg-blue-500/10 rounded-xl">
