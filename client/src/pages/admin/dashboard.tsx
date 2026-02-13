@@ -34,7 +34,9 @@ import {
   Car,
   CalendarDays,
   Eye,
-  Filter
+  Filter,
+  Landmark,
+  CreditCard
 } from "lucide-react";
 import type { Order, DriverApplication, Driver } from "@shared/schema";
 
@@ -592,6 +594,33 @@ export default function AdminDashboard() {
                                   <span className="font-medium" data-testid={`text-app-vehicle-${app.id}`}>{app.vehicleRegistration}</span>
                                 </div>
                               </div>
+
+                              {app.bankName && (
+                                <div className="border rounded-md p-3 space-y-2">
+                                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                                    <Landmark className="h-3 w-3" />
+                                    Banking Details
+                                  </p>
+                                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                                    <div>
+                                      <span className="text-muted-foreground">Bank:</span>{" "}
+                                      <span className="font-medium" data-testid={`text-app-bank-${app.id}`}>{app.bankName}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Branch Code:</span>{" "}
+                                      <span className="font-medium" data-testid={`text-app-branch-${app.id}`}>{app.branchCode}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Account No:</span>{" "}
+                                      <span className="font-medium" data-testid={`text-app-account-${app.id}`}>{app.accountNumber}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Type:</span>{" "}
+                                      <span className="font-medium" data-testid={`text-app-acctype-${app.id}`}>{app.accountType}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
 
                               <div className="flex items-center gap-2 flex-wrap">
                                 {app.licenseDocumentUrl ? (
