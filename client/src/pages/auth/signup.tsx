@@ -116,6 +116,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const handleSelectRole = (role: RoleOption) => {
     setSelectedRole(role);
@@ -124,6 +125,11 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (selectedRole === "driver" && !agreedToTerms) {
+      toast({ title: "Terms & Conditions required", description: "Please agree to the Driver Terms & Conditions to continue.", variant: "destructive" });
+      return;
+    }
 
     if (password !== confirmPassword) {
       toast({ title: "Passwords don't match", description: "Please make sure both passwords are the same.", variant: "destructive" });
@@ -369,11 +375,36 @@ export default function SignUpPage() {
                     />
                   </div>
 
+                  {selectedRole === "driver" && (
+                    <div className="flex items-start gap-3 py-2">
+                      <input
+                        type="checkbox"
+                        id="driverTerms"
+                        checked={agreedToTerms}
+                        onChange={(e) => setAgreedToTerms(e.target.checked)}
+                        className="mt-1 h-4 w-4 rounded border-border accent-blue-500 cursor-pointer"
+                        data-testid="checkbox-driver-terms"
+                      />
+                      <label htmlFor="driverTerms" className="text-sm text-muted-foreground cursor-pointer leading-snug">
+                        I have read and agree to the{" "}
+                        <a
+                          href="/driver/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary font-semibold hover:underline underline-offset-2"
+                          data-testid="link-driver-terms"
+                        >
+                          Driver Terms & Conditions
+                        </a>
+                      </label>
+                    </div>
+                  )}
+
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 border-blue-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg shadow-blue-500/20"
                     size="lg"
-                    disabled={isRegistering}
+                    disabled={isRegistering || (selectedRole === "driver" && !agreedToTerms)}
                     data-testid="button-signup"
                   >
                     {isRegistering ? "Creating account..." : "Create Account"}
