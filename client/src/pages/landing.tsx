@@ -320,7 +320,7 @@ export default function LandingPage() {
           >
             <Badge className="mb-4 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20">How It Works</Badge>
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
-              Get Gas in <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">4 Simple Steps</span>
+              Get Gas in <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">3 Simple Steps</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               From order to delivery in under an hour. It's that simple.
