@@ -37,8 +37,26 @@ import {
   DollarSign,
   Shield,
   Home,
+  Landmark,
+  CreditCard,
+  ChevronDown,
 } from "lucide-react";
 import { insertDriverApplicationSchema, type DriverApplication } from "@shared/schema";
+
+const SA_BANKS = [
+  { name: "ABSA Bank", branchCode: "632005" },
+  { name: "African Bank", branchCode: "430000" },
+  { name: "Bidvest Bank", branchCode: "462005" },
+  { name: "Capitec Bank", branchCode: "470010" },
+  { name: "Discovery Bank", branchCode: "679000" },
+  { name: "First National Bank (FNB)", branchCode: "250655" },
+  { name: "Investec Bank", branchCode: "580105" },
+  { name: "Nedbank", branchCode: "198765" },
+  { name: "Standard Bank", branchCode: "051001" },
+  { name: "TymeBank", branchCode: "678910" },
+];
+
+const ACCOUNT_TYPES = ["Cheque/Current", "Savings", "Transmission"];
 
 const driverSchema = insertDriverApplicationSchema
   .pick({
@@ -58,6 +76,10 @@ const driverSchema = insertDriverApplicationSchema
     address: z.string().min(5, "Home address is required"),
     licenseNumber: z.string().min(5, "License number is required"),
     vehicleRegistration: z.string().min(3, "Vehicle registration is required"),
+    bankName: z.string().min(1, "Please select your bank"),
+    branchCode: z.string().min(1, "Branch code is required"),
+    accountNumber: z.string().min(5, "Valid account number required").max(20, "Account number too long"),
+    accountType: z.string().min(1, "Please select account type"),
   });
 
 type DriverFormData = z.infer<typeof driverSchema>;
@@ -65,7 +87,8 @@ type DriverFormData = z.infer<typeof driverSchema>;
 const steps = [
   { id: 1, title: "Personal Info", icon: User },
   { id: 2, title: "License & Vehicle", icon: Car },
-  { id: 3, title: "Documents", icon: FileText },
+  { id: 3, title: "Banking Details", icon: Landmark },
+  { id: 4, title: "Documents", icon: FileText },
 ];
 
 function ApplicationStatusView({ application }: { application: DriverApplication }) {
@@ -233,6 +256,10 @@ export default function DriverOnboarding() {
       address: "",
       licenseNumber: "",
       vehicleRegistration: "",
+      bankName: "",
+      branchCode: "",
+      accountNumber: "",
+      accountType: "",
     },
   });
 
@@ -242,6 +269,10 @@ export default function DriverOnboarding() {
         ...data,
         licenseDocumentUrl: licenseDocUrl,
         vehicleDocumentUrl: vehicleDocUrl,
+        bankName: data.bankName,
+        branchCode: data.branchCode,
+        accountNumber: data.accountNumber,
+        accountType: data.accountType,
       });
       return res.json();
     },
@@ -279,12 +310,15 @@ export default function DriverOnboarding() {
     if (currentStep === 2) {
       return form.trigger(["licenseNumber", "vehicleRegistration"]);
     }
+    if (currentStep === 3) {
+      return form.trigger(["bankName", "branchCode", "accountNumber", "accountType"]);
+    }
     return true;
   };
 
   const nextStep = async () => {
     const valid = await validateCurrentStep();
-    if (valid && currentStep < 3) {
+    if (valid && currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -358,11 +392,12 @@ export default function DriverOnboarding() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Step {currentStep} of 3: {steps[currentStep - 1].title}</CardTitle>
+            <CardTitle className="text-lg">Step {currentStep} of 4: {steps[currentStep - 1].title}</CardTitle>
             <CardDescription>
               {currentStep === 1 && "Tell us about yourself so we can verify your identity."}
               {currentStep === 2 && "We need your license and vehicle details for verification."}
-              {currentStep === 3 && "Upload your documents to speed up the review process (optional)."}
+              {currentStep === 3 && "Add your banking details for earnings settlement."}
+              {currentStep === 4 && "Upload your documents to speed up the review process (optional)."}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -495,6 +530,117 @@ export default function DriverOnboarding() {
                 )}
 
                 {currentStep === 3 && (
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="bankName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Bank Name</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Landmark className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <select
+                                className="w-full h-9 pl-9 pr-8 rounded-md border border-input bg-background text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+                                value={field.value}
+                                onChange={(e) => {
+                                  field.onChange(e.target.value);
+                                  const bank = SA_BANKS.find(b => b.name === e.target.value);
+                                  form.setValue("branchCode", bank ? bank.branchCode : "");
+                                }}
+                                data-testid="select-bank-name"
+                              >
+                                <option value="">Select your bank</option>
+                                {SA_BANKS.map((bank) => (
+                                  <option key={bank.name} value={bank.name}>{bank.name}</option>
+                                ))}
+                              </select>
+                              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="branchCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Universal Branch Code</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                placeholder="Auto-filled from bank selection"
+                                className="pl-9 bg-muted/50"
+                                readOnly
+                                {...field}
+                                data-testid="input-branch-code"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="accountNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Account Number</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                placeholder="Enter your account number"
+                                className="pl-9"
+                                {...field}
+                                data-testid="input-account-number"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="accountType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Account Type</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <select
+                                className="w-full h-9 pl-9 pr-8 rounded-md border border-input bg-background text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+                                value={field.value}
+                                onChange={field.onChange}
+                                data-testid="select-account-type"
+                              >
+                                <option value="">Select account type</option>
+                                {ACCOUNT_TYPES.map((type) => (
+                                  <option key={type} value={type}>{type}</option>
+                                ))}
+                              </select>
+                              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="bg-muted/50 rounded-md p-4">
+                      <p className="text-sm text-muted-foreground">
+                        Your banking details are used for earnings settlement. We use universal branch codes — no need to look yours up.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 4 && (
                   <div className="space-y-5">
                     <div className="space-y-2">
                       <p className="text-sm font-medium">Driver's License Photo/Scan</p>
@@ -572,7 +718,7 @@ export default function DriverOnboarding() {
                     <div />
                   )}
 
-                  {currentStep < 3 ? (
+                  {currentStep < 4 ? (
                     <Button type="button" onClick={nextStep} data-testid="button-next-step">
                       Next
                       <ArrowRight className="h-4 w-4 ml-2" />
