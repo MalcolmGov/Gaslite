@@ -519,8 +519,17 @@ export default function CustomerHome() {
                                   {getStatusLabel(order.status)}
                                 </Badge>
                                 <Badge variant="outline" className="text-xs" data-testid={`badge-payment-${order.id}`}>
-                                  <Banknote className="h-3 w-3 mr-1" />
-                                  Cash on Delivery
+                                  {order.paymentMethod === "card" ? (
+                                    <>
+                                      <CreditCard className="h-3 w-3 mr-1" />
+                                      Card Payment
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Banknote className="h-3 w-3 mr-1" />
+                                      Cash on Delivery
+                                    </>
+                                  )}
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground flex items-center gap-1">
