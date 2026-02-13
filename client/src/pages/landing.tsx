@@ -327,14 +327,13 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+          <div className="grid md:grid-cols-3 gap-6 relative">
             <div className="hidden md:block absolute top-24 left-[20%] right-[20%] h-1 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent rounded-full" />
             
             {[
-              { step: 1, icon: Flame, title: "Choose Your Gas", desc: "Select from 9kg, 19kg, or 48kg cylinders", time: "~2 min" },
-              { step: 2, icon: MapPin, title: "Set Location", desc: "We match you with nearby verified drivers", time: "~30 sec" },
-              { step: 3, icon: CreditCard, title: "Pay Securely", desc: "Complete payment with card checkout", time: "Instant" },
-              { step: 4, icon: Truck, title: "Track & Receive", desc: "Real-time tracking until it arrives", time: "Live" },
+              { step: 1, icon: Flame, title: "Choose Your Gas", desc: "Select from 9kg, 19kg, or 48kg cylinders", time: "~2s" },
+              { step: 2, icon: CreditCard, title: "Pay Securely", desc: "Complete payment with card checkout", time: "Instant" },
+              { step: 3, icon: Truck, title: "Track & Receive", desc: "Real-time tracking until it arrives", time: "Live" },
             ].map((item, index) => (
               <motion.div
                 key={item.step}
