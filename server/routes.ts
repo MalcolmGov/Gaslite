@@ -171,7 +171,7 @@ export async function registerRoutes(
   app.post("/api/onboarding/driver", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.userId!;
-      const { firstName, lastName, email, phone, address, licenseNumber, vehicleRegistration, licenseDocumentUrl, vehicleDocumentUrl } = req.body;
+      const { firstName, lastName, email, phone, address, licenseNumber, vehicleRegistration, licenseDocumentUrl, vehicleDocumentUrl, bankName, branchCode, accountNumber, accountType } = req.body;
 
       if (!firstName || !lastName || !email || !phone || !address || !licenseNumber || !vehicleRegistration) {
         return res.status(400).json({ error: "All required fields must be filled" });
@@ -193,6 +193,10 @@ export async function registerRoutes(
         vehicleRegistration,
         licenseDocumentUrl: licenseDocumentUrl || null,
         vehicleDocumentUrl: vehicleDocumentUrl || null,
+        bankName: bankName || null,
+        branchCode: branchCode || null,
+        accountNumber: accountNumber || null,
+        accountType: accountType || null,
       });
 
       let profile = await storage.getUserProfile(userId);
