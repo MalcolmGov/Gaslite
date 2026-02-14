@@ -9,7 +9,10 @@ import { RoleSwitcher } from "@/components/role-switcher";
 import { GasliteLogo } from "@/components/gaslite-logo";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { 
   MapPin, 
   Package, 
@@ -20,17 +23,189 @@ import {
   CheckCircle,
   XCircle,
   Navigation,
+  Navigation2,
   Flame,
   AlertCircle,
   Power,
   LocateFixed,
   CreditCard,
-
+  Map,
+  ExternalLink,
   ArrowRight,
   Bell,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import type { Order, Driver } from "@shared/schema";
+
+const driverIcon = L.divIcon({
+  className: "driver-nav-marker",
+  html: '<div style="width:20px;height:20px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 2px 8px rgba(59,130,246,0.5)"><div style="position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:6px solid #3b82f6"></div></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
+const customerIcon = L.divIcon({
+  className: "customer-nav-marker",
+  html: '<div style="width:20px;height:20px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 2px 8px rgba(34,197,94,0.5)"></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
+function MapBoundsUpdater({ driverPos, customerPos }: { driverPos: [number, number] | null; customerPos: [number, number] }) {
+  const map = useMap();
+  const lastFitRef = useRef(0);
+
+  useEffect(() => {
+    const now = Date.now();
+    if (now - lastFitRef.current < 10000) return;
+
+    const points: [number, number][] = [customerPos];
+    if (driverPos) points.push(driverPos);
+
+    if (points.length >= 2) {
+      const bounds = L.latLngBounds(points.map(p => L.latLng(p[0], p[1])));
+      if (!map.getBounds().contains(bounds)) {
+        map.fitBounds(bounds, { padding: [40, 40], animate: true });
+        lastFitRef.current = now;
+      }
+    } else if (lastFitRef.current === 0) {
+      map.setView(customerPos, 14);
+      lastFitRef.current = now;
+    }
+  }, [map, driverPos, customerPos]);
+
+  return null;
+}
+
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function DeliveryNavigationMap({ order, driverLocation }: { order: Order; driverLocation: { lat: number; lng: number } | null }) {
+  const customerPos: [number, number] | null = order.deliveryLatitude && order.deliveryLongitude
+    ? [Number(order.deliveryLatitude), Number(order.deliveryLongitude)]
+    : null;
+
+  const driverPos: [number, number] | null = driverLocation
+    ? [driverLocation.lat, driverLocation.lng]
+    : null;
+
+  const distance = useMemo(() => {
+    if (!driverPos || !customerPos) return null;
+    return haversineDistance(driverPos[0], driverPos[1], customerPos[0], customerPos[1]);
+  }, [driverPos, customerPos]);
+
+  const etaMinutes = useMemo(() => {
+    if (!distance) return null;
+    return Math.max(1, Math.round(distance / 0.5));
+  }, [distance]);
+
+  if (!customerPos) {
+    return (
+      <div className="bg-muted/50 rounded-md p-4 text-center text-sm text-muted-foreground" data-testid="text-no-gps-coords">
+        <Map className="h-5 w-5 mx-auto mb-2" />
+        No GPS coordinates available for this delivery address
+      </div>
+    );
+  }
+
+  const routeLine = driverPos ? [driverPos, customerPos] : null;
+
+  const getGoogleMapsUrl = () => {
+    if (driverPos) {
+      return `https://www.google.com/maps/dir/${driverPos[0]},${driverPos[1]}/${customerPos[0]},${customerPos[1]}`;
+    }
+    return `https://www.google.com/maps/dir/?api=1&destination=${customerPos[0]},${customerPos[1]}`;
+  };
+
+  const getWazeUrl = () => {
+    return `https://waze.com/ul?ll=${customerPos[0]},${customerPos[1]}&navigate=yes`;
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-md overflow-hidden border border-border" style={{ height: "220px" }} data-testid="map-navigation">
+        <MapContainer
+          center={customerPos}
+          zoom={14}
+          style={{ height: "100%", width: "100%" }}
+          zoomControl={false}
+          attributionControl={false}
+        >
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <MapBoundsUpdater driverPos={driverPos} customerPos={customerPos} />
+
+          {driverPos && (
+            <Marker position={driverPos} icon={driverIcon}>
+              <Popup>Your location</Popup>
+            </Marker>
+          )}
+
+          <Marker position={customerPos} icon={customerIcon}>
+            <Popup>{order.deliveryAddress}</Popup>
+          </Marker>
+
+          {routeLine && (
+            <Polyline
+              positions={routeLine}
+              pathOptions={{ color: "#3b82f6", weight: 3, dashArray: "8, 8", opacity: 0.8 }}
+            />
+          )}
+        </MapContainer>
+      </div>
+
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-4 text-sm">
+          {distance !== null ? (
+            <>
+              <span className="flex items-center gap-1 text-muted-foreground" data-testid="text-nav-distance">
+                <Navigation2 className="h-3.5 w-3.5" />
+                {distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`}
+              </span>
+              {etaMinutes !== null && (
+                <span className="flex items-center gap-1 text-muted-foreground" data-testid="text-nav-eta">
+                  <Clock className="h-3.5 w-3.5" />
+                  ~{etaMinutes} min
+                </span>
+              )}
+            </>
+          ) : (
+            <span className="flex items-center gap-1 text-muted-foreground text-xs" data-testid="text-awaiting-gps">
+              <LocateFixed className="h-3.5 w-3.5 animate-pulse" />
+              Awaiting GPS...
+            </span>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={() => window.open(getGoogleMapsUrl(), "_blank")}
+            data-testid="button-navigate-google"
+          >
+            <Navigation className="h-4 w-4 mr-1.5" />
+            Google Maps
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => window.open(getWazeUrl(), "_blank")}
+            data-testid="button-navigate-waze"
+          >
+            <ExternalLink className="h-4 w-4 mr-1.5" />
+            Waze
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 type OrderWithDistance = Order & { distance?: number | null };
 
@@ -181,6 +356,7 @@ export default function DriverDashboard() {
   const { toast } = useToast();
   const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isTogglingOnline, setIsTogglingOnline] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { permission: pushPermission, requestPermission } = usePushNotifications(!!user);
 
   const { data: driver, isLoading: driverLoading } = useQuery<Driver>({
@@ -203,13 +379,13 @@ export default function DriverDashboard() {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        setCurrentLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
         try {
           await apiRequest("POST", "/api/driver/location", {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           });
         } catch {
-          // silently fail location updates
         }
       },
       () => {},
@@ -369,12 +545,6 @@ export default function DriverDashboard() {
     }
   };
 
-  const getNavigateUrl = (order: Order) => {
-    if (order.deliveryLatitude && order.deliveryLongitude) {
-      return `https://maps.google.com/?daddr=${order.deliveryLatitude},${order.deliveryLongitude}`;
-    }
-    return `https://maps.google.com/?q=${encodeURIComponent(order.deliveryAddress)}`;
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -631,15 +801,9 @@ export default function DriverDashboard() {
                         })()}
                       </p>
 
+                      <DeliveryNavigationMap order={order} driverLocation={currentLocation} />
+
                       <div className="flex gap-2 flex-wrap pt-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => window.open(getNavigateUrl(order), "_blank")}
-                          data-testid={`button-navigate-${order.id}`}
-                        >
-                          <Navigation className="h-4 w-4 mr-2" />
-                          Navigate
-                        </Button>
                         {getActionButton(order)}
                       </div>
                     </CardContent>
