@@ -104,7 +104,18 @@ interface OrderEmailData {
   total: string;
 }
 
+function getAppBaseUrl(): string {
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+  }
+  if (process.env.REPLIT_DEPLOYMENT_URL) {
+    return process.env.REPLIT_DEPLOYMENT_URL;
+  }
+  return 'https://gaslite.replit.app';
+}
+
 function buildOrderConfirmationHtml(data: OrderEmailData): string {
+  const logoUrl = `${getAppBaseUrl()}/gaslite-logo.png`;
   const itemsRows = data.items.map(item => `
     <tr>
       <td style="padding: 14px 20px; border-bottom: 1px solid #E8EDF2; font-size: 14px; color: #1E293B; font-weight: 500;">
@@ -136,19 +147,10 @@ function buildOrderConfirmationHtml(data: OrderEmailData): string {
       <td style="padding: 32px 16px;">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
 
-          <!-- Top Brand Bar -->
+          <!-- Top Brand Bar with Logo -->
           <tr>
             <td style="padding: 0 0 24px; text-align: center;">
-              <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
-                <tr>
-                  <td style="background-color: #3B82F6; width: 40px; height: 40px; text-align: center; vertical-align: middle; border-radius: 10px;">
-                    <span style="color: #FFFFFF; font-size: 20px; font-weight: 800; line-height: 40px;">G</span>
-                  </td>
-                  <td style="padding-left: 12px;">
-                    <span style="color: #FFFFFF; font-size: 22px; font-weight: 700; letter-spacing: -0.5px;">Gaslite</span>
-                  </td>
-                </tr>
-              </table>
+              <img src="${logoUrl}" alt="Gaslite" width="180" style="display: inline-block; height: auto; max-width: 180px;" />
             </td>
           </tr>
 
