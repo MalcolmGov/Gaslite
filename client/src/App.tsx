@@ -19,6 +19,7 @@ import DriverTerms from "@/pages/driver/terms";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "./lib/queryClient";
 import type { UserProfile } from "@shared/schema";
+import { PWAInstallBanner } from "@/components/pwa-install";
 
 function LoadingScreen() {
   return (
@@ -127,6 +128,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <AuthenticatedRouter />
+        <PWAInstallBanner />
       </TooltipProvider>
     </QueryClientProvider>
   );
