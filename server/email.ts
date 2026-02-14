@@ -154,24 +154,38 @@ function buildOrderConfirmationHtml(data: OrderEmailData): string {
             </td>
           </tr>
 
-          <!-- Hero Header -->
+          <!-- Hero Header with Blue Gradient -->
           <tr>
-            <td style="background-color: #1E3A5F; border-radius: 16px 16px 0 0; padding: 48px 40px 40px; text-align: center;">
-              <!-- Checkmark Circle -->
-              <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 0 auto 20px;">
+            <td style="padding: 0; border-radius: 16px 16px 0 0; overflow: hidden;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-radius: 16px 16px 0 0; overflow: hidden;">
                 <tr>
-                  <td style="background-color: #10B981; width: 64px; height: 64px; text-align: center; vertical-align: middle; border-radius: 32px;">
-                    <span style="color: #FFFFFF; font-size: 32px; line-height: 64px;">&#10003;</span>
-                  </td>
+                  <!-- Left: Blue #3B82F6 -->
+                  <td width="50%" style="background-color: #3B82F6; height: 8px; font-size: 0; line-height: 0;">&nbsp;</td>
+                  <!-- Right: Cyan #06B6D4 -->
+                  <td width="50%" style="background-color: #06B6D4; height: 8px; font-size: 0; line-height: 0;">&nbsp;</td>
                 </tr>
               </table>
-              <h1 style="margin: 0; color: #FFFFFF; font-size: 26px; font-weight: 700; letter-spacing: -0.3px;">Order Confirmed</h1>
-              <p style="margin: 8px 0 0; color: #94A3B8; font-size: 15px; font-weight: 400;">Payment successfully processed</p>
-              <!-- Order Number Pill -->
-              <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 20px auto 0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td style="background-color: #2563EB; border-radius: 20px; padding: 8px 24px;">
-                    <span style="color: #FFFFFF; font-size: 13px; font-weight: 600; letter-spacing: 1px;">ORDER #${data.orderId.slice(0, 8).toUpperCase()}</span>
+                  <td style="background-color: #1E293B; padding: 44px 40px 40px; text-align: center;">
+                    <!-- Checkmark Circle -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 0 auto 20px;">
+                      <tr>
+                        <td style="background-color: #10B981; width: 64px; height: 64px; text-align: center; vertical-align: middle; border-radius: 32px;">
+                          <span style="color: #FFFFFF; font-size: 32px; line-height: 64px;">&#10003;</span>
+                        </td>
+                      </tr>
+                    </table>
+                    <h1 style="margin: 0; color: #FFFFFF; font-size: 26px; font-weight: 700; letter-spacing: -0.3px;">Order Confirmed</h1>
+                    <p style="margin: 8px 0 0; color: #94A3B8; font-size: 15px; font-weight: 400;">Payment successfully processed</p>
+                    <!-- Order Number Pill with gradient-feel -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 20px auto 0;">
+                      <tr>
+                        <td style="background-color: #2563EB; border-radius: 20px; padding: 8px 24px; border: 1px solid #3B82F6;">
+                          <span style="color: #FFFFFF; font-size: 13px; font-weight: 600; letter-spacing: 1px;">ORDER #${data.orderId.slice(0, 8).toUpperCase()}</span>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
@@ -201,14 +215,14 @@ function buildOrderConfirmationHtml(data: OrderEmailData): string {
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                       <tr>
                         <!-- Date Card -->
-                        <td width="48%" style="background-color: #F1F5F9; border-radius: 12px; padding: 18px 20px; vertical-align: top;">
-                          <p style="margin: 0; color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Order Date</p>
+                        <td width="48%" style="background-color: #EFF6FF; border-radius: 12px; padding: 18px 20px; vertical-align: top; border-left: 3px solid #3B82F6;">
+                          <p style="margin: 0; color: #3B82F6; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Order Date</p>
                           <p style="margin: 6px 0 0; color: #0F172A; font-size: 14px; font-weight: 600;">${data.orderDate}</p>
                         </td>
                         <td width="4%"></td>
                         <!-- Payment Card -->
-                        <td width="48%" style="background-color: #F1F5F9; border-radius: 12px; padding: 18px 20px; vertical-align: top;">
-                          <p style="margin: 0; color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Payment</p>
+                        <td width="48%" style="background-color: #ECFDF5; border-radius: 12px; padding: 18px 20px; vertical-align: top; border-left: 3px solid #10B981;">
+                          <p style="margin: 0; color: #10B981; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Payment</p>
                           <p style="margin: 6px 0 0; color: #0F172A; font-size: 14px; font-weight: 600;">Card &#8226; Paid</p>
                         </td>
                       </tr>
@@ -220,20 +234,20 @@ function buildOrderConfirmationHtml(data: OrderEmailData): string {
                     <!-- Address Card -->
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                       <tr>
-                        <td style="background-color: #F1F5F9; border-radius: 12px; padding: 18px 20px;">
+                        <td style="background-color: #EFF6FF; border-radius: 12px; padding: 18px 20px; border-left: 3px solid #06B6D4;">
                           <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                             <tr>
                               <td width="36" style="vertical-align: top;">
                                 <table role="presentation" cellspacing="0" cellpadding="0">
                                   <tr>
-                                    <td style="background-color: #3B82F6; width: 32px; height: 32px; text-align: center; vertical-align: middle; border-radius: 8px;">
+                                    <td style="background-color: #06B6D4; width: 32px; height: 32px; text-align: center; vertical-align: middle; border-radius: 8px;">
                                       <span style="color: #FFFFFF; font-size: 16px; line-height: 32px;">&#9906;</span>
                                     </td>
                                   </tr>
                                 </table>
                               </td>
                               <td style="padding-left: 12px; vertical-align: top;">
-                                <p style="margin: 0; color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Delivery Address</p>
+                                <p style="margin: 0; color: #06B6D4; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Delivery Address</p>
                                 <p style="margin: 4px 0 0; color: #0F172A; font-size: 14px; font-weight: 600; line-height: 1.4;">${escapeHtml(data.deliveryAddress)}</p>
                               </td>
                             </tr>
@@ -385,13 +399,18 @@ function buildOrderConfirmationHtml(data: OrderEmailData): string {
                 </tr>
               </table>
 
-              <!-- Estimated Delivery Banner -->
+              <!-- Estimated Delivery Banner with Blue-Cyan Accent -->
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
                   <td style="padding: 28px 40px 36px;">
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-radius: 12px; overflow: hidden;">
+                      <!-- Gradient accent bar -->
                       <tr>
-                        <td style="background-color: #0F172A; border-radius: 12px; padding: 20px 24px; text-align: center;">
+                        <td width="50%" style="background-color: #3B82F6; height: 4px; font-size: 0; line-height: 0;">&nbsp;</td>
+                        <td width="50%" style="background-color: #06B6D4; height: 4px; font-size: 0; line-height: 0;">&nbsp;</td>
+                      </tr>
+                      <tr>
+                        <td colspan="2" style="background-color: #0F172A; padding: 20px 24px; text-align: center;">
                           <p style="margin: 0; color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Estimated Delivery</p>
                           <p style="margin: 6px 0 0; color: #FFFFFF; font-size: 22px; font-weight: 800;">30 - 60 minutes</p>
                         </td>
@@ -404,9 +423,19 @@ function buildOrderConfirmationHtml(data: OrderEmailData): string {
             </td>
           </tr>
 
-          <!-- Footer -->
+          <!-- Footer with Gradient Accent -->
           <tr>
-            <td style="padding: 32px 40px; text-align: center;">
+            <td style="padding: 8px 0 0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td width="50%" style="background-color: #3B82F6; height: 3px; font-size: 0; line-height: 0;">&nbsp;</td>
+                  <td width="50%" style="background-color: #06B6D4; height: 3px; font-size: 0; line-height: 0;">&nbsp;</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 28px 40px; text-align: center;">
               <p style="margin: 0; color: #64748B; font-size: 13px; font-weight: 500;">Gaslite</p>
               <p style="margin: 4px 0 0; color: #475569; font-size: 12px;">On-Demand LPG Gas Delivery &bull; South Africa</p>
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 16px auto 0;">
