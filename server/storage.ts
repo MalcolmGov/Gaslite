@@ -7,6 +7,7 @@ import {
   drivers,
   orders,
   orderItems,
+  pushSubscriptions,
   type Product,
   type InsertProduct,
   type UserProfile,
@@ -20,6 +21,8 @@ import {
   type OrderItem,
   type InsertOrderItem,
   type OrderWithItems,
+  type PushSubscription,
+  type InsertPushSubscription,
 } from "@shared/schema";
 
 export interface IStorage {

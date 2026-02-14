@@ -26,8 +26,10 @@ import {
   LocateFixed,
   CreditCard,
 
-  ArrowRight
+  ArrowRight,
+  Bell,
 } from "lucide-react";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 import type { Order, Driver } from "@shared/schema";
 
 type OrderWithDistance = Order & { distance?: number | null };
@@ -179,6 +181,7 @@ export default function DriverDashboard() {
   const { toast } = useToast();
   const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isTogglingOnline, setIsTogglingOnline] = useState(false);
+  const { permission: pushPermission, requestPermission } = usePushNotifications(!!user);
 
   const { data: driver, isLoading: driverLoading } = useQuery<Driver>({
     queryKey: ["/api/driver/profile"],
@@ -490,6 +493,25 @@ export default function DriverDashboard() {
               </p>
             </CardContent>
           </Card>
+
+          {pushPermission === "default" && (
+            <Card className="overflow-visible border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/30">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-3">
+                    <Bell className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <p className="font-medium text-sm">Enable Notifications</p>
+                      <p className="text-xs text-muted-foreground">Get notified instantly when new delivery requests come in</p>
+                    </div>
+                  </div>
+                  <Button size="sm" onClick={requestPermission} data-testid="button-enable-notifications">
+                    Enable
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="overflow-visible">
             <CardHeader>

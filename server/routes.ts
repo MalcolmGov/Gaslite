@@ -15,6 +15,7 @@ import { sendOrderConfirmationEmail } from "./email";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { users } from "@shared/models/auth";
+import { saveSubscription, removeSubscription, notifyDriversNewOrder, notifyCustomerOrderUpdate, notifyDriverOrderCancelled } from "./push";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -380,9 +381,58 @@ export async function registerRoutes(
           console.error('Background email send failed:', emailError);
         }
       })();
+
+      notifyDriversNewOrder(order.id, order.orderNumber, deliveryAddress).catch(err =>
+        console.error('Push notification to drivers failed:', err)
+      );
     } catch (error) {
       console.error("Order creation error:", error);
       res.status(500).json({ error: "Failed to create order" });
+    }
+  });
+
+  app.post("/api/orders/:orderId/cancel", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const order = await storage.getOrder(req.params.orderId);
+
+      if (!order || order.customerId !== userId) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      const cancellableStatuses = ["pending", "confirmed", "assigned"];
+      if (!cancellableStatuses.includes(order.status)) {
+        return res.status(400).json({ error: "This order can no longer be cancelled. It has already been picked up." });
+      }
+
+      if (order.driverId) {
+        const driver = await storage.getDriverByUserId(order.driverId);
+        if (!driver) {
+          const driverRecord = await storage.getDriver(order.driverId);
+          if (driverRecord) {
+            await storage.updateDriver(driverRecord.id, { status: "available" });
+            notifyDriverOrderCancelled(driverRecord.id, order.orderNumber).catch(err =>
+              console.error('Push notification to driver failed:', err)
+            );
+          }
+        } else {
+          await storage.updateDriver(driver.id, { status: "available" });
+          notifyDriverOrderCancelled(driver.id, order.orderNumber).catch(err =>
+            console.error('Push notification to driver failed:', err)
+          );
+        }
+      }
+
+      const updated = await storage.updateOrder(order.id, {
+        status: "cancelled",
+        driverId: null,
+        driverEarnings: null,
+      });
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Order cancellation error:", error);
+      res.status(500).json({ error: "Failed to cancel order" });
     }
   });
 
@@ -578,6 +628,10 @@ export async function registerRoutes(
       await storage.updateDriver(driver.id, { status: "busy" });
 
       res.json(updated);
+
+      notifyCustomerOrderUpdate(order.customerId, order.orderNumber, "assigned").catch(err =>
+        console.error('Push notification to customer failed:', err)
+      );
     } catch (error) {
       res.status(500).json({ error: "Failed to accept order" });
     }
@@ -627,6 +681,10 @@ export async function registerRoutes(
 
       const updated = await storage.updateOrder(order.id, updateData);
       res.json(updated);
+
+      notifyCustomerOrderUpdate(order.customerId, order.orderNumber, status).catch(err =>
+        console.error('Push notification to customer failed:', err)
+      );
     } catch (error) {
       res.status(500).json({ error: "Failed to update order" });
     }
@@ -796,6 +854,43 @@ export async function registerRoutes(
       res.json(orderWithItems.items);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch order items" });
+    }
+  });
+
+  app.get("/api/push/vapid-key", (req, res) => {
+    const key = process.env.VAPID_PUBLIC_KEY;
+    if (!key) {
+      return res.status(404).json({ error: "Push notifications not configured" });
+    }
+    res.json({ publicKey: key });
+  });
+
+  app.post("/api/push/subscribe", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const { subscription } = req.body;
+
+      if (!subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
+        return res.status(400).json({ error: "Invalid subscription data" });
+      }
+
+      await saveSubscription(userId, subscription);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Push subscribe error:", error);
+      res.status(500).json({ error: "Failed to save subscription" });
+    }
+  });
+
+  app.post("/api/push/unsubscribe", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { endpoint } = req.body;
+      if (endpoint) {
+        await removeSubscription(endpoint);
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to remove subscription" });
     }
   });
 

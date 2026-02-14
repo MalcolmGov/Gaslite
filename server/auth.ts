@@ -5,6 +5,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { db } from "./db";
 import { users } from "@shared/models/auth";
 import { eq, or } from "drizzle-orm";
+import { authRateLimit } from "./rate-limit";
 
 declare module "express-session" {
   interface SessionData {
@@ -81,7 +82,7 @@ function userResponse(user: any) {
 }
 
 export function registerAuthRoutes(app: Express) {
-  app.post("/api/auth/register", async (req: Request, res: Response) => {
+  app.post("/api/auth/register", authRateLimit, async (req: Request, res: Response) => {
     try {
       const { email, phone, password, firstName, lastName } = req.body;
 
@@ -154,7 +155,7 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
-  app.post("/api/auth/login", async (req: Request, res: Response) => {
+  app.post("/api/auth/login", authRateLimit, async (req: Request, res: Response) => {
     try {
       const { identifier, password } = req.body;
 

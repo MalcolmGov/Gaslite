@@ -40,3 +40,10 @@ waitForPort = 5000
 
 [agent]
 integrations = ["javascript_object_storage:2.0.0", "javascript_database:1.0.0", "javascript_log_in_with_replit:2.0.0", "google-mail:1.0.0"]
+
+[userenv]
+
+[userenv.shared]
+VAPID_PUBLIC_KEY = "BMxrY6Qqivbljf5PVM2rEEE0lMGI4110Q7sfjvCbfdF9NN6OCRgDXVgfWVgKNwuLymAi6Hp2q98K0C8Ba5tMFhA"
+VAPID_PRIVATE_KEY = "eeC834PWVAJy37jNvZLs73wp5v5s6ezsxgZAac-wzbA"
+VAPID_SUBJECT = "mailto:malcolmgov24@gmail.com"

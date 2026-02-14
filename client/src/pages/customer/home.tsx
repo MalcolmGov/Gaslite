@@ -33,9 +33,22 @@ import {
   Car,
   CreditCard,
   Shield,
-  Lock
+  Lock,
+  XCircle,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 import type { Product, Order, UserProfile } from "@shared/schema";
 
 const driverIcon = L.divIcon({
@@ -75,6 +88,8 @@ export default function CustomerHome() {
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryNotes, setDeliveryNotes] = useState("");
   const [paymentMethod] = useState<"card">("card");
+
+  const { permission: pushPermission, requestPermission } = usePushNotifications(!!user);
 
   const { data: profile } = useQuery<UserProfile>({
     queryKey: ["/api/user/profile"],
@@ -119,6 +134,19 @@ export default function CustomerHome() {
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to place order. Please try again.", variant: "destructive" });
+    },
+  });
+
+  const cancelOrderMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      return apiRequest("POST", `/api/orders/${orderId}/cancel`);
+    },
+    onSuccess: () => {
+      toast({ title: "Order cancelled", description: "Your order has been cancelled successfully." });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error?.message || "Failed to cancel order.", variant: "destructive" });
     },
   });
 
@@ -476,6 +504,25 @@ export default function CustomerHome() {
               </section>
             )}
 
+            {pushPermission === "default" && orders && orders.length > 0 && (
+              <Card className="overflow-visible border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/30 mb-6">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div className="flex items-center gap-3">
+                      <Truck className="h-5 w-5 text-blue-500" />
+                      <div>
+                        <p className="font-medium text-sm">Enable Delivery Updates</p>
+                        <p className="text-xs text-muted-foreground">Get notified when your driver picks up and delivers your order</p>
+                      </div>
+                    </div>
+                    <Button size="sm" onClick={requestPermission} data-testid="button-enable-notifications">
+                      Enable
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <section>
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
@@ -524,11 +571,45 @@ export default function CustomerHome() {
                                 {order.deliveryAddress}
                               </p>
                             </div>
-                            <div className="text-right">
-                              <p className="font-semibold" data-testid={`text-total-${order.id}`}>R{Number(order.total).toFixed(2)}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(order.createdAt!).toLocaleDateString()}
-                              </p>
+                            <div className="flex items-center gap-2">
+                              <div className="text-right">
+                                <p className="font-semibold" data-testid={`text-total-${order.id}`}>R{Number(order.total).toFixed(2)}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(order.createdAt!).toLocaleDateString()}
+                                </p>
+                              </div>
+                              {["pending", "confirmed", "assigned"].includes(order.status) && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="text-destructive"
+                                      data-testid={`button-cancel-order-${order.id}`}
+                                    >
+                                      <XCircle className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Cancel Order?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to cancel order #{order.orderNumber}? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel data-testid="button-cancel-dismiss">Keep Order</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => cancelOrderMutation.mutate(order.id)}
+                                        className="bg-destructive text-destructive-foreground"
+                                        data-testid="button-cancel-confirm"
+                                      >
+                                        Yes, Cancel Order
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
                             </div>
                           </div>
                           {isActive && (
