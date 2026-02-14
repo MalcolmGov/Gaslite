@@ -11,6 +11,10 @@ import {
   insertOrderItemSchema,
   type InsertOrderItem,
 } from "@shared/schema";
+import { sendOrderConfirmationEmail } from "./email";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import { users } from "@shared/models/auth";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -333,6 +337,49 @@ export async function registerRoutes(
       );
 
       res.json(order);
+
+      // Send order confirmation email in background (don't block response)
+      (async () => {
+        try {
+          const [user] = await db.select().from(users).where(eq(users.id, userId));
+          const profile = await storage.getUserProfile(userId);
+          const customerEmail = user?.email;
+          const customerName = profile?.firstName
+            ? `${profile.firstName} ${profile.lastName || ''}`.trim()
+            : user?.firstName
+            ? `${user.firstName} ${user.lastName || ''}`.trim()
+            : 'Valued Customer';
+
+          if (customerEmail) {
+            const orderDate = new Date().toLocaleDateString('en-ZA', {
+              year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            await sendOrderConfirmationEmail({
+              customerName,
+              customerEmail,
+              orderId: order.id,
+              orderDate,
+              deliveryAddress: deliveryAddress,
+              items: order.items.map((item: any) => ({
+                productName: item.productName,
+                productSize: item.productSize,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                totalPrice: item.totalPrice,
+              })),
+              subtotal: subtotal.toFixed(2),
+              serviceFee: serviceFee.toFixed(2),
+              cardProcessingFee: cardProcessingFee.toFixed(2),
+              total: total.toFixed(2),
+            });
+          } else {
+            console.log('No email on file for customer, skipping confirmation email');
+          }
+        } catch (emailError) {
+          console.error('Background email send failed:', emailError);
+        }
+      })();
     } catch (error) {
       console.error("Order creation error:", error);
       res.status(500).json({ error: "Failed to create order" });

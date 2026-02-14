@@ -78,8 +78,17 @@ The schema supports a multi-role user system where authentication users extend i
 
 ## External Dependencies
 
+### Email Notifications
+- **Service**: Gmail API via Replit's Google Mail connector
+- **Sender**: "Gaslite" <malcolmgov24@gmail.com>
+- **Implementation**: `server/email.ts` — Gmail client, MIME message builder, HTML email template
+- **Trigger**: Automatic on order creation (POST `/api/orders`), runs in background (non-blocking)
+- **Email content**: Professional branded HTML with order confirmation, item breakdown, payment receipt (subtotal, delivery fee, card processing fee, total), delivery address, order number, and "what happens next" section
+- **Security**: HTML escaping on all user-supplied fields to prevent injection
+
 ### Third-Party Services
 - **Google Cloud Storage**: File/document storage for driver applications and uploads
+- **Gmail API**: Order confirmation and payment receipt emails (via Replit connector)
 - **Google Maps Places API**: Address autocomplete for delivery addresses (restricted to South Africa)
 - **PostgreSQL**: Primary database (provisioned via Replit)
 
