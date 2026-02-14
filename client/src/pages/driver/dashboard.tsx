@@ -25,7 +25,7 @@ import {
   Power,
   LocateFixed,
   CreditCard,
-  Banknote,
+
   ArrowRight
 } from "lucide-react";
 import type { Order, Driver } from "@shared/schema";
@@ -561,12 +561,8 @@ export default function DriverDashboard() {
                             className="gap-1"
                             data-testid={`badge-payment-${order.id}`}
                           >
-                            {order.paymentMethod === "card" ? (
-                              <CreditCard className="h-3 w-3" />
-                            ) : (
-                              <Banknote className="h-3 w-3" />
-                            )}
-                            {order.paymentMethod === "card" ? "Card" : "Cash"}
+                            <CreditCard className="h-3 w-3" />
+                            Card
                           </Badge>
                         </div>
                       </div>
@@ -698,12 +694,8 @@ export default function DriverDashboard() {
                               You earn: R{(Number(order.total) * 0.15).toFixed(2)}
                             </span>
                             <Badge variant="outline" className="gap-1">
-                              {order.paymentMethod === "card" ? (
-                                <CreditCard className="h-3 w-3" />
-                              ) : (
-                                <Banknote className="h-3 w-3" />
-                              )}
-                              {order.paymentMethod === "card" ? "Card" : "Cash"}
+                              <CreditCard className="h-3 w-3" />
+                              Card
                             </Badge>
                           </div>
                           <p className="text-xs text-muted-foreground flex items-center gap-1" data-testid={`text-order-time-${order.id}`}>

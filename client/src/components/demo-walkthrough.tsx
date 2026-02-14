@@ -32,7 +32,7 @@ const steps = [
     features: [
       { icon: Flame, text: "3 cylinder sizes available" },
       { icon: MapPin, text: "Address autocomplete powered by Google" },
-      { icon: CreditCard, text: "Pay by cash or card" },
+      { icon: CreditCard, text: "Secure card payment" },
     ],
     visual: (
       <div className="relative p-4">
@@ -185,13 +185,13 @@ const steps = [
     number: 4,
     title: "Delivered!",
     subtitle: "Gas at your door",
-    description: "Your driver arrives with your gas cylinder. Pay by cash on delivery or card — it's that simple.",
+    description: "Your driver arrives with your gas cylinder. Payment is handled securely by card — it's that simple.",
     icon: Package,
     accentFrom: "from-violet-500",
     accentTo: "to-purple-400",
     features: [
       { icon: Package, text: "SABS-certified cylinders delivered safely" },
-      { icon: CreditCard, text: "Pay with cash on delivery" },
+      { icon: CreditCard, text: "Paid securely by card" },
       { icon: Clock, text: "Average delivery under 45 minutes" },
     ],
     visual: (
@@ -210,7 +210,7 @@ const steps = [
               </div>
               <div className="flex items-center gap-1.5">
                 <CreditCard className="h-3.5 w-3.5" />
-                <span>R523 cash</span>
+                <span>R523 card</span>
               </div>
             </div>
             <div className="flex gap-1 mt-3">

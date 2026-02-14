@@ -31,7 +31,6 @@ import {
   Phone,
   User,
   Car,
-  Banknote,
   CreditCard,
   Shield,
   Lock
@@ -75,7 +74,7 @@ export default function CustomerHome() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryNotes, setDeliveryNotes] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
+  const [paymentMethod] = useState<"card">("card");
 
   const { data: profile } = useQuery<UserProfile>({
     queryKey: ["/api/user/profile"],
@@ -116,7 +115,6 @@ export default function CustomerHome() {
       setShowCheckout(false);
       setDeliveryAddress(profile?.address || "");
       setDeliveryNotes("");
-      setPaymentMethod("cash");
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
     },
     onError: () => {
@@ -171,9 +169,7 @@ export default function CustomerHome() {
   );
   const serviceFee = cartTotal > 0 ? 29 : 0;
   const beforeCardFee = cartTotal + serviceFee;
-  const cardProcessingFee = paymentMethod === "card"
-    ? Math.round(beforeCardFee * 0.026 * 1.15 * 100) / 100
-    : 0;
+  const cardProcessingFee = Math.round(beforeCardFee * 0.026 * 1.15 * 100) / 100;
   const total = beforeCardFee + cardProcessingFee;
 
   const handlePlaceOrder = () => {
@@ -519,17 +515,8 @@ export default function CustomerHome() {
                                   {getStatusLabel(order.status)}
                                 </Badge>
                                 <Badge variant="outline" className="text-xs" data-testid={`badge-payment-${order.id}`}>
-                                  {order.paymentMethod === "card" ? (
-                                    <>
-                                      <CreditCard className="h-3 w-3 mr-1" />
-                                      Card Payment
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Banknote className="h-3 w-3 mr-1" />
-                                      Cash on Delivery
-                                    </>
-                                  )}
+                                  <CreditCard className="h-3 w-3 mr-1" />
+                                  Card Payment
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -676,7 +663,7 @@ export default function CustomerHome() {
                           <span className="text-muted-foreground">Delivery Fee</span>
                           <span data-testid="text-delivery-fee">R{serviceFee.toFixed(2)}</span>
                         </div>
-                        {paymentMethod === "card" && cardProcessingFee > 0 && (
+                        {cardProcessingFee > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Card Processing Fee</span>
                             <span data-testid="text-card-fee">R{cardProcessingFee.toFixed(2)}</span>
@@ -720,65 +707,43 @@ export default function CustomerHome() {
                           </div>
                           <div className="space-y-2">
                             <Label>Payment Method</Label>
-                            <div className="grid grid-cols-2 gap-2">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className={`flex items-center justify-center gap-2 toggle-elevate ${paymentMethod === "cash" ? "toggle-elevated border-primary" : ""}`}
-                                onClick={() => setPaymentMethod("cash")}
-                                data-testid="button-pay-cash"
-                              >
-                                <Banknote className="h-4 w-4" />
-                                Cash
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className={`flex items-center justify-center gap-2 toggle-elevate ${paymentMethod === "card" ? "toggle-elevated border-primary" : ""}`}
-                                onClick={() => setPaymentMethod("card")}
-                                data-testid="button-pay-card"
-                              >
-                                <CreditCard className="h-4 w-4" />
-                                Card
-                              </Button>
+                            <div className="flex items-center gap-2 p-2 border border-border rounded-md bg-muted/30">
+                              <CreditCard className="h-4 w-4 text-primary" />
+                              <span className="text-sm font-medium">Card Payment</span>
                             </div>
-                            {paymentMethod === "card" && (
-                              <p className="text-xs text-muted-foreground" data-testid="text-card-fee-info">
-                                Card processing fee: 2.6% + 15% VAT applies
-                              </p>
-                            )}
+                            <p className="text-xs text-muted-foreground" data-testid="text-card-fee-info">
+                              Card processing fee: 2.6% + 15% VAT applies
+                            </p>
                           </div>
-                          {paymentMethod === "card" && (
-                            <div className="space-y-3 p-3 border border-border rounded-md bg-muted/30">
-                              <div className="flex items-center gap-2 text-sm font-medium">
-                                <Lock className="h-4 w-4 text-primary" />
-                                <span>Card Details (Demo)</span>
-                              </div>
-                              <Input
-                                placeholder="4242 4242 4242 4242"
-                                maxLength={19}
-                                data-testid="input-card-number"
-                                className="font-mono"
-                              />
-                              <div className="grid grid-cols-2 gap-2">
-                                <Input
-                                  placeholder="MM/YY"
-                                  maxLength={5}
-                                  data-testid="input-card-expiry"
-                                />
-                                <Input
-                                  placeholder="CVV"
-                                  maxLength={3}
-                                  type="password"
-                                  data-testid="input-card-cvv"
-                                />
-                              </div>
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Shield className="h-3 w-3" />
-                                <span>Secure mock payment — no real charges</span>
-                              </div>
+                          <div className="space-y-3 p-3 border border-border rounded-md bg-muted/30">
+                            <div className="flex items-center gap-2 text-sm font-medium">
+                              <Lock className="h-4 w-4 text-primary" />
+                              <span>Card Details (Demo)</span>
                             </div>
-                          )}
+                            <Input
+                              placeholder="4242 4242 4242 4242"
+                              maxLength={19}
+                              data-testid="input-card-number"
+                              className="font-mono"
+                            />
+                            <div className="grid grid-cols-2 gap-2">
+                              <Input
+                                placeholder="MM/YY"
+                                maxLength={5}
+                                data-testid="input-card-expiry"
+                              />
+                              <Input
+                                placeholder="CVV"
+                                maxLength={3}
+                                type="password"
+                                data-testid="input-card-cvv"
+                              />
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Shield className="h-3 w-3" />
+                              <span>Secure mock payment — no real charges</span>
+                            </div>
+                          </div>
                           <Button
                             className="w-full"
                             size="lg"
@@ -788,9 +753,7 @@ export default function CustomerHome() {
                           >
                             {createOrderMutation.isPending
                               ? "Placing Order..."
-                              : paymentMethod === "card"
-                                ? `Pay R${total.toFixed(2)} by Card`
-                                : "Place Order — Cash on Delivery"}
+                              : `Pay R${total.toFixed(2)} by Card`}
                           </Button>
                           <Button
                             className="w-full"

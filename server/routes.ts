@@ -286,7 +286,7 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Delivery address required" });
       }
 
-      const method = paymentMethod === "card" ? "card" : "cash";
+      const method = "card";
 
       const orderItems: InsertOrderItem[] = [];
       let subtotal = 0;

@@ -94,7 +94,7 @@ export const orders = pgTable("orders", {
   serviceFee: decimal("service_fee", { precision: 10, scale: 2 }).notNull(),
   cardProcessingFee: decimal("card_processing_fee", { precision: 10, scale: 2 }).default("0"),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
-  paymentMethod: paymentMethodEnum("payment_method").default("cash").notNull(),
+  paymentMethod: paymentMethodEnum("payment_method").default("card").notNull(),
   driverEarnings: decimal("driver_earnings", { precision: 10, scale: 2 }),
   estimatedDeliveryTime: integer("estimated_delivery_time"),
   pickedUpAt: timestamp("picked_up_at"),

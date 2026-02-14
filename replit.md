@@ -12,7 +12,7 @@ The application features a visually stunning premium landing page with Framer Mo
 - Proximity-based order matching (Haversine formula, 10km radius)
 - Live Leaflet/OpenStreetMap tracking map for customers showing driver location
 - Driver info card with name, phone, vehicle registration during delivery
-- Payment method support (cash on delivery primary)
+- Card-only payment (no cash)
 - Status transition validation on backend
 
 ### Landing Page Features
