@@ -262,7 +262,7 @@ export default function CustomerHome() {
           <div className="lg:col-span-2 space-y-8">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-                Hello, {user?.firstName || "there"}!
+                Hello, {profile?.firstName || "there"}!
               </h1>
               <p className="text-muted-foreground">
                 What gas cylinder would you like delivered today?
