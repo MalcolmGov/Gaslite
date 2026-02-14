@@ -797,6 +797,11 @@ export default function LandingPage() {
           </div>
           <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Gaslite. All rights reserved.</p>
+            <div className="flex items-center gap-4 flex-wrap text-sm text-muted-foreground">
+              <a href="/legal/terms" className="hover:text-foreground transition-colors" data-testid="link-terms">Terms of Service</a>
+              <a href="/legal/privacy" className="hover:text-foreground transition-colors" data-testid="link-privacy">Privacy Policy</a>
+              <a href="/legal/refund" className="hover:text-foreground transition-colors" data-testid="link-refund">Refund Policy</a>
+            </div>
             <div className="flex items-center gap-4">
               <Badge variant="outline" className="text-xs">SABS Approved</Badge>
               <Badge variant="outline" className="text-xs">SSL Secure</Badge>

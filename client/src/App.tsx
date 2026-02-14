@@ -16,6 +16,9 @@ import AdminDashboard from "@/pages/admin/dashboard";
 import CustomerOnboarding from "@/pages/onboarding/customer";
 import DriverOnboarding from "@/pages/onboarding/driver";
 import DriverTerms from "@/pages/driver/terms";
+import TermsOfService from "@/pages/legal/terms";
+import PrivacyPolicy from "@/pages/legal/privacy";
+import RefundPolicy from "@/pages/legal/refund";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "./lib/queryClient";
 import type { UserProfile } from "@shared/schema";
@@ -72,6 +75,9 @@ function AuthenticatedRouter() {
         <Route path="/auth/signin" component={SignInPage} />
         <Route path="/auth/signup" component={SignUpPage} />
         <Route path="/driver/terms" component={DriverTerms} />
+        <Route path="/legal/terms" component={TermsOfService} />
+        <Route path="/legal/privacy" component={PrivacyPolicy} />
+        <Route path="/legal/refund" component={RefundPolicy} />
         <Route component={LandingPage} />
       </Switch>
     );
@@ -96,6 +102,9 @@ function AuthenticatedRouter() {
         <Route path="/" component={AdminDashboard} />
         <Route path="/apply" component={ApplyPage} />
         <Route path="/driver/terms" component={DriverTerms} />
+        <Route path="/legal/terms" component={TermsOfService} />
+        <Route path="/legal/privacy" component={PrivacyPolicy} />
+        <Route path="/legal/refund" component={RefundPolicy} />
         <Route component={AdminDashboard} />
       </Switch>
     );
@@ -107,6 +116,9 @@ function AuthenticatedRouter() {
         <Route path="/" component={DriverDashboard} />
         <Route path="/apply" component={ApplyPage} />
         <Route path="/driver/terms" component={DriverTerms} />
+        <Route path="/legal/terms" component={TermsOfService} />
+        <Route path="/legal/privacy" component={PrivacyPolicy} />
+        <Route path="/legal/refund" component={RefundPolicy} />
         <Route component={DriverDashboard} />
       </Switch>
     );
@@ -117,6 +129,9 @@ function AuthenticatedRouter() {
       <Route path="/" component={CustomerHome} />
       <Route path="/apply" component={ApplyPage} />
       <Route path="/driver/terms" component={DriverTerms} />
+      <Route path="/legal/terms" component={TermsOfService} />
+      <Route path="/legal/privacy" component={PrivacyPolicy} />
+      <Route path="/legal/refund" component={RefundPolicy} />
       <Route component={CustomerHome} />
     </Switch>
   );
