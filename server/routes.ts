@@ -369,6 +369,19 @@ export async function registerRoutes(
     }
   };
 
+  app.get("/api/driver/me", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const driver = await storage.getDriverByUserId(userId);
+      if (!driver) {
+        return res.status(404).json({ error: "No driver record" });
+      }
+      res.json(driver);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to check driver status" });
+    }
+  });
+
   app.get("/api/driver/profile", isAuthenticated, isDriver, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.userId!;

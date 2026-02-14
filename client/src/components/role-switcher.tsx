@@ -1,10 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { User, Truck, Shield } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import type { Driver } from "@shared/schema";
 
-const roles = [
+const allRoles = [
   { key: "customer", label: "Customer", icon: User },
   { key: "driver", label: "Driver", icon: Truck },
   { key: "admin", label: "Admin", icon: Shield },
@@ -12,6 +12,11 @@ const roles = [
 
 export function RoleSwitcher({ currentRole }: { currentRole: string }) {
   const queryClient = useQueryClient();
+
+  const { data: driverData } = useQuery<Driver>({
+    queryKey: ["/api/driver/me"],
+    retry: false,
+  });
 
   const switchRole = useMutation({
     mutationFn: async (role: string) => {
@@ -25,12 +30,18 @@ export function RoleSwitcher({ currentRole }: { currentRole: string }) {
     },
   });
 
+  const availableRoles = allRoles.filter(({ key }) => {
+    if (key === "customer") return true;
+    if (key === "driver") return !!driverData;
+    if (key === "admin") return currentRole === "admin";
+    return false;
+  });
+
+  if (availableRoles.length <= 1) return null;
+
   return (
     <div className="flex items-center gap-1.5" data-testid="role-switcher">
-      <Badge variant="outline" className="text-xs mr-1 no-default-hover-elevate no-default-active-elevate">
-        Demo
-      </Badge>
-      {roles.map(({ key, label, icon: Icon }) => (
+      {availableRoles.map(({ key, label, icon: Icon }) => (
         <Button
           key={key}
           size="sm"
