@@ -55,7 +55,7 @@ The backend uses a modular structure with routes registered in `server/routes.ts
 ### Data Storage
 - **Primary Database**: PostgreSQL accessed via Drizzle ORM
 - **Schema Location**: `shared/schema.ts` for application entities, `shared/models/auth.ts` for auth entities
-- **Key Tables**: products, userProfiles, driverApplications, drivers, orders, orderItems, users, sessions
+- **Key Tables**: products, userProfiles, driverApplications, drivers, orders, orderItems, users, sessions, pushSubscriptions
 
 The schema supports a multi-role user system where authentication users extend into role-specific profiles and capabilities.
 
@@ -101,7 +101,33 @@ The schema supports a multi-role user system where authentication users extend i
 - **framer-motion**: Animation library for premium UI effects
 - **react-hook-form + zod**: Form handling with validation
 
+### Push Notifications
+- **Protocol**: Web Push API with VAPID authentication
+- **Backend**: `server/push.ts` — web-push library, subscription management, per-user notification delivery
+- **Frontend Hook**: `client/src/hooks/use-push-notifications.ts` — subscribe/unsubscribe/permission management
+- **Service Worker**: `client/public/sw.js` — handles push events and notification clicks
+- **Triggers**: New order → all available drivers; order accepted/status change → customer; order cancelled → assigned driver
+- **Storage**: `pushSubscriptions` table with endpoint, p256dh, auth keys per user
+
+### Rate Limiting
+- **Implementation**: `server/rate-limit.ts` — in-memory rate limiter with automatic cleanup
+- **Protected Routes**: `/api/auth/login`, `/api/auth/register` (10 requests per 5-minute window per IP+path)
+- **Response**: HTTP 429 with Retry-After header
+
+### Order Cancellation
+- **Route**: POST `/api/orders/:orderId/cancel`
+- **Allowed States**: pending, confirmed, assigned (before pickup)
+- **Behavior**: Releases assigned driver back to "available" status, notifies driver via push notification
+
+### Legal Pages
+- **Routes**: `/legal/terms`, `/legal/privacy`, `/legal/refund`
+- **Content**: Terms of Service, Privacy Policy (POPIA compliant), Refund Policy (CPA compliant)
+- **Links**: Landing page footer, cross-linked between legal pages
+
 ### Environment Variables Required
 - `DATABASE_URL`: PostgreSQL connection string
 - `SESSION_SECRET`: Secret for session encryption
 - `GOOGLE_MAPS_API_KEY`: Google Maps API key (requires Places API and Maps JavaScript API enabled)
+- `VAPID_PUBLIC_KEY`: VAPID public key for Web Push notifications
+- `VAPID_PRIVATE_KEY`: VAPID private key for Web Push notifications
+- `VAPID_SUBJECT`: VAPID subject (mailto: URI) for Web Push
