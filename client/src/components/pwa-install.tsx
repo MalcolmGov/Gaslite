@@ -79,7 +79,6 @@ export function PWAInstallBanner() {
                 size="sm"
                 onClick={handleInstall}
                 data-testid="button-pwa-install"
-                className="bg-blue-500 hover:bg-blue-600 text-white"
               >
                 <Download className="w-3.5 h-3.5 mr-1.5" />
                 Install App
@@ -94,13 +93,14 @@ export function PWAInstallBanner() {
               </Button>
             </div>
           </div>
-          <button
+          <Button
+            size="icon"
+            variant="ghost"
             onClick={handleDismiss}
-            className="flex-shrink-0 text-muted-foreground hover:text-foreground"
             data-testid="button-pwa-close"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>
