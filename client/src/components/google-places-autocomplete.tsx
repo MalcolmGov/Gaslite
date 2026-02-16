@@ -53,10 +53,15 @@ interface Prediction {
   secondaryText: string;
 }
 
+interface PlaceCoordinates {
+  latitude: number;
+  longitude: number;
+}
+
 interface GooglePlacesAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
-  onSelect?: (address: string, placeId: string) => void;
+  onSelect?: (address: string, placeId: string, coordinates?: PlaceCoordinates) => void;
   placeholder?: string;
   className?: string;
   "data-testid"?: string;
@@ -76,6 +81,7 @@ export function GooglePlacesAutocomplete({
   const [loadError, setLoadError] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null);
+  const geocoder = useRef<google.maps.Geocoder | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -101,6 +107,7 @@ export function GooglePlacesAutocomplete({
       .then(() => {
         if (!mountedRef.current) return;
         autocompleteService.current = new window.google.maps.places.AutocompleteService();
+        geocoder.current = new window.google.maps.Geocoder();
         setIsReady(true);
       })
       .catch(() => {
@@ -168,10 +175,25 @@ export function GooglePlacesAutocomplete({
 
   const handleSelect = (prediction: Prediction) => {
     onChange(prediction.description);
-    onSelect?.(prediction.description, prediction.placeId);
     setIsOpen(false);
     setPredictions([]);
     setActiveIndex(-1);
+
+    if (geocoder.current && onSelect) {
+      geocoder.current.geocode({ placeId: prediction.placeId }, (results, status) => {
+        if (status === window.google.maps.GeocoderStatus.OK && results && results[0]) {
+          const location = results[0].geometry.location;
+          onSelect(prediction.description, prediction.placeId, {
+            latitude: location.lat(),
+            longitude: location.lng(),
+          });
+        } else {
+          onSelect(prediction.description, prediction.placeId);
+        }
+      });
+    } else {
+      onSelect?.(prediction.description, prediction.placeId);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

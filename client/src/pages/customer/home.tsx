@@ -98,6 +98,7 @@ export default function CustomerHome() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryCoordinates, setDeliveryCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [deliveryNotes, setDeliveryNotes] = useState("");
   const [paymentMethod] = useState<"card">("card");
   const [chatOpen, setChatOpen] = useState(false);
@@ -144,7 +145,7 @@ export default function CustomerHome() {
   });
 
   const createOrderMutation = useMutation({
-    mutationFn: async (data: { items: { productId: string; quantity: number }[]; deliveryAddress: string; deliveryNotes?: string; paymentMethod: string }) => {
+    mutationFn: async (data: { items: { productId: string; quantity: number }[]; deliveryAddress: string; deliveryLatitude?: number; deliveryLongitude?: number; deliveryNotes?: string; paymentMethod: string }) => {
       const res = await apiRequest("POST", "/api/orders", data);
       return res.json();
     },
@@ -239,12 +240,18 @@ export default function CustomerHome() {
       toast({ title: "Error", description: "Please enter a delivery address", variant: "destructive" });
       return;
     }
+    if (!deliveryCoordinates) {
+      toast({ title: "Select an address", description: "Please select an address from the dropdown suggestions so we can locate your delivery", variant: "destructive" });
+      return;
+    }
     createOrderMutation.mutate({
       items: cart.map((item) => ({
         productId: item.product.id,
         quantity: item.quantity,
       })),
       deliveryAddress,
+      deliveryLatitude: deliveryCoordinates?.latitude,
+      deliveryLongitude: deliveryCoordinates?.longitude,
       deliveryNotes: deliveryNotes || undefined,
       paymentMethod,
     });
@@ -903,7 +910,15 @@ export default function CustomerHome() {
                             <Label htmlFor="address">Delivery Address</Label>
                             <GooglePlacesAutocomplete
                               value={deliveryAddress}
-                              onChange={setDeliveryAddress}
+                              onChange={(val) => {
+                                setDeliveryAddress(val);
+                                setDeliveryCoordinates(null);
+                              }}
+                              onSelect={(_address, _placeId, coordinates) => {
+                                if (coordinates) {
+                                  setDeliveryCoordinates(coordinates);
+                                }
+                              }}
                               placeholder="Start typing your delivery address..."
                               data-testid="input-address"
                             />

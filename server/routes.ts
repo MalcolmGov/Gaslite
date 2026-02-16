@@ -315,7 +315,7 @@ export async function registerRoutes(
   app.post("/api/orders", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.userId!;
-      const { items, deliveryAddress, deliveryNotes, paymentMethod } = req.body;
+      const { items, deliveryAddress, deliveryLatitude, deliveryLongitude, deliveryNotes, paymentMethod } = req.body;
 
       if (!items || !Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ error: "Order must have items" });
@@ -358,10 +358,34 @@ export async function registerRoutes(
         : 0;
       const total = beforeCardFee + cardProcessingFee;
 
+      let finalLat = deliveryLatitude ? String(deliveryLatitude) : null;
+      let finalLng = deliveryLongitude ? String(deliveryLongitude) : null;
+
+      if (!finalLat || !finalLng) {
+        try {
+          const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(deliveryAddress)}&components=country:ZA&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+          const geoRes = await fetch(geocodeUrl);
+          const geoData = await geoRes.json();
+          if (geoData.status === "OK" && geoData.results?.[0]) {
+            const loc = geoData.results[0].geometry.location;
+            finalLat = String(loc.lat);
+            finalLng = String(loc.lng);
+          }
+        } catch (e) {
+          console.log("Server-side geocoding failed:", e);
+        }
+      }
+
+      if (!finalLat || !finalLng) {
+        return res.status(400).json({ error: "Could not determine delivery location. Please select an address from the dropdown suggestions." });
+      }
+
       const order = await storage.createOrder(
         {
           customerId: userId,
           deliveryAddress,
+          deliveryLatitude: finalLat,
+          deliveryLongitude: finalLng,
           deliveryNotes: deliveryNotes || null,
           subtotal: subtotal.toFixed(2),
           serviceFee: serviceFee.toFixed(2),
