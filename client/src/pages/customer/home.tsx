@@ -35,6 +35,7 @@ import {
   Shield,
   Lock,
   XCircle,
+  MessageCircle,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -89,6 +90,7 @@ export default function CustomerHome() {
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryNotes, setDeliveryNotes] = useState("");
   const [paymentMethod] = useState<"card">("card");
+  const [chatOpen, setChatOpen] = useState(false);
 
   const { permission: pushPermission, requestPermission } = usePushNotifications(!!user);
 
@@ -502,12 +504,24 @@ export default function CustomerHome() {
                               </div>
                             </div>
                           </div>
-                          <a href={`tel:${trackingData.driverInfo.phone}`} data-testid="link-call-driver">
-                            <Button size="sm" variant="outline">
-                              <Phone className="h-4 w-4 mr-1" />
-                              Call
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Button
+                              size="default"
+                              variant="outline"
+                              className="gap-1"
+                              data-testid="button-open-chat"
+                              onClick={() => setChatOpen(true)}
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                              Chat
                             </Button>
-                          </a>
+                            <a href={`tel:${trackingData.driverInfo.phone}`} data-testid="link-call-driver">
+                              <Button size="default" variant="outline" className="gap-1">
+                                <Phone className="h-4 w-4" />
+                                Call
+                              </Button>
+                            </a>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -852,13 +866,13 @@ export default function CustomerHome() {
         </div>
       </main>
 
-      {activeOrder && user && (
+      {activeOrder && user && chatOpen && (
         <ChatPanel
           threadType="order"
           threadId={activeOrder.id}
           currentUserId={user.id}
           title={`Chat - #${activeOrder.orderNumber}`}
-          collapsed
+          onClose={() => setChatOpen(false)}
         />
       )}
     </div>
