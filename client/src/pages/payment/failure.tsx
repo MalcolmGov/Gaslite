@@ -10,7 +10,8 @@ export default function PaymentFailure() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const orderId = params.get("orderId");
+    const orderId = params.get("orderId") || localStorage.getItem("gaslite_pending_order_id");
+    localStorage.removeItem("gaslite_pending_order_id");
     if (orderId) {
       apiRequest("POST", `/api/payments/verify/${orderId}`).catch(() => {});
     }

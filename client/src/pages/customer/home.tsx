@@ -127,6 +127,9 @@ export default function CustomerHome() {
     },
     onSuccess: (data: any) => {
       if (data.redirectUrl) {
+        if (data.id) {
+          localStorage.setItem("gaslite_pending_order_id", data.id);
+        }
         setCart([]);
         setShowCheckout(false);
         window.location.href = data.redirectUrl;

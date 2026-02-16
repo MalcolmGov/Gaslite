@@ -14,13 +14,15 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const orderId = params.get("orderId");
+    const orderId = params.get("orderId") || localStorage.getItem("gaslite_pending_order_id");
 
     if (!orderId) {
       setError("No order found");
       setVerifying(false);
       return;
     }
+
+    localStorage.removeItem("gaslite_pending_order_id");
 
     const verifyPayment = async () => {
       try {
