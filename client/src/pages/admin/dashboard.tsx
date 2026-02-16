@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { RoleSwitcher } from "@/components/role-switcher";
+
 import { GasliteLogo } from "@/components/gaslite-logo";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -215,7 +215,6 @@ export default function AdminDashboard() {
               <Badge variant="outline">Admin</Badge>
             </div>
             <div className="flex items-center gap-4 flex-wrap">
-              <RoleSwitcher currentRole="admin" />
               <ThemeToggle />
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground hidden sm:inline">

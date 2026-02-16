@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { RoleSwitcher } from "@/components/role-switcher";
+
 import { GasliteLogo } from "@/components/gaslite-logo";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -557,7 +557,6 @@ export default function DriverDashboard() {
               <Badge variant="outline">Driver</Badge>
             </div>
             <div className="flex items-center gap-4 flex-wrap">
-              <RoleSwitcher currentRole="driver" />
               <ThemeToggle />
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground hidden sm:inline">
