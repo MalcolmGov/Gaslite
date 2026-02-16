@@ -127,7 +127,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
             >
-              <GasliteLogo size="md" />
+              <GasliteLogo size="md" showTagline />
             </motion.div>
             <div className="hidden md:flex items-center gap-6">
               <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
@@ -730,7 +730,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <div className="mb-4">
-                <GasliteLogo size="lg" />
+                <GasliteLogo size="lg" showTagline />
               </div>
               <p className="text-muted-foreground mb-6 max-w-sm">
                 South Africa's fastest and most reliable LPG gas delivery service. Order with confidence.
