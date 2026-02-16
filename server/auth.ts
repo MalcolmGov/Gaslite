@@ -58,7 +58,7 @@ export function setupSession(app: Express) {
       cookie: {
         httpOnly: true,
         secure: true,
-        sameSite: "none",
+        sameSite: "lax",
         maxAge: sessionTtl,
       },
     })
