@@ -782,6 +782,20 @@ export default function LandingPage() {
               <Badge variant="outline" className="text-xs">SSL Secure</Badge>
             </div>
           </div>
+          <div className="text-center mt-8 pt-6 border-t border-border">
+            <p className="text-sm text-muted-foreground">
+              Powered by{" "}
+              <a
+                href="https://www.movedigital.africa"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+                data-testid="link-move-digital"
+              >
+                Move Digital
+              </a>
+            </p>
+          </div>
         </div>
       </footer>
 
