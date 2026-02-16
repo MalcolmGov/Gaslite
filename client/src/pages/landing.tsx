@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { DemoWalkthrough } from "@/components/demo-walkthrough";
 import gasCylinderImageLight from "@/assets/images/gas-cylinder.png";
 import gasCylinderImageDark from "@/assets/images/gas-cylinder-dark.png";
@@ -678,41 +679,19 @@ export default function LandingPage() {
             >
               <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-3xl blur-xl opacity-30" />
               <div className="relative bg-white p-6 rounded-2xl shadow-2xl">
-                <div className="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center relative overflow-hidden">
-                  <svg viewBox="0 0 100 100" className="w-full h-full p-2">
-                    <rect fill="#000" x="10" y="10" width="20" height="20" rx="2"/>
-                    <rect fill="#000" x="70" y="10" width="20" height="20" rx="2"/>
-                    <rect fill="#000" x="10" y="70" width="20" height="20" rx="2"/>
-                    <rect fill="#fff" x="14" y="14" width="12" height="12" rx="1"/>
-                    <rect fill="#fff" x="74" y="14" width="12" height="12" rx="1"/>
-                    <rect fill="#fff" x="14" y="74" width="12" height="12" rx="1"/>
-                    <rect fill="#000" x="17" y="17" width="6" height="6"/>
-                    <rect fill="#000" x="77" y="17" width="6" height="6"/>
-                    <rect fill="#000" x="17" y="77" width="6" height="6"/>
-                    <rect fill="#000" x="35" y="10" width="5" height="5"/>
-                    <rect fill="#000" x="45" y="10" width="5" height="5"/>
-                    <rect fill="#000" x="55" y="15" width="5" height="5"/>
-                    <rect fill="#000" x="35" y="20" width="5" height="5"/>
-                    <rect fill="#000" x="50" y="25" width="5" height="5"/>
-                    <rect fill="#000" x="10" y="35" width="5" height="5"/>
-                    <rect fill="#000" x="20" y="40" width="5" height="5"/>
-                    <rect fill="#000" x="10" y="50" width="5" height="5"/>
-                    <rect fill="#000" x="25" y="55" width="5" height="5"/>
-                    <rect fill="#000" x="35" y="35" width="30" height="30" rx="4"/>
-                    <rect fill="#fff" x="40" y="40" width="20" height="20" rx="2"/>
-                    <path d="M45 50 L50 55 L55 45" stroke="#3b82f6" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                    <rect fill="#000" x="75" y="35" width="5" height="5"/>
-                    <rect fill="#000" x="85" y="45" width="5" height="5"/>
-                    <rect fill="#000" x="70" y="55" width="5" height="5"/>
-                    <rect fill="#000" x="80" y="60" width="5" height="5"/>
-                    <rect fill="#000" x="35" y="75" width="5" height="5"/>
-                    <rect fill="#000" x="45" y="80" width="5" height="5"/>
-                    <rect fill="#000" x="55" y="70" width="5" height="5"/>
-                    <rect fill="#000" x="60" y="85" width="5" height="5"/>
-                    <rect fill="#000" x="75" y="75" width="5" height="5"/>
-                    <rect fill="#000" x="85" y="80" width="5" height="5"/>
-                    <rect fill="#000" x="80" y="85" width="5" height="5"/>
-                  </svg>
+                <div className="w-48 h-48 rounded-xl flex items-center justify-center">
+                  <QRCodeSVG
+                    value={window.location.origin}
+                    size={180}
+                    level="M"
+                    includeMargin={false}
+                    imageSettings={{
+                      src: "",
+                      height: 0,
+                      width: 0,
+                      excavate: false,
+                    }}
+                  />
                 </div>
                 <p className="text-center text-gray-600 text-sm mt-3 font-medium">Scan to install</p>
               </div>
