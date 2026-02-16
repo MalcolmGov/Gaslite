@@ -476,3 +476,139 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
     return false;
   }
 }
+
+function buildPasswordResetHtml(name: string, resetLink: string): string {
+  const logoUrl = `${getAppBaseUrl()}/gaslite-logo.png`;
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #0F172A; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #0F172A;">
+    <tr>
+      <td style="padding: 32px 16px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+          <tr>
+            <td style="padding: 0 0 24px; text-align: center;">
+              <img src="${logoUrl}" alt="Gaslite" width="180" style="display: inline-block; height: auto; max-width: 180px;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0; border-radius: 16px 16px 0 0; overflow: hidden;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-radius: 16px 16px 0 0; overflow: hidden;">
+                <tr>
+                  <td width="50%" style="background-color: #3B82F6; height: 8px; font-size: 0; line-height: 0;">&nbsp;</td>
+                  <td width="50%" style="background-color: #06B6D4; height: 8px; font-size: 0; line-height: 0;">&nbsp;</td>
+                </tr>
+              </table>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="background-color: #1E293B; padding: 44px 40px 40px; text-align: center;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 0 auto 20px;">
+                      <tr>
+                        <td style="background-color: #3B82F6; width: 64px; height: 64px; text-align: center; vertical-align: middle; border-radius: 32px;">
+                          <span style="color: #FFFFFF; font-size: 28px; line-height: 64px;">&#128274;</span>
+                        </td>
+                      </tr>
+                    </table>
+                    <h1 style="margin: 0; color: #FFFFFF; font-size: 26px; font-weight: 700; letter-spacing: -0.3px;">Password Reset</h1>
+                    <p style="margin: 8px 0 0; color: #94A3B8; font-size: 15px; font-weight: 400;">We received a request to reset your password</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #FFFFFF; padding: 0; border-radius: 0 0 16px 16px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="padding: 36px 40px 20px;">
+                    <p style="margin: 0; color: #0F172A; font-size: 18px; font-weight: 600;">Hi ${escapeHtml(name)},</p>
+                    <p style="margin: 10px 0 0; color: #64748B; font-size: 14px; line-height: 1.7;">
+                      You requested a password reset for your Gaslite account. Click the button below to create a new password. This link will expire in 1 hour.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="padding: 16px 40px 28px; text-align: center;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                      <tr>
+                        <td style="background-color: #2563EB; border-radius: 10px; padding: 16px 40px;">
+                          <a href="${resetLink}" style="color: #FFFFFF; font-size: 16px; font-weight: 700; text-decoration: none; display: inline-block;">Reset Password</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="padding: 0 40px 28px;">
+                    <p style="margin: 0; color: #94A3B8; font-size: 12px; line-height: 1.6;">
+                      If you did not request this, you can safely ignore this email. Your password will remain unchanged.
+                    </p>
+                    <p style="margin: 12px 0 0; color: #94A3B8; font-size: 12px; line-height: 1.6;">
+                      Or copy and paste this link into your browser:<br/>
+                      <span style="color: #3B82F6; word-break: break-all;">${escapeHtml(resetLink)}</span>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0 0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td width="50%" style="background-color: #3B82F6; height: 3px; font-size: 0; line-height: 0;">&nbsp;</td>
+                  <td width="50%" style="background-color: #06B6D4; height: 3px; font-size: 0; line-height: 0;">&nbsp;</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 28px 40px; text-align: center;">
+              <p style="margin: 0; color: #64748B; font-size: 13px; font-weight: 500;">Gaslite</p>
+              <p style="margin: 4px 0 0; color: #475569; font-size: 12px;">On-Demand LPG Gas Delivery &bull; South Africa</p>
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 16px auto 0;">
+                <tr>
+                  <td style="border-top: 1px solid #334155; padding-top: 16px;">
+                    <p style="margin: 0; color: #475569; font-size: 11px;">This is an automated email. Please do not reply.</p>
+                    <p style="margin: 4px 0 0; color: #475569; font-size: 11px;">Need help? Contact us at support@gaslite.co.za</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+export async function sendPasswordResetEmail(email: string, name: string, resetLink: string): Promise<boolean> {
+  try {
+    const gmail = await getGmailClient();
+    const subject = `Reset Your Password | Gaslite`;
+    const html = buildPasswordResetHtml(name, resetLink);
+    const raw = createMimeMessage(email, subject, html);
+
+    await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: { raw },
+    });
+
+    console.log(`Password reset email sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error('Failed to send password reset email:', error);
+    return false;
+  }
+}

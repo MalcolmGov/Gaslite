@@ -1,11 +1,13 @@
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import type { Express, Request, Response, NextFunction } from "express";
 import { db } from "./db";
-import { users } from "@shared/models/auth";
-import { eq, or } from "drizzle-orm";
+import { users, passwordResetTokens } from "@shared/models/auth";
+import { eq, or, and, gt } from "drizzle-orm";
 import { authRateLimit } from "./rate-limit";
+import { sendPasswordResetEmail } from "./email";
 
 declare module "express-session" {
   interface SessionData {
@@ -224,6 +226,90 @@ export function registerAuthRoutes(app: Express) {
     } catch (error) {
       console.error("Get user error:", error);
       res.status(500).json({ error: "Failed to fetch user" });
+    }
+  });
+
+  app.post("/api/auth/forgot-password", authRateLimit, async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+
+      if (!email || !isEmail(email.trim())) {
+        return res.status(400).json({ error: "Please enter a valid email address" });
+      }
+
+      const normalizedEmail = email.trim().toLowerCase();
+      const [user] = await db.select().from(users).where(eq(users.email, normalizedEmail));
+
+      res.json({ message: "If an account with that email exists, we've sent a password reset link." });
+
+      if (!user) return;
+
+      await db
+        .update(passwordResetTokens)
+        .set({ used: true })
+        .where(and(eq(passwordResetTokens.userId, user.id), eq(passwordResetTokens.used, false)));
+
+      const token = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+      await db.insert(passwordResetTokens).values({
+        userId: user.id,
+        token,
+        expiresAt,
+      });
+
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+        : process.env.REPLIT_DEPLOYMENT_URL || "https://gaslite.replit.app";
+
+      const resetLink = `${baseUrl}/auth/reset-password?token=${token}`;
+      const name = user.firstName || "there";
+
+      sendPasswordResetEmail(normalizedEmail, name, resetLink).catch((err) => {
+        console.error("Background password reset email error:", err);
+      });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ error: "Something went wrong. Please try again." });
+    }
+  });
+
+  app.post("/api/auth/reset-password", authRateLimit, async (req: Request, res: Response) => {
+    try {
+      const { token, password } = req.body;
+
+      if (!token) {
+        return res.status(400).json({ error: "Reset token is required" });
+      }
+
+      if (!password || password.length < 6) {
+        return res.status(400).json({ error: "Password must be at least 6 characters" });
+      }
+
+      const [resetToken] = await db
+        .select()
+        .from(passwordResetTokens)
+        .where(
+          and(
+            eq(passwordResetTokens.token, token),
+            eq(passwordResetTokens.used, false),
+            gt(passwordResetTokens.expiresAt, new Date())
+          )
+        );
+
+      if (!resetToken) {
+        return res.status(400).json({ error: "This reset link is invalid or has expired. Please request a new one." });
+      }
+
+      const passwordHash = await bcrypt.hash(password, 12);
+
+      await db.update(users).set({ passwordHash }).where(eq(users.id, resetToken.userId));
+      await db.update(passwordResetTokens).set({ used: true }).where(eq(passwordResetTokens.id, resetToken.id));
+
+      res.json({ message: "Password has been reset successfully" });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({ error: "Something went wrong. Please try again." });
     }
   });
 }

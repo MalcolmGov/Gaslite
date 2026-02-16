@@ -10,6 +10,8 @@ import LandingPage from "@/pages/landing";
 import ApplyPage from "@/pages/apply";
 import SignInPage from "@/pages/auth/signin";
 import SignUpPage from "@/pages/auth/signup";
+import ForgotPasswordPage from "@/pages/auth/forgot-password";
+import ResetPasswordPage from "@/pages/auth/reset-password";
 import CustomerHome from "@/pages/customer/home";
 import DriverDashboard from "@/pages/driver/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -84,6 +86,8 @@ function AuthenticatedRouter() {
         <Route path="/apply" component={ApplyPage} />
         <Route path="/auth/signin" component={SignInPage} />
         <Route path="/auth/signup" component={SignUpPage} />
+        <Route path="/auth/forgot-password" component={ForgotPasswordPage} />
+        <Route path="/auth/reset-password" component={ResetPasswordPage} />
         <Route path="/driver/terms" component={DriverTerms} />
         <Route path="/legal/terms" component={TermsOfService} />
         <Route path="/legal/privacy" component={PrivacyPolicy} />
