@@ -13,6 +13,9 @@ import { RoleSwitcher } from "@/components/role-switcher";
 import { GasliteLogo } from "@/components/gaslite-logo";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { 
   MapPin, 
   Package, 
@@ -36,11 +39,33 @@ import {
   Eye,
   Filter,
   Landmark,
-  CreditCard
+  CreditCard,
+  Map
 } from "lucide-react";
 import { ChatPanel } from "@/components/chat-panel";
 import { MessageCircle } from "lucide-react";
 import type { Order, DriverApplication, Driver } from "@shared/schema";
+
+const availableDriverIcon = L.divIcon({
+  className: "driver-marker-available",
+  html: '<div style="width:14px;height:14px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+});
+
+const busyDriverIcon = L.divIcon({
+  className: "driver-marker-busy",
+  html: '<div style="width:14px;height:14px;border-radius:50%;background:#f59e0b;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+});
+
+const offlineDriverIcon = L.divIcon({
+  className: "driver-marker-offline",
+  html: '<div style="width:14px;height:14px;border-radius:50%;background:#94a3b8;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+});
 
 type DriverWithApplication = Driver & { application?: DriverApplication };
 
@@ -66,6 +91,7 @@ export default function AdminDashboard() {
 
   const { data: drivers, isLoading: driversLoading } = useQuery<DriverWithApplication[]>({
     queryKey: ["/api/admin/drivers"],
+    refetchInterval: selectedTab === "driver-map" ? 15000 : undefined,
   });
 
   const { data: stats } = useQuery<{
@@ -308,7 +334,7 @@ export default function AdminDashboard() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="orders" data-testid="tab-orders">
                 <Package className="h-4 w-4 mr-2" />
                 Orders
@@ -326,6 +352,10 @@ export default function AdminDashboard() {
               <TabsTrigger value="drivers" data-testid="tab-drivers">
                 <Truck className="h-4 w-4 mr-2" />
                 Drivers
+              </TabsTrigger>
+              <TabsTrigger value="driver-map" data-testid="tab-driver-map">
+                <Map className="h-4 w-4 mr-2" />
+                Map
               </TabsTrigger>
             </TabsList>
 
@@ -775,6 +805,158 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="driver-map" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Map className="h-5 w-5" />
+                    Driver Coverage Map
+                  </CardTitle>
+                  <CardDescription>
+                    Live view of driver locations and their 10km delivery radius
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4 mb-4 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500" />
+                      <span className="text-sm text-muted-foreground">Available ({drivers?.filter(d => d.status === "available").length || 0})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-amber-500" />
+                      <span className="text-sm text-muted-foreground">Busy ({drivers?.filter(d => d.status === "busy").length || 0})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-slate-400" />
+                      <span className="text-sm text-muted-foreground">Offline ({drivers?.filter(d => d.status === "offline").length || 0})</span>
+                    </div>
+                  </div>
+
+                  {driversLoading ? (
+                    <Skeleton className="h-[500px] w-full rounded-md" />
+                  ) : (() => {
+                    const driversWithLocation = drivers?.filter(
+                      d => d.currentLatitude && d.currentLongitude
+                    ) || [];
+
+                    if (driversWithLocation.length === 0) {
+                      return (
+                        <div className="text-center py-16">
+                          <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                          <p className="text-muted-foreground mb-2">No driver locations available yet</p>
+                          <p className="text-sm text-muted-foreground">Drivers will appear on the map once they go online and share their location.</p>
+                        </div>
+                      );
+                    }
+
+                    const avgLat = driversWithLocation.reduce((sum, d) => sum + Number(d.currentLatitude), 0) / driversWithLocation.length;
+                    const avgLng = driversWithLocation.reduce((sum, d) => sum + Number(d.currentLongitude), 0) / driversWithLocation.length;
+
+                    return (
+                      <div className="rounded-md overflow-hidden border border-border" style={{ height: "500px" }}>
+                        <MapContainer
+                          center={[avgLat, avgLng]}
+                          zoom={12}
+                          style={{ height: "100%", width: "100%" }}
+                          scrollWheelZoom={true}
+                        >
+                          <TileLayer
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          />
+                          {driversWithLocation.map((driver) => {
+                            const lat = Number(driver.currentLatitude);
+                            const lng = Number(driver.currentLongitude);
+                            const icon = driver.status === "available"
+                              ? availableDriverIcon
+                              : driver.status === "busy"
+                              ? busyDriverIcon
+                              : offlineDriverIcon;
+                            const driverName = driver.application
+                              ? `${driver.application.firstName} ${driver.application.lastName}`
+                              : `Driver ${driver.id.slice(0, 8)}`;
+
+                            return (
+                              <div key={driver.id}>
+                                <Circle
+                                  center={[lat, lng]}
+                                  radius={10000}
+                                  pathOptions={{
+                                    color: driver.status === "available" ? "#22c55e" : driver.status === "busy" ? "#f59e0b" : "#94a3b8",
+                                    fillColor: driver.status === "available" ? "#22c55e" : driver.status === "busy" ? "#f59e0b" : "#94a3b8",
+                                    fillOpacity: 0.06,
+                                    weight: 1,
+                                    opacity: 0.3,
+                                  }}
+                                />
+                                <Marker position={[lat, lng]} icon={icon}>
+                                  <Popup>
+                                    <div className="text-sm" data-testid={`popup-driver-${driver.id}`}>
+                                      <p className="font-medium">{driverName}</p>
+                                      <p className="capitalize">{driver.status}</p>
+                                      <p>{driver.totalDeliveries} deliveries</p>
+                                      {driver.application?.phone && (
+                                        <p>{driver.application.phone}</p>
+                                      )}
+                                      {driver.application?.vehicleRegistration && (
+                                        <p>{driver.application.vehicleRegistration}</p>
+                                      )}
+                                    </div>
+                                  </Popup>
+                                </Marker>
+                              </div>
+                            );
+                          })}
+                        </MapContainer>
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+
+              {drivers && drivers.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Driver Summary by Status</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="p-4 rounded-md bg-green-500/10 border border-green-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-3 h-3 rounded-full bg-green-500" />
+                          <span className="font-medium text-sm">Available</span>
+                        </div>
+                        <p className="text-2xl font-bold" data-testid="text-available-count">
+                          {drivers.filter(d => d.status === "available").length}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Ready for deliveries</p>
+                      </div>
+                      <div className="p-4 rounded-md bg-amber-500/10 border border-amber-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-3 h-3 rounded-full bg-amber-500" />
+                          <span className="font-medium text-sm">Busy</span>
+                        </div>
+                        <p className="text-2xl font-bold" data-testid="text-busy-count">
+                          {drivers.filter(d => d.status === "busy").length}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Currently on delivery</p>
+                      </div>
+                      <div className="p-4 rounded-md bg-slate-500/10 border border-slate-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-3 h-3 rounded-full bg-slate-400" />
+                          <span className="font-medium text-sm">Offline</span>
+                        </div>
+                        <p className="text-2xl font-bold" data-testid="text-offline-count">
+                          {drivers.filter(d => d.status === "offline").length}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Not accepting orders</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
         </div>
