@@ -81,9 +81,10 @@ export function GooglePlacesAutocomplete({
   const [loadError, setLoadError] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null);
-  const geocoder = useRef<google.maps.Geocoder | null>(null);
+  const placesService = useRef<google.maps.places.PlacesService | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const hiddenDivRef = useRef<HTMLDivElement | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
   const listboxId = useId();
@@ -107,7 +108,10 @@ export function GooglePlacesAutocomplete({
       .then(() => {
         if (!mountedRef.current) return;
         autocompleteService.current = new window.google.maps.places.AutocompleteService();
-        geocoder.current = new window.google.maps.Geocoder();
+        if (!hiddenDivRef.current) {
+          hiddenDivRef.current = document.createElement("div");
+        }
+        placesService.current = new window.google.maps.places.PlacesService(hiddenDivRef.current);
         setIsReady(true);
       })
       .catch(() => {
@@ -163,7 +167,10 @@ export function GooglePlacesAutocomplete({
     []
   );
 
+  const selectingRef = useRef(false);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (selectingRef.current) return;
     const val = e.target.value;
     onChange(val);
 
@@ -174,25 +181,35 @@ export function GooglePlacesAutocomplete({
   };
 
   const handleSelect = (prediction: Prediction) => {
-    onChange(prediction.description);
+    selectingRef.current = true;
     setIsOpen(false);
     setPredictions([]);
     setActiveIndex(-1);
 
-    if (geocoder.current && onSelect) {
-      geocoder.current.geocode({ placeId: prediction.placeId }, (results, status) => {
-        if (status === window.google.maps.GeocoderStatus.OK && results && results[0]) {
-          const location = results[0].geometry.location;
-          onSelect(prediction.description, prediction.placeId, {
-            latitude: location.lat(),
-            longitude: location.lng(),
-          });
-        } else {
-          onSelect(prediction.description, prediction.placeId);
+    if (placesService.current && onSelect) {
+      placesService.current.getDetails(
+        { placeId: prediction.placeId, fields: ["geometry"] },
+        (place, status) => {
+          if (!mountedRef.current) return;
+          onChange(prediction.description);
+          if (
+            status === window.google.maps.places.PlacesServiceStatus.OK &&
+            place?.geometry?.location
+          ) {
+            onSelect(prediction.description, prediction.placeId, {
+              latitude: place.geometry.location.lat(),
+              longitude: place.geometry.location.lng(),
+            });
+          } else {
+            onSelect(prediction.description, prediction.placeId);
+          }
+          selectingRef.current = false;
         }
-      });
+      );
     } else {
+      onChange(prediction.description);
       onSelect?.(prediction.description, prediction.placeId);
+      selectingRef.current = false;
     }
   };
 

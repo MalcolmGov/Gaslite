@@ -914,7 +914,8 @@ export default function CustomerHome() {
                                 setDeliveryAddress(val);
                                 setDeliveryCoordinates(null);
                               }}
-                              onSelect={(_address, _placeId, coordinates) => {
+                              onSelect={(address, _placeId, coordinates) => {
+                                setDeliveryAddress(address);
                                 if (coordinates) {
                                   setDeliveryCoordinates(coordinates);
                                 }
