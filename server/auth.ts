@@ -161,7 +161,10 @@ export function registerAuthRoutes(app: Express) {
     try {
       const { identifier, password } = req.body;
 
+      console.log("[LOGIN] Attempt for:", identifier);
+
       if (!identifier || !password) {
+        console.log("[LOGIN] Missing identifier or password");
         return res.status(400).json({ error: "Email/mobile number and password are required" });
       }
 
@@ -169,21 +172,29 @@ export function registerAuthRoutes(app: Express) {
       let user;
 
       if (isEmail(trimmed)) {
+        console.log("[LOGIN] Email lookup:", trimmed.toLowerCase());
         const results = await db.select().from(users).where(eq(users.email, trimmed.toLowerCase()));
         user = results[0];
+        console.log("[LOGIN] User found:", !!user);
       } else {
         const normalized = normalizePhone(trimmed);
+        console.log("[LOGIN] Phone lookup:", normalized);
         if (isPhone(normalized)) {
           const results = await db.select().from(users).where(eq(users.phone, normalized));
           user = results[0];
+          console.log("[LOGIN] User found:", !!user);
+        } else {
+          console.log("[LOGIN] Not a valid phone number");
         }
       }
 
       if (!user) {
+        console.log("[LOGIN] No user found for:", trimmed);
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
       const valid = await bcrypt.compare(password, user.passwordHash);
+      console.log("[LOGIN] Password valid:", valid, "hash length:", user.passwordHash?.length);
       if (!valid) {
         return res.status(401).json({ error: "Invalid credentials" });
       }

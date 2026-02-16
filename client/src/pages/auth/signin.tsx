@@ -23,11 +23,18 @@ export default function SignInPage() {
       navigate("/");
     } catch (err: any) {
       const msg = err?.message || "Login failed";
-      let errorText = "Invalid credentials";
+      let errorText = msg;
       try {
-        const parsed = JSON.parse(msg.replace(/^\d+:\s*/, ""));
+        const jsonStr = msg.replace(/^\d+:\s*/, "");
+        const parsed = JSON.parse(jsonStr);
         if (parsed.error) errorText = parsed.error;
-      } catch {}
+      } catch {
+        if (msg.includes("429")) {
+          errorText = "Too many login attempts. Please try again in 5 minutes.";
+        } else if (msg.includes("401")) {
+          errorText = "Invalid email/mobile number or password. Please try again.";
+        }
+      }
       toast({ title: "Sign in failed", description: errorText, variant: "destructive" });
     }
   };
