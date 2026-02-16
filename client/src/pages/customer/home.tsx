@@ -578,7 +578,7 @@ export default function CustomerHome() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {frequentProducts.slice(0, 4).map((fp) => {
                     const product = products.find(p => p.id === fp.productId);
-                    if (!product || !product.available) return null;
+                    if (!product || !product.isAvailable) return null;
                     return (
                       <Card key={fp.productId} className="overflow-visible">
                         <CardContent className="p-4">
@@ -747,12 +747,19 @@ export default function CustomerHome() {
               )}
             </section>
 
-            {olderOrders.length > 0 && (
-              <section className="mt-6" data-testid="section-order-history">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <History className="h-5 w-5 text-muted-foreground" />
-                  Order History
-                </h2>
+            <section className="mt-6" data-testid="section-order-history">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <History className="h-5 w-5 text-muted-foreground" />
+                Order History
+              </h2>
+              {olderOrders.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <History className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">Orders older than a week will appear here.</p>
+                  </CardContent>
+                </Card>
+              ) : (
                 <div className="space-y-3">
                   {olderOrders.slice(0, 10).map((order) => (
                     <Card key={order.id} className="overflow-visible">
@@ -781,8 +788,8 @@ export default function CustomerHome() {
                     </Card>
                   ))}
                 </div>
-              </section>
-            )}
+              )}
+            </section>
           </div>
 
           <div className="lg:col-span-1">
