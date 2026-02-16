@@ -117,6 +117,21 @@ export const orderItems = pgTable("order_items", {
   totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
 });
 
+// Chat messages table
+export const chatMessageTypeEnum = pgEnum("chat_message_type", ["order", "admin_driver"]);
+
+export const chatMessages = pgTable("chat_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  threadType: chatMessageTypeEnum("thread_type").notNull(),
+  orderId: varchar("order_id"),
+  driverId: varchar("driver_id"),
+  senderUserId: varchar("sender_user_id").notNull(),
+  senderRole: userRoleEnum("sender_role").notNull(),
+  senderName: text("sender_name"),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Push subscriptions table
 export const pushSubscriptions = pgTable("push_subscriptions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -199,12 +214,20 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
   id: true,
 });
 
+export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).omit({
   id: true,
   createdAt: true,
 });
 
 // Types
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;
 
