@@ -1060,5 +1060,150 @@ export async function registerRoutes(
     }
   });
 
+  // ============ CHAT ROUTES ============
+
+  // Get messages for an order thread
+  app.get("/api/chat/order/:orderId", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { orderId } = req.params;
+
+      const order = await storage.getOrder(orderId);
+      if (!order) return res.status(404).json({ error: "Order not found" });
+
+      const profile = await storage.getUserProfile(userId);
+      if (!profile) return res.status(403).json({ error: "No profile" });
+
+      const isCustomer = order.customerId === userId;
+      let isAssignedDriver = false;
+      if (profile.role === "driver" && order.driverId) {
+        const driver = await storage.getDriverByUserId(userId);
+        if (driver && driver.id === order.driverId) isAssignedDriver = true;
+      }
+      const isAdmin = profile.role === "admin";
+
+      if (!isCustomer && !isAssignedDriver && !isAdmin) {
+        return res.status(403).json({ error: "Not authorized to view this chat" });
+      }
+
+      const messages = await storage.getChatMessages("order", orderId);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch messages" });
+    }
+  });
+
+  // Send message in an order thread
+  app.post("/api/chat/order/:orderId", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { orderId } = req.params;
+      const { body } = req.body;
+
+      if (!body || typeof body !== "string" || body.trim().length === 0) {
+        return res.status(400).json({ error: "Message body required" });
+      }
+
+      const order = await storage.getOrder(orderId);
+      if (!order) return res.status(404).json({ error: "Order not found" });
+
+      const profile = await storage.getUserProfile(userId);
+      if (!profile) return res.status(403).json({ error: "No profile" });
+
+      const isCustomer = order.customerId === userId;
+      let isAssignedDriver = false;
+      if (profile.role === "driver" && order.driverId) {
+        const driver = await storage.getDriverByUserId(userId);
+        if (driver && driver.id === order.driverId) isAssignedDriver = true;
+      }
+
+      if (!isCustomer && !isAssignedDriver && profile.role !== "admin") {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      const message = await storage.createChatMessage({
+        threadType: "order",
+        orderId,
+        driverId: null,
+        senderUserId: userId,
+        senderRole: profile.role,
+        senderName: `${profile.firstName || ""} ${profile.lastName || ""}`.trim() || "User",
+        body: body.trim(),
+      });
+
+      res.json(message);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to send message" });
+    }
+  });
+
+  // Get messages for admin-driver thread
+  app.get("/api/chat/admin-driver/:driverId", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { driverId } = req.params;
+
+      const profile = await storage.getUserProfile(userId);
+      if (!profile) return res.status(403).json({ error: "No profile" });
+
+      const isAdmin = profile.role === "admin";
+      let isTheDriver = false;
+      if (profile.role === "driver") {
+        const driver = await storage.getDriverByUserId(userId);
+        if (driver && driver.id === driverId) isTheDriver = true;
+      }
+
+      if (!isAdmin && !isTheDriver) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      const messages = await storage.getChatMessages("admin_driver", driverId);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch messages" });
+    }
+  });
+
+  // Send message in admin-driver thread
+  app.post("/api/chat/admin-driver/:driverId", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { driverId } = req.params;
+      const { body } = req.body;
+
+      if (!body || typeof body !== "string" || body.trim().length === 0) {
+        return res.status(400).json({ error: "Message body required" });
+      }
+
+      const profile = await storage.getUserProfile(userId);
+      if (!profile) return res.status(403).json({ error: "No profile" });
+
+      const isAdmin = profile.role === "admin";
+      let isTheDriver = false;
+      if (profile.role === "driver") {
+        const driver = await storage.getDriverByUserId(userId);
+        if (driver && driver.id === driverId) isTheDriver = true;
+      }
+
+      if (!isAdmin && !isTheDriver) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      const message = await storage.createChatMessage({
+        threadType: "admin_driver",
+        orderId: null,
+        driverId,
+        senderUserId: userId,
+        senderRole: profile.role,
+        senderName: `${profile.firstName || ""} ${profile.lastName || ""}`.trim() || (isAdmin ? "Admin" : "Driver"),
+        body: body.trim(),
+      });
+
+      res.json(message);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to send message" });
+    }
+  });
+
   return httpServer;
 }
