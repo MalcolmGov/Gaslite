@@ -36,6 +36,9 @@ import {
   Lock,
   XCircle,
   MessageCircle,
+  History,
+  Star,
+  RefreshCw,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -82,6 +85,13 @@ interface TrackingData {
   deliveryLocation: { latitude: number; longitude: number } | null;
 }
 
+interface FrequentProduct {
+  productId: string;
+  productName: string;
+  productSize: string;
+  count: number;
+}
+
 export default function CustomerHome() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
@@ -112,6 +122,16 @@ export default function CustomerHome() {
     queryKey: ["/api/orders"],
     refetchInterval: 10000,
   });
+
+  const { data: frequentProducts, isLoading: frequentLoading } = useQuery<FrequentProduct[]>({
+    queryKey: ["/api/orders/frequent-products"],
+  });
+
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const recentOrders = orders?.filter(o => new Date(o.createdAt!) >= oneWeekAgo) || [];
+  const olderOrders = orders?.filter(o => new Date(o.createdAt!) < oneWeekAgo) || [];
 
   const activeOrder = orders?.find(
     (o) => o.status === "assigned" || o.status === "picked_up" || o.status === "in_transit"
@@ -549,10 +569,52 @@ export default function CustomerHome() {
               </Card>
             )}
 
-            <section>
+            {frequentProducts && frequentProducts.length > 0 && products && (
+              <section className="mb-6" data-testid="section-frequent-products">
+                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Star className="h-5 w-5 text-primary" />
+                  Frequently Purchased
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {frequentProducts.slice(0, 4).map((fp) => {
+                    const product = products.find(p => p.id === fp.productId);
+                    if (!product || !product.available) return null;
+                    return (
+                      <Card key={fp.productId} className="overflow-visible">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-10 h-10 bg-primary/10 rounded-md flex items-center justify-center shrink-0">
+                                <Flame className="h-5 w-5 text-primary" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium truncate" data-testid={`text-freq-name-${fp.productId}`}>{fp.productName}</p>
+                                <p className="text-xs text-muted-foreground">R{Number(product.price).toFixed(2)}</p>
+                                <p className="text-xs text-muted-foreground">Ordered {fp.count} time{fp.count !== 1 ? "s" : ""}</p>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => addToCart(product)}
+                              data-testid={`button-quick-add-${fp.productId}`}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            <section data-testid="section-recent-orders">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
                 Recent Orders
+                <span className="text-sm font-normal text-muted-foreground ml-1">(Past Week)</span>
               </h2>
               {ordersLoading ? (
                 <div className="space-y-4">
@@ -565,16 +627,16 @@ export default function CustomerHome() {
                     </Card>
                   ))}
                 </div>
-              ) : orders?.length === 0 ? (
+              ) : recentOrders.length === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center">
                     <Truck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No orders yet. Place your first order!</p>
+                    <p className="text-muted-foreground">{orders?.length === 0 ? "No orders yet. Place your first order!" : "No orders this week."}</p>
                   </CardContent>
                 </Card>
               ) : (
                 <div className="space-y-4">
-                  {orders?.slice(0, 10).map((order) => {
+                  {recentOrders.map((order) => {
                     const step = getStatusStep(order.status);
                     const isActive = order.status !== "delivered" && order.status !== "cancelled";
                     return (
@@ -684,6 +746,43 @@ export default function CustomerHome() {
                 </div>
               )}
             </section>
+
+            {olderOrders.length > 0 && (
+              <section className="mt-6" data-testid="section-order-history">
+                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <History className="h-5 w-5 text-muted-foreground" />
+                  Order History
+                </h2>
+                <div className="space-y-3">
+                  {olderOrders.slice(0, 10).map((order) => (
+                    <Card key={order.id} className="overflow-visible">
+                      <CardContent className="p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-medium" data-testid={`text-history-order-${order.id}`}>#{order.orderNumber}</span>
+                              <Badge className={getStatusColor(order.status)} data-testid={`badge-history-status-${order.id}`}>
+                                {getStatusLabel(order.status)}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {order.deliveryAddress}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold" data-testid={`text-history-total-${order.id}`}>R{Number(order.total).toFixed(2)}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(order.createdAt!).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           <div className="lg:col-span-1">
