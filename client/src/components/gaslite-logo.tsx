@@ -4,11 +4,12 @@ interface GasliteLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   showTagline?: boolean;
+  animate?: boolean;
 }
 
-export function GasliteLogo({ size = "md", className = "", showTagline = false }: GasliteLogoProps) {
+export function GasliteLogo({ size = "md", className = "", showTagline = false, animate = true }: GasliteLogoProps) {
   return (
-    <GasliteLogoSvg size={size} className={className} showTagline={showTagline} />
+    <GasliteLogoSvg size={size} className={className} showTagline={showTagline} animate={animate} />
   );
 }
 

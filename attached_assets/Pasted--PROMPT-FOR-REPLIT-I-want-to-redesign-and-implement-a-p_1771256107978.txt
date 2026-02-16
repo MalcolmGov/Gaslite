@@ -1,0 +1,135 @@
+🚀 PROMPT FOR REPLIT
+
+I want to redesign and implement a premium SaaS-style brand logo component for “GasLite” in my React + TypeScript app.
+
+Stack Context
+
+Frontend:
+
+React + TypeScript
+
+Tailwind CSS
+
+shadcn/ui
+
+Wouter routing
+
+Framer Motion installed
+
+Objective
+
+Create a premium, modern, tech-forward logo component that works in both light and dark mode and replaces the current navbar logo.
+
+This should feel like Stripe / Uber / Linear level quality.
+
+DESIGN SPECIFICATIONS
+Brand Feel
+
+Premium
+
+Trustworthy
+
+Modern tech platform
+
+Clean and scalable
+
+Not “utility service” looking
+
+Logo Requirements
+
+Minimal geometric flame icon (clean, abstract, tech style)
+
+Wordmark: GasLite
+
+“Gas” → Navy (#0B1F3B in light mode, #FFFFFF in dark mode)
+
+“Lite” → Blue gradient (#00BFFF → #0047AB)
+
+Tagline under wordmark:
+FAST. SAFE. RELIABLE.
+
+Small caps
+
+Letter spacing (tracking)
+
+Softer muted tone
+
+Transparent background
+
+Optimized for navbar height: 64–72px
+
+Perfect vertical alignment with nav items
+
+Fully scalable SVG
+
+No PNG files
+
+IMPLEMENTATION REQUIREMENTS
+1️⃣ Create a reusable component:
+
+/components/brand/Logo.tsx
+
+Use inline SVG
+
+Accept optional prop: size?: "sm" | "md" | "lg"
+
+Accept optional prop: showTagline?: boolean
+
+Responsive scaling
+
+Clean flex alignment
+
+2️⃣ Dark Mode Support
+
+Must automatically adapt using Tailwind dark: classes.
+
+Do NOT duplicate the SVG.
+Instead dynamically control:
+
+Text fill colors
+
+Tagline color
+
+Gradient visibility if needed
+
+3️⃣ Header Integration
+
+Update the Navbar component to use:
+
+<Logo size="md" showTagline />
+
+
+Ensure:
+
+Proper spacing
+
+No layout shift
+
+Clean alignment with shadcn Button components
+
+4️⃣ Optional Enhancement
+
+Add subtle Framer Motion animation:
+
+Slight fade-in on mount
+
+Very subtle scale transition
+
+No flashy effects
+
+5️⃣ Output Required
+
+Full Logo.tsx component code
+
+Updated Navbar snippet
+
+Tailwind adjustments if required
+
+Explanation of how scaling works
+
+Ensure no layout breaking
+
+Important:
+This must look like a VC-backed delivery tech platform brand.
+
+Do not make it look like clip-art or generic flame logo.

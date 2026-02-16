@@ -1,17 +1,19 @@
 import { Link } from "wouter";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useId } from "react";
+import { motion } from "framer-motion";
 
 interface GasliteLogoSvgProps {
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   showTagline?: boolean;
+  animate?: boolean;
 }
 
-const widthMap = {
-  sm: 160,
-  md: 200,
-  lg: 260,
-  xl: 320,
+const sizeConfig = {
+  sm: { width: 140, navHeight: 40 },
+  md: { width: 180, navHeight: 48 },
+  lg: { width: 240, navHeight: 60 },
+  xl: { width: 300, navHeight: 72 },
 };
 
 function useIsDark() {
@@ -30,135 +32,125 @@ function useIsDark() {
   return isDark;
 }
 
-export function GasliteLogoSvg({ size = "md", className = "", showTagline = false }: GasliteLogoSvgProps) {
-  const w = widthMap[size];
-  const aspect = showTagline ? 3.2 : 3.8;
-  const h = Math.round(w / aspect);
+export function GasliteLogoSvg({ size = "md", className = "", showTagline = false, animate = true }: GasliteLogoSvgProps) {
+  const uid = useId().replace(/:/g, "");
   const isDark = useIsDark();
+  const { width } = sizeConfig[size];
+  const viewBoxH = showTagline ? 58 : 44;
+  const svgW = 200;
+  const svgH = viewBoxH;
 
-  const gasStartColor = isDark ? "#F0F9FF" : "#0C4A6E";
-  const gasMidColor = isDark ? "#BAE6FD" : "#0369A1";
-  const gasEndColor = isDark ? "#38BDF8" : "#0EA5E9";
+  const gasColor = isDark ? "#FFFFFF" : "#0B1F3B";
+  const taglineColor = isDark ? "rgba(255,255,255,0.5)" : "rgba(11,31,59,0.45)";
 
-  const liteStartColor = isDark ? "#38BDF8" : "#0EA5E9";
-  const liteEndColor = isDark ? "#0EA5E9" : "#0284C7";
-
-  const taglineColor = isDark ? "#7DD3FC" : "#0369A1";
-
-  const uid = `logo-${size}`;
+  const Wrapper = animate ? motion.div : "div";
+  const wrapperProps = animate
+    ? { initial: { opacity: 0, scale: 0.97 }, animate: { opacity: 1, scale: 1 }, transition: { duration: 0.4, ease: "easeOut" } }
+    : {};
 
   return (
-    <Link href="/" className={`flex items-center ${className}`} data-testid="gaslite-logo">
-      <svg
-        width={w}
-        height={h}
-        viewBox={showTagline ? "0 0 360 112" : "0 0 360 95"}
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        role="img"
-        aria-label="Gaslite - Fast. Safe. Reliable."
-      >
-        <defs>
-          <linearGradient id={`${uid}-flameGrad`} x1="0" y1="1" x2="0.5" y2="0">
-            <stop offset="0%" stopColor="#0EA5E9" />
-            <stop offset="50%" stopColor="#38BDF8" />
-            <stop offset="100%" stopColor="#7DD3FC" />
-          </linearGradient>
-          <linearGradient id={`${uid}-flameInner`} x1="0.3" y1="1" x2="0.5" y2="0">
-            <stop offset="0%" stopColor="#38BDF8" />
-            <stop offset="100%" stopColor="#BAE6FD" />
-          </linearGradient>
-          <linearGradient id={`${uid}-textGrad`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={gasStartColor} />
-            <stop offset="40%" stopColor={gasMidColor} />
-            <stop offset="100%" stopColor={gasEndColor} />
-          </linearGradient>
-          <linearGradient id={`${uid}-liteGrad`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={liteStartColor} />
-            <stop offset="100%" stopColor={liteEndColor} />
-          </linearGradient>
-        </defs>
-
-        <g transform="translate(12, 8)">
-          <path
-            d="M32 72C32 72 8 56 8 36C8 20 18 8 28 2C28 2 24 18 32 26C40 18 38 8 38 8C50 16 58 28 58 42C58 58 46 72 32 72Z"
-            fill={`url(#${uid}-flameGrad)`}
-          />
-          <path
-            d="M32 72C32 72 18 62 18 48C18 38 24 30 32 26C32 26 28 38 32 44C36 38 35 30 35 30C42 36 48 42 48 52C48 64 40 72 32 72Z"
-            fill={`url(#${uid}-flameInner)`}
-          />
-          <path
-            d="M32 72C32 72 25 66 25 58C25 52 28 46 32 44C32 44 30 52 32 56C34 52 33 48 33 48C37 52 40 55 40 60C40 68 36 72 32 72Z"
-            fill={isDark ? "#E0F2FE" : "#BAE6FD"}
-            opacity="0.9"
-          />
-        </g>
-
-        <text
-          x="82"
-          y="58"
-          fontFamily="'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif"
-          fontSize="48"
-          fontWeight="800"
-          letterSpacing="-1"
+    <Link href="/" className={`flex items-center shrink-0 ${className}`} data-testid="gaslite-logo">
+      <Wrapper {...(wrapperProps as any)} className="flex items-center">
+        <svg
+          width={width}
+          height={Math.round(width * (svgH / svgW))}
+          viewBox={`0 0 ${svgW} ${svgH}`}
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-label="GasLite - Fast. Safe. Reliable."
         >
-          <tspan fill={`url(#${uid}-textGrad)`}>Gas</tspan>
-          <tspan fill={`url(#${uid}-liteGrad)`}>Lite</tspan>
-        </text>
+          <defs>
+            <linearGradient id={`${uid}-fg`} x1="0" y1="1" x2="0.4" y2="0">
+              <stop offset="0%" stopColor="#0047AB" />
+              <stop offset="100%" stopColor="#00BFFF" />
+            </linearGradient>
+            <linearGradient id={`${uid}-fi`} x1="0.2" y1="1" x2="0.6" y2="0">
+              <stop offset="0%" stopColor="#00BFFF" />
+              <stop offset="100%" stopColor="#7DD3FC" />
+            </linearGradient>
+            <linearGradient id={`${uid}-lg`} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#00BFFF" />
+              <stop offset="100%" stopColor="#0047AB" />
+            </linearGradient>
+          </defs>
 
-        {showTagline && (
+          <g transform="translate(4, 2) rotate(3, 14, 20)">
+            <path
+              d="M14 40 C14 40 1 30 3 15 C4 8 9 2 14 0 C14 0 12 11 14 15 L16 11 C16 11 24 6 26 18 C28 30 22 38 14 40Z"
+              fill={`url(#${uid}-fg)`}
+            />
+            <path
+              d="M14 40 C14 40 7 34 8 24 C8.5 19 11 15 14 13 C14 13 12.5 22 14 26 L16 22 C16 22 21 19 22 27 C23 35 18 40 14 40Z"
+              fill={`url(#${uid}-fi)`}
+              opacity="0.9"
+            />
+          </g>
+
           <text
-            x="84"
-            y="92"
-            fontFamily="'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif"
-            fontSize="13"
-            fontWeight="600"
-            letterSpacing="4"
-            fill={taglineColor}
+            x="38"
+            y="30"
+            fontFamily="'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif"
+            fontSize="28"
+            fontWeight="800"
+            letterSpacing="-0.5"
           >
-            FAST. SAFE. RELIABLE.
+            <tspan fill={gasColor}>Gas</tspan>
+            <tspan fill={`url(#${uid}-lg)`}>Lite</tspan>
           </text>
-        )}
-      </svg>
+
+          {showTagline && (
+            <text
+              x="39"
+              y="50"
+              fontFamily="'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif"
+              fontSize="7.5"
+              fontWeight="600"
+              letterSpacing="3"
+              fill={taglineColor}
+            >
+              FAST. SAFE. RELIABLE.
+            </text>
+          )}
+        </svg>
+      </Wrapper>
     </Link>
   );
 }
 
 export function GasliteFlameIcon({ className = "h-10 w-10" }: { className?: string }) {
+  const uid = useId().replace(/:/g, "");
+
   return (
     <svg
       className={className}
-      viewBox="0 0 64 80"
+      viewBox="0 0 36 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label="Gaslite"
     >
       <defs>
-        <linearGradient id="flameIconGrad" x1="0" y1="1" x2="0.5" y2="0">
-          <stop offset="0%" stopColor="#0EA5E9" />
-          <stop offset="50%" stopColor="#38BDF8" />
+        <linearGradient id={`${uid}-fig`} x1="0" y1="1" x2="0.4" y2="0">
+          <stop offset="0%" stopColor="#0047AB" />
+          <stop offset="100%" stopColor="#00BFFF" />
+        </linearGradient>
+        <linearGradient id={`${uid}-fii`} x1="0.2" y1="1" x2="0.6" y2="0">
+          <stop offset="0%" stopColor="#00BFFF" />
           <stop offset="100%" stopColor="#7DD3FC" />
         </linearGradient>
-        <linearGradient id="flameIconInner" x1="0.3" y1="1" x2="0.5" y2="0">
-          <stop offset="0%" stopColor="#38BDF8" />
-          <stop offset="100%" stopColor="#BAE6FD" />
-        </linearGradient>
       </defs>
-      <path
-        d="M32 72C32 72 8 56 8 36C8 20 18 8 28 2C28 2 24 18 32 26C40 18 38 8 38 8C50 16 58 28 58 42C58 58 46 72 32 72Z"
-        fill="url(#flameIconGrad)"
-      />
-      <path
-        d="M32 72C32 72 18 62 18 48C18 38 24 30 32 26C32 26 28 38 32 44C36 38 35 30 35 30C42 36 48 42 48 52C48 64 40 72 32 72Z"
-        fill="url(#flameIconInner)"
-      />
-      <path
-        d="M32 72C32 72 25 66 25 58C25 52 28 46 32 44C32 44 30 52 32 56C34 52 33 48 33 48C37 52 40 55 40 60C40 68 36 72 32 72Z"
-        fill="#E0F2FE"
-        opacity="0.9"
-      />
+      <g transform="rotate(3, 18, 20)">
+        <path
+          d="M18 40 C18 40 3 30 5 15 C6 8 12 2 18 0 C18 0 15.5 12 18 16 L21 11 C21 11 31 7 33 20 C35 33 27 40 18 40Z"
+          fill={`url(#${uid}-fig)`}
+        />
+        <path
+          d="M18 40 C18 40 10 34 11 24 C11.5 19 14.5 15 18 13 C18 13 16 23 18 27 L21 22 C21 22 27 19 28 28 C29 37 23 40 18 40Z"
+          fill={`url(#${uid}-fii)`}
+          opacity="0.9"
+        />
+      </g>
     </svg>
   );
 }
