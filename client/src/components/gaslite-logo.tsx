@@ -1,46 +1,17 @@
-import { Link } from "wouter";
-import logoImage from "@assets/Gemini_Generated_Image_p1bj2yp1bj2yp1bj_1770624893561.png";
-import shieldIcon from "@assets/gaslite-shield-icon.png";
+import { GasliteLogoSvg, GasliteFlameIcon } from "./gaslite-logo-svg";
 
 interface GasliteLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
+  showTagline?: boolean;
 }
 
-const widthMap = {
-  sm: "160px",
-  md: "200px",
-  lg: "260px",
-  xl: "320px",
-};
-
-export function GasliteLogo({ size = "md", className = "" }: GasliteLogoProps) {
-  const w = widthMap[size];
-
+export function GasliteLogo({ size = "md", className = "", showTagline = false }: GasliteLogoProps) {
   return (
-    <Link href="/" className={`flex items-center ${className}`} data-testid="gaslite-logo">
-      <img
-        src={logoImage}
-        alt="Gaslite - Trusted Delivery"
-        style={{
-          width: w,
-          height: "auto",
-          display: "block",
-          imageRendering: "-webkit-optimize-contrast" as React.CSSProperties["imageRendering"],
-        }}
-        className="object-contain"
-      />
-    </Link>
+    <GasliteLogoSvg size={size} className={className} showTagline={showTagline} />
   );
 }
 
 export function GasliteLogoIcon({ className = "h-10 w-10" }: { className?: string }) {
-  return (
-    <img
-      src={shieldIcon}
-      alt="Gaslite"
-      className={`object-contain ${className}`}
-      data-testid="gaslite-logo-icon"
-    />
-  );
+  return <GasliteFlameIcon className={className} />;
 }
