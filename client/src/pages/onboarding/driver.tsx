@@ -404,18 +404,15 @@ export default function DriverOnboarding() {
             <Form {...form}>
               <form
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && currentStep < 4 && (e.target as HTMLElement).tagName !== "SELECT") {
+                    if (e.key === "Enter") {
                       e.preventDefault();
-                      nextStep();
+                      if (currentStep < 4) {
+                        nextStep();
+                      }
                     }
                   }}
                   onSubmit={(e) => {
-                    if (currentStep < 4) {
-                      e.preventDefault();
-                      nextStep();
-                      return;
-                    }
-                    form.handleSubmit((data) => submitMutation.mutate(data))(e);
+                    e.preventDefault();
                   }}
                 >
                 {currentStep === 1 && (
@@ -739,7 +736,12 @@ export default function DriverOnboarding() {
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   ) : (
-                    <Button type="submit" disabled={submitMutation.isPending} data-testid="button-submit-driver-application">
+                    <Button
+                      type="button"
+                      disabled={submitMutation.isPending}
+                      data-testid="button-submit-driver-application"
+                      onClick={() => form.handleSubmit((data) => submitMutation.mutate(data))()}
+                    >
                       {submitMutation.isPending ? "Submitting..." : "Submit Application"}
                       {!submitMutation.isPending && <ArrowRight className="h-4 w-4 ml-2" />}
                     </Button>
