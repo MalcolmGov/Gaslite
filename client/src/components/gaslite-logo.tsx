@@ -8,10 +8,10 @@ interface GasliteLogoProps {
 }
 
 const heightMap = {
-  sm: 70,
-  md: 80,
-  lg: 90,
-  xl: 110,
+  sm: 100,
+  md: 120,
+  lg: 140,
+  xl: 160,
 };
 
 export function GasliteLogo({ size = "md", className = "" }: GasliteLogoProps) {
