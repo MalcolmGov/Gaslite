@@ -402,7 +402,22 @@ export default function DriverOnboarding() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit((data) => submitMutation.mutate(data))}>
+              <form
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && currentStep < 4 && (e.target as HTMLElement).tagName !== "SELECT") {
+                      e.preventDefault();
+                      nextStep();
+                    }
+                  }}
+                  onSubmit={(e) => {
+                    if (currentStep < 4) {
+                      e.preventDefault();
+                      nextStep();
+                      return;
+                    }
+                    form.handleSubmit((data) => submitMutation.mutate(data))(e);
+                  }}
+                >
                 {currentStep === 1 && (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
