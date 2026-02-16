@@ -86,7 +86,22 @@ The schema supports a multi-role user system where authentication users extend i
 - **Email content**: Professional branded HTML with order confirmation, item breakdown, payment receipt (subtotal, delivery fee, card processing fee, total), delivery address, order number, and "what happens next" section
 - **Security**: HTML escaping on all user-supplied fields to prevent injection
 
+### Yoco Card Payments
+- **Service**: Yoco Checkout API (South African payment gateway)
+- **Implementation**: `server/yoco.ts` — creates checkout sessions, verifies payment status
+- **Flow**: Order created → Yoco checkout session created → customer redirected to Yoco hosted payment page → customer returns to success/cancel/failure page → payment verified via API poll + webhook
+- **Endpoints**:
+  - POST `/api/orders` — creates order + Yoco checkout, returns `redirectUrl`
+  - POST `/api/payments/verify/:orderId` — verifies payment status with Yoco API
+  - POST `/api/webhooks/yoco` — receives Yoco webhook events (payment.succeeded)
+- **Payment pages**: `/payment/success`, `/payment/cancel`, `/payment/failure`
+- **Schema fields**: `orders.paymentStatus` (pending/paid/failed), `orders.yocoCheckoutId`
+- **Email/notifications**: Confirmation email + driver notifications sent only after payment verified (not on order creation)
+- **Keys**: YOCO_SECRET_KEY (secret), YOCO_PUBLIC_KEY (secret) — currently using test keys
+- **Currency**: ZAR only, amount in cents, minimum R2.00
+
 ### Third-Party Services
+- **Yoco**: Card payment processing (Visa, Mastercard, Amex, Apple Pay, Google Pay)
 - **Google Cloud Storage**: File/document storage for driver applications and uploads
 - **Gmail API**: Order confirmation and payment receipt emails (via Replit connector)
 - **Google Maps Places API**: Address autocomplete for delivery addresses (restricted to South Africa)

@@ -19,6 +19,9 @@ import DriverTerms from "@/pages/driver/terms";
 import TermsOfService from "@/pages/legal/terms";
 import PrivacyPolicy from "@/pages/legal/privacy";
 import RefundPolicy from "@/pages/legal/refund";
+import PaymentSuccess from "@/pages/payment/success";
+import PaymentCancel from "@/pages/payment/cancel";
+import PaymentFailure from "@/pages/payment/failure";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "./lib/queryClient";
 import type { UserProfile } from "@shared/schema";
@@ -132,6 +135,9 @@ function AuthenticatedRouter() {
       <Route path="/legal/terms" component={TermsOfService} />
       <Route path="/legal/privacy" component={PrivacyPolicy} />
       <Route path="/legal/refund" component={RefundPolicy} />
+      <Route path="/payment/success" component={PaymentSuccess} />
+      <Route path="/payment/cancel" component={PaymentCancel} />
+      <Route path="/payment/failure" component={PaymentFailure} />
       <Route component={CustomerHome} />
     </Switch>
   );

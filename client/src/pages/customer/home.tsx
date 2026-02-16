@@ -122,15 +122,22 @@ export default function CustomerHome() {
 
   const createOrderMutation = useMutation({
     mutationFn: async (data: { items: { productId: string; quantity: number }[]; deliveryAddress: string; deliveryNotes?: string; paymentMethod: string }) => {
-      return apiRequest("POST", "/api/orders", data);
+      const res = await apiRequest("POST", "/api/orders", data);
+      return res.json();
     },
-    onSuccess: () => {
-      toast({ title: "Order placed!", description: "Your order has been submitted successfully." });
-      setCart([]);
-      setShowCheckout(false);
-      setDeliveryAddress(profile?.address || "");
-      setDeliveryNotes("");
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+    onSuccess: (data: any) => {
+      if (data.redirectUrl) {
+        setCart([]);
+        setShowCheckout(false);
+        window.location.href = data.redirectUrl;
+      } else {
+        toast({ title: "Order placed!", description: "Your order has been submitted successfully." });
+        setCart([]);
+        setShowCheckout(false);
+        setDeliveryAddress(profile?.address || "");
+        setDeliveryNotes("");
+        queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      }
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to place order. Please try again.", variant: "destructive" });
@@ -790,7 +797,7 @@ export default function CustomerHome() {
                             <Label>Payment Method</Label>
                             <div className="flex items-center gap-2 p-2 border border-border rounded-md bg-muted/30">
                               <CreditCard className="h-4 w-4 text-primary" />
-                              <span className="text-sm font-medium">Card Payment</span>
+                              <span className="text-sm font-medium">Card Payment via Yoco</span>
                             </div>
                             <p className="text-xs text-muted-foreground" data-testid="text-card-fee-info">
                               Card processing fee: 2.6% + 15% VAT applies
@@ -798,31 +805,16 @@ export default function CustomerHome() {
                           </div>
                           <div className="space-y-3 p-3 border border-border rounded-md bg-muted/30">
                             <div className="flex items-center gap-2 text-sm font-medium">
-                              <Lock className="h-4 w-4 text-primary" />
-                              <span>Card Details (Demo)</span>
+                              <Shield className="h-4 w-4 text-primary" />
+                              <span>Secure Payment</span>
                             </div>
-                            <Input
-                              placeholder="4242 4242 4242 4242"
-                              maxLength={19}
-                              data-testid="input-card-number"
-                              className="font-mono"
-                            />
-                            <div className="grid grid-cols-2 gap-2">
-                              <Input
-                                placeholder="MM/YY"
-                                maxLength={5}
-                                data-testid="input-card-expiry"
-                              />
-                              <Input
-                                placeholder="CVV"
-                                maxLength={3}
-                                type="password"
-                                data-testid="input-card-cvv"
-                              />
-                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              You'll be redirected to Yoco's secure payment page to complete your card payment.
+                              Visa, Mastercard, and American Express accepted.
+                            </p>
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Shield className="h-3 w-3" />
-                              <span>Secure mock payment — no real charges</span>
+                              <Lock className="h-3 w-3" />
+                              <span>PCI DSS compliant with 3D Secure protection</span>
                             </div>
                           </div>
                           <Button
@@ -833,7 +825,7 @@ export default function CustomerHome() {
                             data-testid="button-place-order"
                           >
                             {createOrderMutation.isPending
-                              ? "Placing Order..."
+                              ? "Redirecting to payment..."
                               : `Pay R${total.toFixed(2)} by Card`}
                           </Button>
                           <Button

@@ -15,7 +15,9 @@ import { sendOrderConfirmationEmail } from "./email";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { users } from "@shared/models/auth";
+import { orders } from "@shared/schema";
 import { saveSubscription, removeSubscription, notifyDriversNewOrder, notifyCustomerOrderUpdate, notifyDriverOrderCancelled } from "./push";
+import { createYocoCheckout, getYocoCheckoutStatus } from "./yoco";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -333,58 +335,50 @@ export async function registerRoutes(
           cardProcessingFee: cardProcessingFee.toFixed(2),
           total: total.toFixed(2),
           paymentMethod: method,
+          paymentStatus: "pending",
         },
         orderItems
       );
 
-      res.json(order);
+      const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
+      const host = req.headers["x-forwarded-host"] || req.headers.host;
+      const baseUrl = `${protocol}://${host}`;
 
-      // Send order confirmation email in background (don't block response)
-      (async () => {
-        try {
-          const [user] = await db.select().from(users).where(eq(users.id, userId));
-          const profile = await storage.getUserProfile(userId);
-          const customerEmail = user?.email;
-          const customerName = profile?.firstName
-            ? `${profile.firstName} ${profile.lastName || ''}`.trim()
-            : user?.firstName
-            ? `${user.firstName} ${user.lastName || ''}`.trim()
-            : 'Valued Customer';
+      try {
+        const amountInCents = Math.round(total * 100);
 
-          if (customerEmail) {
-            const orderDate = new Date().toLocaleDateString('en-ZA', {
-              year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-            });
+        const lineItems = orderItems.map((item) => ({
+          displayName: `${item.productName} (${item.productSize})`,
+          quantity: item.quantity,
+          pricingDetails: {
+            price: Math.round(Number(item.unitPrice) * 100),
+          },
+        }));
 
-            await sendOrderConfirmationEmail({
-              customerName,
-              customerEmail,
-              orderId: order.id,
-              orderDate,
-              deliveryAddress: deliveryAddress,
-              items: order.items.map((item: any) => ({
-                productName: item.productName,
-                productSize: item.productSize,
-                quantity: item.quantity,
-                unitPrice: item.unitPrice,
-                totalPrice: item.totalPrice,
-              })),
-              subtotal: subtotal.toFixed(2),
-              serviceFee: serviceFee.toFixed(2),
-              cardProcessingFee: cardProcessingFee.toFixed(2),
-              total: total.toFixed(2),
-            });
-          } else {
-            console.log('No email on file for customer, skipping confirmation email');
-          }
-        } catch (emailError) {
-          console.error('Background email send failed:', emailError);
-        }
-      })();
+        const checkout = await createYocoCheckout({
+          amountInCents,
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          baseUrl,
+          lineItems,
+          subtotalInCents: Math.round(subtotal * 100),
+          taxInCents: Math.round(cardProcessingFee * 100),
+        });
 
-      notifyDriversNewOrder(order.id, order.orderNumber, deliveryAddress).catch(err =>
-        console.error('Push notification to drivers failed:', err)
-      );
+        await storage.updateOrder(order.id, {
+          yocoCheckoutId: checkout.id,
+        });
+
+        res.json({
+          ...order,
+          yocoCheckoutId: checkout.id,
+          redirectUrl: checkout.redirectUrl,
+        });
+      } catch (paymentError) {
+        console.error("Yoco checkout creation failed:", paymentError);
+        await storage.updateOrder(order.id, { status: "cancelled", paymentStatus: "failed" });
+        return res.status(500).json({ error: "Payment initialization failed. Please try again." });
+      }
     } catch (error) {
       console.error("Order creation error:", error);
       res.status(500).json({ error: "Failed to create order" });
@@ -433,6 +427,177 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Order cancellation error:", error);
       res.status(500).json({ error: "Failed to cancel order" });
+    }
+  });
+
+  app.post("/api/payments/verify/:orderId", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const order = await storage.getOrder(req.params.orderId);
+
+      if (!order || order.customerId !== userId) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      if (!order.yocoCheckoutId) {
+        return res.status(400).json({ error: "No payment session found for this order" });
+      }
+
+      if (order.paymentStatus === "paid") {
+        return res.json({ status: "paid", order });
+      }
+
+      const checkoutStatus = await getYocoCheckoutStatus(order.yocoCheckoutId);
+
+      if (checkoutStatus.status === "completed") {
+        const expectedAmountCents = Math.round(Number(order.total) * 100);
+        if (checkoutStatus.amount && checkoutStatus.amount !== expectedAmountCents) {
+          console.error(`Payment amount mismatch: expected ${expectedAmountCents}, got ${checkoutStatus.amount}`);
+          return res.status(400).json({ error: "Payment amount does not match order total" });
+        }
+
+        await storage.updateOrder(order.id, { paymentStatus: "paid" });
+
+        const updatedOrder = await storage.getOrderWithItems(order.id);
+
+        (async () => {
+          try {
+            const [user] = await db.select().from(users).where(eq(users.id, userId));
+            const profile = await storage.getUserProfile(userId);
+            const customerEmail = user?.email;
+            const customerName = profile?.firstName
+              ? `${profile.firstName} ${profile.lastName || ''}`.trim()
+              : user?.firstName
+              ? `${user.firstName} ${user.lastName || ''}`.trim()
+              : 'Valued Customer';
+
+            if (customerEmail && updatedOrder) {
+              const orderDate = new Date().toLocaleDateString('en-ZA', {
+                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+              });
+
+              await sendOrderConfirmationEmail({
+                customerName,
+                customerEmail,
+                orderId: order.id,
+                orderDate,
+                deliveryAddress: order.deliveryAddress,
+                items: updatedOrder.items.map((item: any) => ({
+                  productName: item.productName,
+                  productSize: item.productSize,
+                  quantity: item.quantity,
+                  unitPrice: item.unitPrice,
+                  totalPrice: item.totalPrice,
+                })),
+                subtotal: order.subtotal as string,
+                serviceFee: order.serviceFee as string,
+                cardProcessingFee: order.cardProcessingFee as string,
+                total: order.total as string,
+              });
+            }
+          } catch (emailError) {
+            console.error('Background email send failed:', emailError);
+          }
+        })();
+
+        notifyDriversNewOrder(order.id, order.orderNumber, order.deliveryAddress).catch(err =>
+          console.error('Push notification to drivers failed:', err)
+        );
+
+        return res.json({ status: "paid", order: updatedOrder });
+      } else if (checkoutStatus.status === "expired" || checkoutStatus.status === "cancelled") {
+        await storage.updateOrder(order.id, { paymentStatus: "failed", status: "cancelled" });
+        return res.json({ status: "failed", order });
+      } else {
+        return res.json({ status: "pending", order });
+      }
+    } catch (error) {
+      console.error("Payment verification error:", error);
+      res.status(500).json({ error: "Failed to verify payment" });
+    }
+  });
+
+  app.post("/api/webhooks/yoco", async (req, res) => {
+    try {
+      const event = req.body;
+      console.log("Yoco webhook received:", event.type, event.payload?.metadata?.orderId);
+
+      if (event.type === "payment.succeeded") {
+        const orderId = event.payload?.metadata?.orderId;
+        if (orderId) {
+          const order = await storage.getOrder(orderId);
+          if (order && order.paymentStatus !== "paid" && order.yocoCheckoutId) {
+            try {
+              const checkoutStatus = await getYocoCheckoutStatus(order.yocoCheckoutId);
+              if (checkoutStatus.status !== "completed") {
+                console.warn(`Webhook claimed payment.succeeded but Yoco API says status=${checkoutStatus.status} for order ${orderId}`);
+                return res.status(200).json({ received: true });
+              }
+
+              const expectedAmountCents = Math.round(Number(order.total) * 100);
+              if (checkoutStatus.amount && checkoutStatus.amount !== expectedAmountCents) {
+                console.error(`Webhook amount mismatch: expected ${expectedAmountCents}, got ${checkoutStatus.amount}`);
+                return res.status(200).json({ received: true });
+              }
+
+              await storage.updateOrder(order.id, { paymentStatus: "paid" });
+
+              const updatedOrder = await storage.getOrderWithItems(order.id);
+
+              (async () => {
+                try {
+                  const [user] = await db.select().from(users).where(eq(users.id, order.customerId));
+                  const profile = await storage.getUserProfile(order.customerId);
+                  const customerEmail = user?.email;
+                  const customerName = profile?.firstName
+                    ? `${profile.firstName} ${profile.lastName || ''}`.trim()
+                    : user?.firstName
+                    ? `${user.firstName} ${user.lastName || ''}`.trim()
+                    : 'Valued Customer';
+
+                  if (customerEmail && updatedOrder) {
+                    const orderDate = new Date().toLocaleDateString('en-ZA', {
+                      year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    await sendOrderConfirmationEmail({
+                      customerName,
+                      customerEmail,
+                      orderId: order.id,
+                      orderDate,
+                      deliveryAddress: order.deliveryAddress,
+                      items: updatedOrder.items.map((item: any) => ({
+                        productName: item.productName,
+                        productSize: item.productSize,
+                        quantity: item.quantity,
+                        unitPrice: item.unitPrice,
+                        totalPrice: item.totalPrice,
+                      })),
+                      subtotal: order.subtotal as string,
+                      serviceFee: order.serviceFee as string,
+                      cardProcessingFee: order.cardProcessingFee as string,
+                      total: order.total as string,
+                    });
+                  }
+                } catch (emailError) {
+                  console.error('Webhook background email send failed:', emailError);
+                }
+              })();
+
+              notifyDriversNewOrder(order.id, order.orderNumber, order.deliveryAddress).catch(err =>
+                console.error('Webhook push notification to drivers failed:', err)
+              );
+            } catch (verifyError) {
+              console.error('Webhook Yoco verification failed:', verifyError);
+            }
+          }
+        }
+      }
+
+      res.status(200).json({ received: true });
+    } catch (error) {
+      console.error("Webhook processing error:", error);
+      res.status(200).json({ received: true });
     }
   });
 

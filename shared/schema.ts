@@ -95,6 +95,8 @@ export const orders = pgTable("orders", {
   cardProcessingFee: decimal("card_processing_fee", { precision: 10, scale: 2 }).default("0"),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   paymentMethod: paymentMethodEnum("payment_method").default("card").notNull(),
+  paymentStatus: text("payment_status").default("pending"),
+  yocoCheckoutId: text("yoco_checkout_id"),
   driverEarnings: decimal("driver_earnings", { precision: 10, scale: 2 }),
   estimatedDeliveryTime: integer("estimated_delivery_time"),
   pickedUpAt: timestamp("picked_up_at"),
