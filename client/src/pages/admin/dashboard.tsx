@@ -29,6 +29,7 @@ import {
   ChevronUp,
   Flame,
   User,
+  Users,
   Clock,
   AlertTriangle,
   Timer,
@@ -40,7 +41,12 @@ import {
   Filter,
   Landmark,
   CreditCard,
-  Map
+  Map,
+  Search,
+  TrendingUp,
+  UserCheck,
+  UserX,
+  ShoppingBag
 } from "lucide-react";
 import { ChatPanel } from "@/components/chat-panel";
 import { MessageCircle } from "lucide-react";
@@ -69,10 +75,26 @@ const offlineDriverIcon = L.divIcon({
 
 type DriverWithApplication = Driver & { application?: DriverApplication };
 
+interface CustomerSignup {
+  id: string;
+  email: string | null;
+  phone: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  role: string;
+  address: string | null;
+  onboardingCompleted: boolean;
+  createdAt: string | null;
+  orderCount: number;
+  totalSpent: number;
+}
+
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState("orders");
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customerRoleFilter, setCustomerRoleFilter] = useState<"all" | "customer" | "driver" | "admin">("all");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [applicationFilter, setApplicationFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
   const [rejectingAppId, setRejectingAppId] = useState<string | null>(null);
@@ -92,6 +114,11 @@ export default function AdminDashboard() {
   const { data: drivers, isLoading: driversLoading } = useQuery<DriverWithApplication[]>({
     queryKey: ["/api/admin/drivers"],
     refetchInterval: selectedTab === "driver-map" ? 15000 : undefined,
+  });
+
+  const { data: customers, isLoading: customersLoading } = useQuery<CustomerSignup[]>({
+    queryKey: ["/api/admin/customers"],
+    refetchInterval: 60000,
   });
 
   const { data: stats } = useQuery<{
@@ -233,7 +260,7 @@ export default function AdminDashboard() {
         <div className="space-y-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold" data-testid="text-admin-title">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Manage orders, drivers, and applications</p>
+            <p className="text-muted-foreground">Manage orders, drivers, applications, and customers</p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -333,7 +360,7 @@ export default function AdminDashboard() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="orders" data-testid="tab-orders">
                 <Package className="h-4 w-4 mr-2" />
                 Orders
@@ -341,9 +368,13 @@ export default function AdminDashboard() {
                   <Badge variant="secondary" className="ml-2">{pendingOrders.length}</Badge>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="customers" data-testid="tab-customers">
+                <Users className="h-4 w-4 mr-2" />
+                Customers
+              </TabsTrigger>
               <TabsTrigger value="applications" data-testid="tab-applications">
                 <FileText className="h-4 w-4 mr-2" />
-                Applications
+                Apps
                 {pendingApplications.length > 0 && (
                   <Badge variant="secondary" className="ml-2">{pendingApplications.length}</Badge>
                 )}
@@ -493,6 +524,218 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="customers" className="space-y-4">
+              {(() => {
+                const allCustomers = customers || [];
+                const filteredCustomers = allCustomers.filter(c => {
+                  const matchesRole = customerRoleFilter === "all" || c.role === customerRoleFilter;
+                  const searchLower = customerSearch.toLowerCase();
+                  const matchesSearch = !customerSearch || 
+                    (c.firstName?.toLowerCase().includes(searchLower)) ||
+                    (c.lastName?.toLowerCase().includes(searchLower)) ||
+                    (c.email?.toLowerCase().includes(searchLower)) ||
+                    (c.phone?.includes(customerSearch));
+                  return matchesRole && matchesSearch;
+                });
+
+                const totalCustomerRole = allCustomers.filter(c => c.role === "customer").length;
+                const totalDriverRole = allCustomers.filter(c => c.role === "driver").length;
+                const completedOnboarding = allCustomers.filter(c => c.onboardingCompleted).length;
+                const withOrders = allCustomers.filter(c => c.orderCount > 0).length;
+
+                const now = new Date();
+                const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const weekStart = new Date(todayStart);
+                weekStart.setDate(weekStart.getDate() - 7);
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+                const signupsToday = allCustomers.filter(c => c.createdAt && new Date(c.createdAt) >= todayStart).length;
+                const signupsThisWeek = allCustomers.filter(c => c.createdAt && new Date(c.createdAt) >= weekStart).length;
+                const signupsThisMonth = allCustomers.filter(c => c.createdAt && new Date(c.createdAt) >= monthStart).length;
+
+                return (
+                  <>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                              <Users className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">Total Sign-ups</p>
+                              <p className="text-2xl font-bold" data-testid="text-total-signups">{allCustomers.length}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center">
+                              <TrendingUp className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">Today / Week / Month</p>
+                              <p className="text-2xl font-bold" data-testid="text-signup-trend">
+                                {signupsToday} / {signupsThisWeek} / {signupsThisMonth}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                              <UserCheck className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">Onboarded</p>
+                              <p className="text-2xl font-bold" data-testid="text-onboarded">{completedOnboarding} / {allCustomers.length}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                              <ShoppingBag className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">Have Ordered</p>
+                              <p className="text-2xl font-bold" data-testid="text-with-orders">{withOrders}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div>
+                            <CardTitle>All Sign-ups</CardTitle>
+                            <CardDescription>
+                              {allCustomers.length} total users — {totalCustomerRole} customers, {totalDriverRole} drivers
+                            </CardDescription>
+                          </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <div className="relative">
+                              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <input
+                                type="text"
+                                placeholder="Search name, email, phone..."
+                                value={customerSearch}
+                                onChange={(e) => setCustomerSearch(e.target.value)}
+                                className="pl-9 pr-3 py-2 text-sm rounded-md border border-input bg-background"
+                                data-testid="input-customer-search"
+                              />
+                            </div>
+                            <Select value={customerRoleFilter} onValueChange={(v) => setCustomerRoleFilter(v as any)}>
+                              <SelectTrigger className="w-[130px]" data-testid="select-role-filter">
+                                <SelectValue placeholder="All Roles" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All Roles</SelectItem>
+                                <SelectItem value="customer">Customers</SelectItem>
+                                <SelectItem value="driver">Drivers</SelectItem>
+                                <SelectItem value="admin">Admins</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {customersLoading ? (
+                          <div className="space-y-3">
+                            {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
+                          </div>
+                        ) : filteredCustomers.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <Users className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                            <p>No users found</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {filteredCustomers.map((customer) => (
+                              <div key={customer.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-md border border-border" data-testid={`card-customer-${customer.id}`}>
+                                <div className="flex items-start gap-3 min-w-0">
+                                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                    <User className="h-4 w-4 text-muted-foreground" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <p className="font-medium text-sm" data-testid={`text-customer-name-${customer.id}`}>
+                                        {customer.firstName && customer.lastName
+                                          ? `${customer.firstName} ${customer.lastName}`
+                                          : "Not onboarded"}
+                                      </p>
+                                      <Badge variant="outline" className="text-xs">
+                                        {customer.role}
+                                      </Badge>
+                                      {customer.onboardingCompleted ? (
+                                        <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-600">
+                                          <UserCheck className="h-3 w-3 mr-1" />
+                                          Onboarded
+                                        </Badge>
+                                      ) : (
+                                        <Badge variant="secondary" className="text-xs bg-yellow-500/10 text-yellow-600">
+                                          <UserX className="h-3 w-3 mr-1" />
+                                          Incomplete
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
+                                      {customer.email && (
+                                        <span className="flex items-center gap-1">
+                                          <Mail className="h-3 w-3" />
+                                          {customer.email}
+                                        </span>
+                                      )}
+                                      {customer.phone && (
+                                        <span className="flex items-center gap-1">
+                                          <Phone className="h-3 w-3" />
+                                          {customer.phone}
+                                        </span>
+                                      )}
+                                      {customer.createdAt && (
+                                        <span className="flex items-center gap-1">
+                                          <CalendarDays className="h-3 w-3" />
+                                          {new Date(customer.createdAt).toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" })}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {customer.address && (
+                                      <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                        <MapPin className="h-3 w-3 shrink-0" />
+                                        <span className="truncate">{customer.address}</span>
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4 text-sm shrink-0 sm:text-right">
+                                  <div>
+                                    <p className="text-muted-foreground text-xs">Orders</p>
+                                    <p className="font-medium" data-testid={`text-customer-orders-${customer.id}`}>{customer.orderCount}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground text-xs">Spent</p>
+                                    <p className="font-medium" data-testid={`text-customer-spent-${customer.id}`}>R{customer.totalSpent.toFixed(2)}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </>
+                );
+              })()}
             </TabsContent>
 
             <TabsContent value="applications" className="space-y-4">

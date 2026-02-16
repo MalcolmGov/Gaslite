@@ -990,6 +990,15 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/admin/customers", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const customers = await storage.getCustomerSignups();
+      res.json(customers);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch customers" });
+    }
+  });
+
   app.get("/api/admin/orders", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const orders = await storage.getOrders();

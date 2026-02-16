@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, gte, lte, count } from "drizzle-orm";
 import {
   products,
   userProfiles,
@@ -27,6 +27,7 @@ import {
   type ChatMessage,
   type InsertChatMessage,
 } from "@shared/schema";
+import { users } from "@shared/models/auth";
 
 export interface IStorage {
   // Products
@@ -80,6 +81,21 @@ export interface IStorage {
     activeDrivers: number;
     pendingApplications: number;
   }>;
+
+  // Customer sign-ups
+  getCustomerSignups(): Promise<Array<{
+    id: string;
+    email: string | null;
+    phone: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    role: string;
+    address: string | null;
+    onboardingCompleted: boolean;
+    createdAt: Date | null;
+    orderCount: number;
+    totalSpent: number;
+  }>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -275,6 +291,70 @@ export class DatabaseStorage implements IStorage {
     const pendingApplications = allApplications.filter((a) => a.status === "pending").length;
 
     return { totalOrders, totalRevenue, activeDrivers, pendingApplications };
+  }
+
+  async getCustomerSignups(): Promise<Array<{
+    id: string;
+    email: string | null;
+    phone: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    role: string;
+    address: string | null;
+    onboardingCompleted: boolean;
+    createdAt: Date | null;
+    orderCount: number;
+    totalSpent: number;
+  }>> {
+    const allUsers = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        phone: users.phone,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .orderBy(desc(users.createdAt));
+
+    const allProfiles = await db.select().from(userProfiles);
+    const allOrders = await db
+      .select({
+        customerId: orders.customerId,
+        total: orders.total,
+        status: orders.status,
+      })
+      .from(orders);
+
+    const profileMap = new Map(allProfiles.map(p => [p.userId, p]));
+    const ordersByUser = new Map<string, { count: number; spent: number }>();
+
+    for (const order of allOrders) {
+      if (!order.customerId) continue;
+      const existing = ordersByUser.get(order.customerId) || { count: 0, spent: 0 };
+      existing.count += 1;
+      if (order.status === "delivered") {
+        existing.spent += Number(order.total);
+      }
+      ordersByUser.set(order.customerId, existing);
+    }
+
+    return allUsers.map(u => {
+      const profile = profileMap.get(u.id);
+      const orderData = ordersByUser.get(u.id) || { count: 0, spent: 0 };
+      return {
+        id: u.id,
+        email: u.email,
+        phone: u.phone,
+        firstName: profile?.firstName || null,
+        lastName: profile?.lastName || null,
+        role: profile?.role || "customer",
+        address: profile?.address || null,
+        onboardingCompleted: profile?.onboardingCompleted || false,
+        createdAt: u.createdAt,
+        orderCount: orderData.count,
+        totalSpent: orderData.spent,
+      };
+    });
   }
 }
 
