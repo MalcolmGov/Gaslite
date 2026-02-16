@@ -318,7 +318,8 @@ export async function registerRoutes(
         });
       }
 
-      const serviceFee = 29;
+      const isTestOrder = orderItems.some(i => i.productSize === "Test");
+      const serviceFee = isTestOrder ? 1 : 29;
       const beforeCardFee = subtotal + serviceFee;
       const cardProcessingFee = method === "card"
         ? Math.round(beforeCardFee * 0.026 * 1.15 * 100) / 100
