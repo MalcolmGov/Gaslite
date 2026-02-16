@@ -92,6 +92,8 @@ interface TrackingData {
   estimatedDeliveryTime: number | null;
   pickedUpAt: string | null;
   driverLocation: { latitude: number; longitude: number } | null;
+  locationUpdatedAt: string | null;
+  locationStale: boolean;
   driverInfo: { firstName: string; lastName: string; phone: string; vehicleRegistration: string } | null;
   deliveryLocation: { latitude: number; longitude: number } | null;
 }
@@ -151,9 +153,23 @@ export default function CustomerHome() {
 
   const { data: trackingData } = useQuery<TrackingData>({
     queryKey: ["/api/orders", activeOrder?.id, "tracking"],
-    enabled: !!activeOrder,
+    queryFn: async () => {
+      if (!activeOrder?.id) return null;
+      const res = await fetch(`/api/orders/${activeOrder.id}/tracking`, { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 401) return null;
+        throw new Error("Tracking fetch failed");
+      }
+      return res.json();
+    },
+    enabled: !!activeOrder?.id,
     refetchInterval: 5000,
     staleTime: 0,
+    retry: 3,
+    retryDelay: 2000,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: true,
   });
 
   const createOrderMutation = useMutation({
@@ -437,10 +453,16 @@ export default function CustomerHome() {
                 </h2>
 
                 <div className="space-y-4">
+                  {trackingData?.locationStale && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200 text-sm" data-testid="text-location-stale">
+                      <Clock className="h-4 w-4 shrink-0" />
+                      <span>Driver location may be outdated. The driver's GPS signal is weak — they're still on the way.</span>
+                    </div>
+                  )}
                   {hasMapData && (
                     <Card className="overflow-visible">
                       <CardContent className="p-0">
-                        <div className="rounded-md overflow-hidden" style={{ height: "300px" }} data-testid="map-tracking">
+                        <div className="rounded-md overflow-hidden" style={{ height: "350px" }} data-testid="map-tracking">
                           <MapContainer
                             center={mapCenter}
                             zoom={15}

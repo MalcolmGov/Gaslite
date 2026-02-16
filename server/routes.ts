@@ -753,6 +753,7 @@ export async function registerRoutes(
       const updated = await storage.updateDriver(driver.id, {
         currentLatitude: latitude.toFixed(8),
         currentLongitude: longitude.toFixed(8),
+        locationUpdatedAt: new Date(),
       });
       res.json({ success: true, location: { latitude, longitude } });
     } catch (error) {
@@ -934,6 +935,10 @@ export async function registerRoutes(
       const driver = await storage.getDriver(order.driverId);
       const driverApp = driver ? await storage.getDriverApplicationByUserId(driver.userId) : null;
 
+      const locationAge = driver?.locationUpdatedAt 
+        ? (Date.now() - new Date(driver.locationUpdatedAt).getTime()) / 1000 
+        : null;
+
       res.json({
         orderId: order.id,
         status: order.status,
@@ -943,6 +948,8 @@ export async function registerRoutes(
           latitude: Number(driver.currentLatitude),
           longitude: Number(driver.currentLongitude),
         } : null,
+        locationUpdatedAt: driver?.locationUpdatedAt || null,
+        locationStale: locationAge !== null && locationAge > 60,
         driverInfo: driverApp ? {
           firstName: driverApp.firstName,
           lastName: driverApp.lastName,

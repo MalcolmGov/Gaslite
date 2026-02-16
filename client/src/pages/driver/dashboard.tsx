@@ -356,6 +356,8 @@ export default function DriverDashboard() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const watchIdRef = useRef<number | null>(null);
+  const lastSentRef = useRef<number>(0);
   const [isTogglingOnline, setIsTogglingOnline] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { permission: pushPermission, requestPermission } = usePushNotifications(!!user);
@@ -376,31 +378,63 @@ export default function DriverDashboard() {
     enabled: isOnline,
   });
 
+  const sendLocationToServer = useCallback(async (lat: number, lng: number) => {
+    const now = Date.now();
+    if (now - lastSentRef.current < 8000) return;
+    lastSentRef.current = now;
+    try {
+      await fetch("/api/driver/location", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ latitude: lat, longitude: lng }),
+      });
+    } catch {
+    }
+  }, []);
+
   const sendLocation = useCallback(async () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        setCurrentLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
-        try {
-          await apiRequest("POST", "/api/driver/location", {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        } catch {
-        }
+        const { latitude, longitude } = position.coords;
+        setCurrentLocation({ lat: latitude, lng: longitude });
+        await sendLocationToServer(latitude, longitude);
       },
       () => {},
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
     );
-  }, []);
+  }, [sendLocationToServer]);
 
   const startLocationSharing = useCallback(() => {
+    if (!navigator.geolocation) return;
+
     sendLocation();
+
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+    }
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setCurrentLocation({ lat: latitude, lng: longitude });
+        await sendLocationToServer(latitude, longitude);
+      },
+      () => {
+        sendLocation();
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 }
+    );
+
     if (locationIntervalRef.current) clearInterval(locationIntervalRef.current);
-    locationIntervalRef.current = setInterval(sendLocation, 15000);
-  }, [sendLocation]);
+    locationIntervalRef.current = setInterval(sendLocation, 10000);
+  }, [sendLocation, sendLocationToServer]);
 
   const stopLocationSharing = useCallback(() => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
     if (locationIntervalRef.current) {
       clearInterval(locationIntervalRef.current);
       locationIntervalRef.current = null;

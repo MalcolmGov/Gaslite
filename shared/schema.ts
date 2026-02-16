@@ -73,6 +73,7 @@ export const drivers = pgTable("drivers", {
   status: driverStatusEnum("status").default("offline").notNull(),
   currentLatitude: decimal("current_latitude", { precision: 10, scale: 8 }),
   currentLongitude: decimal("current_longitude", { precision: 11, scale: 8 }),
+  locationUpdatedAt: timestamp("location_updated_at"),
   totalDeliveries: integer("total_deliveries").default(0),
   totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0"),
   createdAt: timestamp("created_at").defaultNow(),
