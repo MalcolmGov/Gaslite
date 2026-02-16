@@ -205,7 +205,8 @@ export default function CustomerHome() {
     (sum, item) => sum + Number(item.product.price) * item.quantity,
     0
   );
-  const serviceFee = cartTotal > 0 ? 29 : 0;
+  const isTestOrder = cart.some(item => item.product.size === "Test");
+  const serviceFee = cartTotal > 0 ? (isTestOrder ? 1 : 29) : 0;
   const beforeCardFee = cartTotal + serviceFee;
   const cardProcessingFee = Math.round(beforeCardFee * 0.026 * 1.15 * 100) / 100;
   const total = beforeCardFee + cardProcessingFee;
