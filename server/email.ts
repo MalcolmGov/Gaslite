@@ -58,7 +58,7 @@ async function getGmailClient() {
 }
 
 const SENDER_NAME = "Gaslite";
-const SENDER_EMAIL = "malcolmgov24@gmail.com";
+const SENDER_EMAIL = "accounts@gaslite.co.za";
 
 function createMimeMessage(to: string, subject: string, htmlBody: string): string {
   const boundary = "boundary_" + Date.now();
