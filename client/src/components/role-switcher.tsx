@@ -31,7 +31,7 @@ export function RoleSwitcher({ currentRole }: { currentRole: string }) {
   });
 
   const availableRoles = allRoles.filter(({ key }) => {
-    if (key === "customer") return true;
+    if (key === "customer") return currentRole !== "admin";
     if (key === "driver") return !!driverData;
     if (key === "admin") return currentRole === "admin";
     return false;
