@@ -581,7 +581,7 @@ export default function LandingPage() {
                 Earn Money <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Your Way</span>
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Become a Gaslite driver and enjoy flexible hours, competitive earnings, and the freedom to be your own boss.
+                Become a Gaslite driver and enjoy flexible hours, competitive pay, and the freedom to be your own boss.
               </p>
               <div className="grid sm:grid-cols-2 gap-6 mb-8">
                 {[
@@ -616,21 +616,21 @@ export default function LandingPage() {
             >
               <Card className="bg-gradient-to-br from-card to-muted/50 border-border/50">
                 <CardContent className="p-8">
-                  <h3 className="text-xl font-bold mb-6">Earnings Calculator</h3>
+                  <h3 className="text-xl font-bold mb-6">Why Drive With Us</h3>
                   <div className="space-y-6">
                     <div className="p-4 bg-blue-500/10 rounded-xl text-center">
-                      <p className="text-sm text-muted-foreground mb-2">Estimated Weekly Earnings</p>
-                      <div className="text-4xl font-bold text-primary">R3,500 - R7,000</div>
-                      <p className="text-xs text-muted-foreground mt-2">Based on 20-40 deliveries per week</p>
+                      <p className="text-sm text-muted-foreground mb-2">Flexible Delivery Schedule</p>
+                      <div className="text-4xl font-bold text-primary">Your Hours</div>
+                      <p className="text-xs text-muted-foreground mt-2">Work when it suits you</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-center">
                       <div className="p-4 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold">R75-R150</div>
-                        <p className="text-xs text-muted-foreground">Per Delivery</p>
+                        <div className="text-2xl font-bold">10km</div>
+                        <p className="text-xs text-muted-foreground">Delivery Radius</p>
                       </div>
                       <div className="p-4 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold">Instant</div>
-                        <p className="text-xs text-muted-foreground">Payouts</p>
+                        <div className="text-2xl font-bold">24/7</div>
+                        <p className="text-xs text-muted-foreground">Support</p>
                       </div>
                     </div>
                   </div>

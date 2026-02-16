@@ -840,11 +840,9 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Order is no longer available" });
       }
 
-      const driverEarnings = (Number(order.total) * 0.15).toFixed(2);
       const updated = await storage.updateOrder(order.id, {
         driverId: driver.id,
         status: "assigned",
-        driverEarnings,
         estimatedDeliveryTime: 30,
       });
 
@@ -897,7 +895,6 @@ export async function registerRoutes(
         updateData.deliveredAt = new Date();
         await storage.updateDriver(driver.id, {
           totalDeliveries: (driver.totalDeliveries || 0) + 1,
-          totalEarnings: (Number(driver.totalEarnings || 0) + Number(order.driverEarnings || 0)).toFixed(2),
           status: "available",
         });
       }
@@ -1016,10 +1013,6 @@ export async function registerRoutes(
       if (status) updateData.status = status;
       if (driverId) {
         updateData.driverId = driverId;
-        const order = await storage.getOrder(req.params.orderId);
-        if (order) {
-          updateData.driverEarnings = (Number(order.total) * 0.15).toFixed(2);
-        }
       }
 
       const updated = await storage.updateOrder(req.params.orderId, updateData);

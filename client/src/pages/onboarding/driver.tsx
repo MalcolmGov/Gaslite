@@ -100,7 +100,7 @@ function ApplicationStatusView({ application }: { application: DriverApplication
     },
     approved: {
       label: "Approved",
-      description: "Your application has been approved! You're now a registered Gaslite driver. Go online to start receiving delivery requests and earning money.",
+      description: "Your application has been approved! You're now a registered Gaslite driver. Go online to start receiving delivery requests and making deliveries.",
     },
     rejected: {
       label: "Not Approved",
@@ -348,7 +348,7 @@ export default function DriverOnboarding() {
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold mb-2" data-testid="text-driver-onboarding-title">Become a Gaslite Driver</h1>
           <p className="text-muted-foreground">
-            Complete your application to start earning with flexible deliveries.
+            Complete your application to start making flexible deliveries.
           </p>
         </div>
 
@@ -396,7 +396,7 @@ export default function DriverOnboarding() {
             <CardDescription>
               {currentStep === 1 && "Tell us about yourself so we can verify your identity."}
               {currentStep === 2 && "We need your license and vehicle details for verification."}
-              {currentStep === 3 && "Add your banking details for earnings settlement."}
+              {currentStep === 3 && "Add your banking details for payment processing."}
               {currentStep === 4 && "Upload your documents to speed up the review process (optional)."}
             </CardDescription>
           </CardHeader>
@@ -646,7 +646,7 @@ export default function DriverOnboarding() {
                     />
                     <div className="bg-muted/50 rounded-md p-4">
                       <p className="text-sm text-muted-foreground">
-                        Your banking details are used for earnings settlement. We use universal branch codes — no need to look yours up.
+                        Your banking details are used for payment processing. We use universal branch codes — no need to look yours up.
                       </p>
                     </div>
                   </div>

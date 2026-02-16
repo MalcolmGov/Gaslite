@@ -1019,7 +1019,6 @@ export default function AdminDashboard() {
                                   </div>
                                   <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                                     <span>{driver.totalDeliveries} deliveries</span>
-                                    <span>R{Number(driver.totalEarnings || 0).toFixed(2)} earned</span>
                                     {driver.application && (
                                       <>
                                         <span>{driver.application.phone}</span>

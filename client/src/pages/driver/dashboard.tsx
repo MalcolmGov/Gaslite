@@ -16,7 +16,6 @@ import "leaflet/dist/leaflet.css";
 import { 
   MapPin, 
   Package, 
-  DollarSign, 
   Truck, 
   LogOut,
   Clock,
@@ -275,15 +274,14 @@ function useOrderNotifications(
 
         newOrders.forEach(order => {
           const distance = order.distance != null ? `${order.distance.toFixed(1)} km away` : "";
-          const earnings = `Earn R${(Number(order.total) * 0.15).toFixed(2)}`;
-          const desc = [order.deliveryAddress, distance, `R${Number(order.total).toFixed(2)}`, earnings].filter(Boolean).join(" · ");
+          const desc = [order.deliveryAddress, distance, `R${Number(order.total).toFixed(2)}`].filter(Boolean).join(" · ");
 
           showToast({ title: "New Order Available!", description: desc });
 
           try {
             if ("Notification" in window && Notification.permission === "granted") {
               new Notification("New Gaslite Order!", {
-                body: `${order.deliveryAddress}${distance ? ` (${distance})` : ""}\nR${Number(order.total).toFixed(2)} - ${earnings}`,
+                body: `${order.deliveryAddress}${distance ? ` (${distance})` : ""}\nR${Number(order.total).toFixed(2)}`,
                 icon: "/favicon.ico",
                 tag: `order-${order.id}`,
               });
@@ -610,7 +608,7 @@ export default function DriverDashboard() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold" data-testid="text-driver-title">Driver Dashboard</h1>
-              <p className="text-muted-foreground">Manage your deliveries and earnings</p>
+              <p className="text-muted-foreground">Manage your deliveries</p>
             </div>
             {driverLoading ? (
               <Skeleton className="h-10 w-32" />
@@ -636,7 +634,7 @@ export default function DriverDashboard() {
             )}
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             <Card className="overflow-visible">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
@@ -646,19 +644,6 @@ export default function DriverDashboard() {
                   <div>
                     <p className="text-sm text-muted-foreground">Total Deliveries</p>
                     <p className="text-2xl font-bold" data-testid="text-total-deliveries">{driver?.totalDeliveries || 0}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="overflow-visible">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
-                    <DollarSign className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Earnings</p>
-                    <p className="text-2xl font-bold" data-testid="text-total-earnings">R{Number(driver?.totalEarnings || 0).toFixed(2)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -693,7 +678,7 @@ export default function DriverDashboard() {
                 <Badge variant="outline" data-testid="badge-subscription-status">Active</Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-3">
-                Deducted from your earnings during weekly/monthly settlement. See <a href="/driver/terms" className="underline text-primary">Terms &amp; Conditions</a>.
+                See <a href="/driver/terms" className="underline text-primary">Terms &amp; Conditions</a> for details.
               </p>
             </CardContent>
           </Card>
@@ -812,9 +797,6 @@ export default function DriverDashboard() {
                         <span className="font-medium">
                           Total: R{Number(order.total).toFixed(2)}
                         </span>
-                        <span className="text-green-600 font-medium" data-testid={`text-earnings-active-${order.id}`}>
-                          You earn: R{Number(order.driverEarnings || 0).toFixed(2)}
-                        </span>
                         {order.estimatedDeliveryTime && (
                           <span className="text-muted-foreground flex items-center gap-1">
                             <Clock className="h-3 w-3" />
@@ -910,9 +892,6 @@ export default function DriverDashboard() {
                             <span className="font-medium text-primary">
                               Order Total: R{Number(order.total).toFixed(2)}
                             </span>
-                            <span className="text-green-600 font-medium">
-                              You earn: R{(Number(order.total) * 0.15).toFixed(2)}
-                            </span>
                             <Badge variant="outline" className="gap-1">
                               <CreditCard className="h-3 w-3" />
                               Card
@@ -991,8 +970,8 @@ export default function DriverDashboard() {
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">{order.deliveryAddress}</p>
                         </div>
-                        <span className="font-medium text-green-600" data-testid={`text-earnings-${order.id}`}>
-                          +R{Number(order.driverEarnings || 0).toFixed(2)}
+                        <span className="text-sm text-muted-foreground">
+                          {new Date(order.deliveredAt || order.createdAt!).toLocaleDateString("en-ZA", { day: "numeric", month: "short" })}
                         </span>
                       </div>
                     </CardContent>

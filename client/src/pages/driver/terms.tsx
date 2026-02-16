@@ -54,7 +54,7 @@ export default function DriverTerms() {
                   <li>Is not entitled to employee benefits, leave, UIF, PAYE deductions, or any statutory employment protections.</li>
                   <li>Is responsible for their own tax obligations, including income tax and VAT (if applicable).</li>
                   <li>Controls their own working hours and availability.</li>
-                  <li>Is not guaranteed any minimum number of delivery assignments or earnings.</li>
+                  <li>Is not guaranteed any minimum number of delivery assignments.</li>
                 </ul>
                 <p className="text-muted-foreground leading-relaxed">
                   2.3 The Driver may perform services for other entities, provided such services do not conflict with this Agreement.
@@ -94,16 +94,16 @@ export default function DriverTerms() {
                   4.3 The subscription fee shall be deducted from the Driver's first settlement in each calendar month.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
-                  4.4 Failure to maintain sufficient earnings to cover the subscription fee may result in account suspension.
+                  4.4 Failure to maintain the subscription fee may result in account suspension.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3">5. Earnings &amp; Settlement</h2>
+                <h2 className="text-xl font-semibold mb-3">5. Compensation &amp; Settlement</h2>
                 <p className="text-muted-foreground leading-relaxed mb-2">
-                  5.1 Drivers earn compensation per completed delivery as displayed in the Driver dashboard.
+                  5.1 Drivers receive compensation per completed delivery. Compensation details are discussed privately between the Driver and Gaslite.
                 </p>
-                <p className="text-muted-foreground leading-relaxed mb-2">5.2 Earnings are confirmed only once:</p>
+                <p className="text-muted-foreground leading-relaxed mb-2">5.2 Compensation is confirmed only once:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>The delivery is completed and marked successful.</li>
                   <li>Customer payment has cleared.</li>
@@ -122,7 +122,7 @@ export default function DriverTerms() {
                   <li>Regulatory fines caused by Driver negligence</li>
                 </ul>
                 <p className="text-muted-foreground leading-relaxed">
-                  5.5 Gaslite does not guarantee earnings levels.
+                  5.5 Gaslite does not guarantee compensation levels.
                 </p>
               </section>
 

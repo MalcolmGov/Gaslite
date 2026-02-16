@@ -212,7 +212,7 @@ export default function SignUpPage() {
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   {selectedRole === "driver"
-                    ? "Sign up to start earning as a Gaslite driver"
+                    ? "Sign up to start delivering with Gaslite"
                     : "Sign up to order gas delivery to your door"}
                 </p>
               </>

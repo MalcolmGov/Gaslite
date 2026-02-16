@@ -147,7 +147,7 @@ export default function ApplyPage() {
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <DollarSign className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold mb-1">Competitive Earnings</h3>
+              <h3 className="font-semibold mb-1">Competitive Pay</h3>
               <p className="text-sm text-muted-foreground">Earn per delivery plus tips</p>
             </CardContent>
           </Card>
