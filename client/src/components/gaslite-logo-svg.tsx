@@ -32,18 +32,24 @@ function useIsDark() {
   return isDark;
 }
 
-function FlameIcon({ uid, isDark, x = 0, y = 0, scale = 1 }: { uid: string; isDark?: boolean; x?: number; y?: number; scale?: number }) {
+function FlamePaths({ uid }: { uid: string }) {
   return (
-    <g transform={`translate(${x}, ${y}) scale(${scale})`}>
+    <>
       <path
-        d="M15.5 48 C15.5 48 4 40.5 3 28 C2.2 18.5 5.5 11 10 5.5 C12.5 2.5 15.5 0.5 15.5 0.5 C15.5 0.5 13 8 13.5 14 C14 19 16 22.5 17 24.5 C18 22 19.5 17 21 13 C22.5 9 24 6 26 4 C26 4 30 8.5 31.5 15 C33 22 32.5 28 30 34 C27.5 40 22 46 15.5 48Z"
-        fill={`url(#${uid}-fg)`}
+        d="M20 60 C20 60 18.5 58 16 54 C12 47 5 38 4 28 C3 19 6 11 11 5 C13 2.5 15 1 16.5 0 C16.5 3 16 8 16.5 13 C17 18 18.5 22 20 25 C20.5 23 21.5 19.5 23 16 C24.5 12 26 8.5 27.5 6.5 C31 11 33 17 33.5 24 C34 31 32 39 28 46 C25 51 22 56 20 60Z"
+        fill={`url(#${uid}-left)`}
       />
+
       <path
-        d="M15 48 C15 48 9 43 8.5 35 C8 29 10 24 12.5 20 C14 17.5 15.5 16 15.5 16 C15.5 16 14.5 22 15 26 C15.5 30 17 33 18.5 34.5 C19.5 32 21 27.5 22 24 C22.8 21.5 23.5 19 24.5 17.5 C24.5 17.5 27 21 27.5 26.5 C28 32 26 38 22.5 43 C20 46 17 48 15 48Z"
-        fill={`url(#${uid}-fi)`}
+        d="M21 60 C21 60 19 57 18 54 C16 49 14 43 14.5 37 C15 31 17.5 25 20.5 20 C21.5 18.5 22.5 17.5 23 17 C23 20 23 24 23.5 28 C24 32 25 35 26 37 C27 34 28 30 29 26.5 C30 23.5 31 21 32 19.5 C34 23 35 28 34.5 33 C34 38 32 43 29 48 C26.5 52.5 23.5 57 21 60Z"
+        fill={`url(#${uid}-right)`}
       />
-    </g>
+
+      <path
+        d="M20.5 58 C20.5 58 19.5 55 19 51 C18 45 18.5 39 20 34 C21 30.5 22 28 23 26.5 C23 29 23.2 32 23.5 35 C23.8 38 24.5 40.5 25 42 C25.5 40 26 37 26.5 34.5 C27 32.5 27.5 31 28 30 C29 33 29.5 36 29 40 C28.5 44 27 48 25 52 C23.5 55 21.5 57.5 20.5 58Z"
+        fill={`url(#${uid}-inner)`}
+      />
+    </>
   );
 }
 
@@ -53,7 +59,6 @@ export function GasliteLogoSvg({ size = "md", className = "", showTagline = fals
   const { width } = sizeConfig[size];
   const viewBoxH = showTagline ? 58 : 44;
   const svgW = 200;
-  const svgH = viewBoxH;
 
   const gasColor = isDark ? "#FFFFFF" : "#0B1F3B";
   const taglineColor = isDark ? "rgba(255,255,255,0.5)" : "rgba(11,31,59,0.45)";
@@ -68,22 +73,28 @@ export function GasliteLogoSvg({ size = "md", className = "", showTagline = fals
       <Wrapper {...(wrapperProps as any)} className="flex items-center">
         <svg
           width={width}
-          height={Math.round(width * (svgH / svgW))}
-          viewBox={`0 0 ${svgW} ${svgH}`}
+          height={Math.round(width * (viewBoxH / svgW))}
+          viewBox={`0 0 ${svgW} ${viewBoxH}`}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           role="img"
           aria-label="GasLite - Fast. Safe. Reliable."
         >
           <defs>
-            <linearGradient id={`${uid}-fg`} x1="0.1" y1="0.9" x2="0.8" y2="0.1">
+            <linearGradient id={`${uid}-left`} x1="0.15" y1="0.95" x2="0.6" y2="0">
               <stop offset="0%" stopColor="#0047AB" />
-              <stop offset="60%" stopColor="#0080DD" />
+              <stop offset="50%" stopColor="#0088DD" />
+              <stop offset="100%" stopColor="#00DCFF" />
+            </linearGradient>
+            <linearGradient id={`${uid}-right`} x1="0.3" y1="1" x2="0.85" y2="0.1">
+              <stop offset="0%" stopColor="#0047AB" />
+              <stop offset="45%" stopColor="#0070CC" />
               <stop offset="100%" stopColor="#00BFFF" />
             </linearGradient>
-            <linearGradient id={`${uid}-fi`} x1="0.15" y1="0.85" x2="0.75" y2="0.15">
-              <stop offset="0%" stopColor="#40C4FF" />
-              <stop offset="100%" stopColor="#E0F7FF" />
+            <linearGradient id={`${uid}-inner`} x1="0.2" y1="0.9" x2="0.8" y2="0.15">
+              <stop offset="0%" stopColor="#00AAEE" />
+              <stop offset="50%" stopColor="#40D4FF" />
+              <stop offset="100%" stopColor="#B0EDFF" />
             </linearGradient>
             <linearGradient id={`${uid}-lg`} x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="#00BFFF" />
@@ -91,10 +102,8 @@ export function GasliteLogoSvg({ size = "md", className = "", showTagline = fals
             </linearGradient>
           </defs>
 
-          <FlameIcon uid={uid} isDark={isDark} x={2} y={2} scale={0.82} />
-
           <text
-            x="32"
+            x="4"
             y="30"
             fontFamily="'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif"
             fontSize="28"
@@ -107,7 +116,7 @@ export function GasliteLogoSvg({ size = "md", className = "", showTagline = fals
 
           {showTagline && (
             <text
-              x="33"
+              x="5"
               y="50"
               fontFamily="'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif"
               fontSize="7.5"
@@ -130,31 +139,30 @@ export function GasliteFlameIcon({ className = "h-10 w-10" }: { className?: stri
   return (
     <svg
       className={className}
-      viewBox="0 0 34 50"
+      viewBox="0 0 38 62"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label="Gaslite"
     >
       <defs>
-        <linearGradient id={`${uid}-fig`} x1="0.1" y1="0.9" x2="0.8" y2="0.1">
+        <linearGradient id={`${uid}-left`} x1="0.15" y1="0.95" x2="0.6" y2="0">
           <stop offset="0%" stopColor="#0047AB" />
-          <stop offset="60%" stopColor="#0080DD" />
+          <stop offset="50%" stopColor="#0088DD" />
+          <stop offset="100%" stopColor="#00DCFF" />
+        </linearGradient>
+        <linearGradient id={`${uid}-right`} x1="0.3" y1="1" x2="0.85" y2="0.1">
+          <stop offset="0%" stopColor="#0047AB" />
+          <stop offset="45%" stopColor="#0070CC" />
           <stop offset="100%" stopColor="#00BFFF" />
         </linearGradient>
-        <linearGradient id={`${uid}-fii`} x1="0.15" y1="0.85" x2="0.75" y2="0.15">
-          <stop offset="0%" stopColor="#40C4FF" />
-          <stop offset="100%" stopColor="#E0F7FF" />
+        <linearGradient id={`${uid}-inner`} x1="0.2" y1="0.9" x2="0.8" y2="0.15">
+          <stop offset="0%" stopColor="#00AAEE" />
+          <stop offset="50%" stopColor="#40D4FF" />
+          <stop offset="100%" stopColor="#B0EDFF" />
         </linearGradient>
       </defs>
-      <path
-        d="M15.5 48 C15.5 48 4 40.5 3 28 C2.2 18.5 5.5 11 10 5.5 C12.5 2.5 15.5 0.5 15.5 0.5 C15.5 0.5 13 8 13.5 14 C14 19 16 22.5 17 24.5 C18 22 19.5 17 21 13 C22.5 9 24 6 26 4 C26 4 30 8.5 31.5 15 C33 22 32.5 28 30 34 C27.5 40 22 46 15.5 48Z"
-        fill={`url(#${uid}-fig)`}
-      />
-      <path
-        d="M15 48 C15 48 9 43 8.5 35 C8 29 10 24 12.5 20 C14 17.5 15.5 16 15.5 16 C15.5 16 14.5 22 15 26 C15.5 30 17 33 18.5 34.5 C19.5 32 21 27.5 22 24 C22.8 21.5 23.5 19 24.5 17.5 C24.5 17.5 27 21 27.5 26.5 C28 32 26 38 22.5 43 C20 46 17 48 15 48Z"
-        fill={`url(#${uid}-fii)`}
-      />
+      <FlamePaths uid={uid} />
     </svg>
   );
 }
