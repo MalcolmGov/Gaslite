@@ -46,7 +46,10 @@ import {
   TrendingUp,
   UserCheck,
   UserX,
-  ShoppingBag
+  ShoppingBag,
+  Wallet,
+  Banknote,
+  Calendar,
 } from "lucide-react";
 import { ChatPanel } from "@/components/chat-panel";
 import { MessageCircle } from "lucide-react";
@@ -128,6 +131,32 @@ export default function AdminDashboard() {
     pendingApplications: number;
   }>({
     queryKey: ["/api/admin/stats"],
+  });
+
+  interface DriverEarningRow {
+    driverId: string;
+    driverName: string;
+    phone: string | null;
+    status: string;
+    totalDeliveries: number;
+    totalEarnings: string;
+    weekEarnings: string;
+    monthEarnings: string;
+  }
+  interface EarningsResponse {
+    drivers: DriverEarningRow[];
+    summary: {
+      weekTotal: string;
+      monthTotal: string;
+      grandTotal: string;
+      totalDrivers: number;
+    };
+  }
+
+  const { data: earningsData, isLoading: earningsLoading } = useQuery<EarningsResponse>({
+    queryKey: ["/api/admin/driver-earnings"],
+    enabled: selectedTab === "earnings",
+    refetchInterval: selectedTab === "earnings" ? 30000 : false,
   });
 
   const updateOrderMutation = useMutation({
@@ -360,7 +389,7 @@ export default function AdminDashboard() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="orders" data-testid="tab-orders">
                 <Package className="h-4 w-4 mr-2" />
                 Orders
@@ -382,6 +411,10 @@ export default function AdminDashboard() {
               <TabsTrigger value="drivers" data-testid="tab-drivers">
                 <Truck className="h-4 w-4 mr-2" />
                 Drivers
+              </TabsTrigger>
+              <TabsTrigger value="earnings" data-testid="tab-earnings">
+                <Wallet className="h-4 w-4 mr-2" />
+                Earnings
               </TabsTrigger>
               <TabsTrigger value="driver-map" data-testid="tab-driver-map">
                 <Map className="h-4 w-4 mr-2" />
@@ -1046,6 +1079,158 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="earnings" className="space-y-4">
+              {earningsLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-64 w-full" />
+                </div>
+              ) : earningsData ? (
+                <>
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    <Card className="overflow-visible">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                            <Calendar className="h-6 w-6 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">This Week</p>
+                            <p className="text-2xl font-bold" data-testid="text-admin-week-total">R{earningsData.summary.weekTotal}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="overflow-visible">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                            <Banknote className="h-6 w-6 text-purple-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">This Month</p>
+                            <p className="text-2xl font-bold" data-testid="text-admin-month-total">R{earningsData.summary.monthTotal}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="overflow-visible">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                            <DollarSign className="h-6 w-6 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">All Time</p>
+                            <p className="text-2xl font-bold" data-testid="text-admin-grand-total">R{earningsData.summary.grandTotal}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Wallet className="h-5 w-5" />
+                        Weekly Settlement Overview
+                      </CardTitle>
+                      <CardDescription>
+                        Earnings per driver for the current week (Sun - Sat). Use this for weekly payouts.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {earningsData.drivers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-8">No drivers yet</p>
+                      ) : (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-border">
+                                <th className="text-left py-3 px-2 font-medium text-muted-foreground">Driver</th>
+                                <th className="text-left py-3 px-2 font-medium text-muted-foreground">Phone</th>
+                                <th className="text-center py-3 px-2 font-medium text-muted-foreground">Status</th>
+                                <th className="text-center py-3 px-2 font-medium text-muted-foreground">Deliveries</th>
+                                <th className="text-right py-3 px-2 font-medium text-muted-foreground">This Week</th>
+                                <th className="text-right py-3 px-2 font-medium text-muted-foreground">This Month</th>
+                                <th className="text-right py-3 px-2 font-medium text-muted-foreground">All Time</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {earningsData.drivers
+                                .sort((a, b) => Number(b.weekEarnings) - Number(a.weekEarnings))
+                                .map(driver => (
+                                <tr key={driver.driverId} className="border-b border-border last:border-0" data-testid={`row-driver-earnings-${driver.driverId}`}>
+                                  <td className="py-3 px-2 font-medium" data-testid={`text-driver-name-${driver.driverId}`}>{driver.driverName}</td>
+                                  <td className="py-3 px-2 text-muted-foreground" data-testid={`text-driver-phone-${driver.driverId}`}>{driver.phone || "-"}</td>
+                                  <td className="py-3 px-2 text-center">
+                                    <Badge
+                                      variant={driver.status === "available" ? "default" : driver.status === "busy" ? "secondary" : "outline"}
+                                      data-testid={`badge-driver-status-${driver.driverId}`}
+                                    >
+                                      {driver.status}
+                                    </Badge>
+                                  </td>
+                                  <td className="py-3 px-2 text-center" data-testid={`text-driver-deliveries-${driver.driverId}`}>{driver.totalDeliveries}</td>
+                                  <td className="py-3 px-2 text-right font-bold" data-testid={`text-driver-week-${driver.driverId}`}>
+                                    {Number(driver.weekEarnings) > 0 ? (
+                                      <span className="text-green-600">R{driver.weekEarnings}</span>
+                                    ) : (
+                                      <span className="text-muted-foreground">R0.00</span>
+                                    )}
+                                  </td>
+                                  <td className="py-3 px-2 text-right" data-testid={`text-driver-month-${driver.driverId}`}>R{driver.monthEarnings}</td>
+                                  <td className="py-3 px-2 text-right" data-testid={`text-driver-total-${driver.driverId}`}>R{driver.totalEarnings}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            <tfoot>
+                              <tr className="border-t-2 border-border">
+                                <td colSpan={4} className="py-3 px-2 font-bold">Total ({earningsData.summary.totalDrivers} drivers)</td>
+                                <td className="py-3 px-2 text-right font-bold text-green-600">R{earningsData.summary.weekTotal}</td>
+                                <td className="py-3 px-2 text-right font-bold">R{earningsData.summary.monthTotal}</td>
+                                <td className="py-3 px-2 text-right font-bold">R{earningsData.summary.grandTotal}</td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CreditCard className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-sm font-medium">Commission Rate Card</p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="text-center p-3 rounded-lg bg-muted/50">
+                          <p className="text-xs text-muted-foreground mb-1">9kg Cylinder</p>
+                          <p className="text-lg font-bold">R80</p>
+                        </div>
+                        <div className="text-center p-3 rounded-lg bg-muted/50">
+                          <p className="text-xs text-muted-foreground mb-1">19kg Cylinder</p>
+                          <p className="text-lg font-bold">R200</p>
+                        </div>
+                        <div className="text-center p-3 rounded-lg bg-muted/50">
+                          <p className="text-xs text-muted-foreground mb-1">48kg Cylinder</p>
+                          <p className="text-lg font-bold">R500</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-3">Per delivery per cylinder. Rates may change.</p>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : (
+                <Card>
+                  <CardContent className="py-8 text-center text-muted-foreground">
+                    Failed to load earnings data
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="driver-map" className="space-y-4">

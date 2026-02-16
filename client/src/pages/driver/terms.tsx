@@ -101,20 +101,28 @@ export default function DriverTerms() {
               <section>
                 <h2 className="text-xl font-semibold mb-3">5. Compensation &amp; Settlement</h2>
                 <p className="text-muted-foreground leading-relaxed mb-2">
-                  5.1 Drivers receive compensation per completed delivery. Compensation details are discussed privately between the Driver and Gaslite.
+                  5.1 Drivers receive a commission per completed delivery based on the cylinder size delivered:
                 </p>
-                <p className="text-muted-foreground leading-relaxed mb-2">5.2 Compensation is confirmed only once:</p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
+                  <li><strong className="text-foreground">9kg cylinder</strong> — R80.00 per delivery</li>
+                  <li><strong className="text-foreground">19kg cylinder</strong> — R200.00 per delivery</li>
+                  <li><strong className="text-foreground">48kg cylinder</strong> — R500.00 per delivery</li>
+                </ul>
+                <p className="text-muted-foreground leading-relaxed mb-2">
+                  5.2 Commission rates are subject to change at the sole discretion of Gaslite. Drivers will be notified in advance of any changes to commission rates.
+                </p>
+                <p className="text-muted-foreground leading-relaxed mb-2">5.3 Compensation is confirmed only once:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>The delivery is completed and marked successful.</li>
                   <li>Customer payment has cleared.</li>
                 </ul>
-                <p className="text-muted-foreground leading-relaxed mb-2">5.3 Settlement Terms:</p>
+                <p className="text-muted-foreground leading-relaxed mb-2">5.4 Settlement Terms:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>Weekly (Fridays), or</li>
                   <li>Monthly (last business day)</li>
                   <li>Minimum payout threshold: R100.00</li>
                 </ul>
-                <p className="text-muted-foreground leading-relaxed mb-2">5.4 Gaslite may deduct:</p>
+                <p className="text-muted-foreground leading-relaxed mb-2">5.5 Gaslite may deduct:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>Platform subscription fees</li>
                   <li>Refunds or chargebacks</li>
@@ -122,7 +130,7 @@ export default function DriverTerms() {
                   <li>Regulatory fines caused by Driver negligence</li>
                 </ul>
                 <p className="text-muted-foreground leading-relaxed">
-                  5.5 Gaslite does not guarantee compensation levels.
+                  5.6 Gaslite reserves the right to adjust commission rates. Updated rates will be communicated to Drivers and reflected on the Platform.
                 </p>
               </section>
 

@@ -32,6 +32,10 @@ import {
   ExternalLink,
   ArrowRight,
   Bell,
+  DollarSign,
+  TrendingUp,
+  Wallet,
+  Calendar,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { ChatPanel } from "@/components/chat-panel";
@@ -376,6 +380,19 @@ export default function DriverDashboard() {
     enabled: isOnline,
   });
 
+  interface EarningsSummary {
+    totalEarnings: string;
+    todayEarnings: string;
+    weekEarnings: string;
+    monthEarnings: string;
+    totalDeliveries: number;
+  }
+
+  const { data: earnings } = useQuery<EarningsSummary>({
+    queryKey: ["/api/driver/earnings"],
+    refetchInterval: 30000,
+  });
+
   const sendLocationToServer = useCallback(async (lat: number, lng: number) => {
     const now = Date.now();
     if (now - lastSentRef.current < 8000) return;
@@ -634,7 +651,62 @@ export default function DriverDashboard() {
             )}
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="overflow-visible">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                    <DollarSign className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Today</p>
+                    <p className="text-2xl font-bold" data-testid="text-today-earnings">R{earnings?.todayEarnings || "0.00"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="overflow-visible">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">This Week</p>
+                    <p className="text-2xl font-bold" data-testid="text-week-earnings">R{earnings?.weekEarnings || "0.00"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="overflow-visible">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                    <Calendar className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">This Month</p>
+                    <p className="text-2xl font-bold" data-testid="text-month-earnings">R{earnings?.monthEarnings || "0.00"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="overflow-visible">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <Wallet className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Earned</p>
+                    <p className="text-2xl font-bold" data-testid="text-total-earnings">R{earnings?.totalEarnings || "0.00"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-4">
             <Card className="overflow-visible">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
@@ -661,25 +733,46 @@ export default function DriverDashboard() {
                 </div>
               </CardContent>
             </Card>
+            <Card className="overflow-visible">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                      <CreditCard className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Subscription</p>
+                      <p className="text-2xl font-bold" data-testid="text-subscription-fee">R39<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           <Card className="overflow-visible">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
-                    <CreditCard className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Platform Subscription</p>
-                    <p className="text-2xl font-bold" data-testid="text-subscription-fee">R39.00<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                  </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">Commission Rates</p>
+                  <p className="text-xs text-muted-foreground">Rates may change from time to time</p>
                 </div>
-                <Badge variant="outline" data-testid="badge-subscription-status">Active</Badge>
+                <a href="/driver/terms" className="text-xs text-primary underline">View T&amp;Cs</a>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">
-                See <a href="/driver/terms" className="underline text-primary">Terms &amp; Conditions</a> for details.
-              </p>
+              <div className="grid grid-cols-3 gap-3 mt-4">
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground mb-1">9kg</p>
+                  <p className="text-lg font-bold" data-testid="text-rate-9kg">R80</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground mb-1">19kg</p>
+                  <p className="text-lg font-bold" data-testid="text-rate-19kg">R200</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground mb-1">48kg</p>
+                  <p className="text-lg font-bold" data-testid="text-rate-48kg">R500</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -961,6 +1054,11 @@ export default function DriverDashboard() {
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium">#{order.orderNumber}</span>
                             <Badge className="bg-green-500/10 text-green-600">Delivered</Badge>
+                            {order.driverEarnings && (
+                              <Badge variant="outline" className="text-green-600">
+                                +R{Number(order.driverEarnings).toFixed(2)}
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">{order.deliveryAddress}</p>
                         </div>

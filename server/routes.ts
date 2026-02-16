@@ -777,6 +777,49 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/driver/earnings", isAuthenticated, isDriver, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const driver = await storage.getDriverByUserId(userId);
+      if (!driver) {
+        return res.status(404).json({ error: "Driver profile not found" });
+      }
+
+      const allOrders = await storage.getOrdersByDriver(driver.id);
+      const delivered = allOrders.filter(o => o.status === "delivered" && o.driverEarnings);
+
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfWeek = new Date(startOfToday);
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      let totalEarnings = 0;
+      let todayEarnings = 0;
+      let weekEarnings = 0;
+      let monthEarnings = 0;
+
+      for (const o of delivered) {
+        const amount = Number(o.driverEarnings);
+        totalEarnings += amount;
+        const orderDate = new Date(o.deliveredAt || o.createdAt!);
+        if (orderDate >= startOfToday) todayEarnings += amount;
+        if (orderDate >= startOfWeek) weekEarnings += amount;
+        if (orderDate >= startOfMonth) monthEarnings += amount;
+      }
+
+      res.json({
+        totalEarnings: totalEarnings.toFixed(2),
+        todayEarnings: todayEarnings.toFixed(2),
+        weekEarnings: weekEarnings.toFixed(2),
+        monthEarnings: monthEarnings.toFixed(2),
+        totalDeliveries: delivered.length,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch earnings" });
+    }
+  });
+
   function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -831,7 +874,7 @@ export async function registerRoutes(
         return res.status(400).json({ error: "You must be available to accept orders" });
       }
 
-      const order = await storage.getOrder(req.params.orderId);
+      const order = await storage.getOrderWithItems(req.params.orderId);
       if (!order) {
         return res.status(404).json({ error: "Order not found" });
       }
@@ -840,10 +883,18 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Order is no longer available" });
       }
 
+      const COMMISSION_RATES: Record<string, number> = { "9kg": 80, "19kg": 200, "48kg": 500 };
+      let totalCommission = 0;
+      for (const item of order.items || []) {
+        const rate = COMMISSION_RATES[item.productSize] || 0;
+        totalCommission += rate * item.quantity;
+      }
+
       const updated = await storage.updateOrder(order.id, {
         driverId: driver.id,
         status: "assigned",
         estimatedDeliveryTime: 30,
+        driverEarnings: totalCommission.toFixed(2),
       });
 
       await storage.updateDriver(driver.id, { status: "busy" });
@@ -1085,6 +1136,62 @@ export async function registerRoutes(
       res.json(orderWithItems.items);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch order items" });
+    }
+  });
+
+  app.get("/api/admin/driver-earnings", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const allDrivers = await storage.getDriversWithApplications();
+      const allOrders = await storage.getOrders();
+
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const driverEarnings = allDrivers.map(driver => {
+        const driverOrders = allOrders.filter(o => o.driverId === driver.id && o.status === "delivered" && o.driverEarnings);
+
+        let totalEarnings = 0;
+        let weekEarnings = 0;
+        let monthEarnings = 0;
+
+        for (const o of driverOrders) {
+          const amount = Number(o.driverEarnings);
+          totalEarnings += amount;
+          const orderDate = new Date(o.deliveredAt || o.createdAt!);
+          if (orderDate >= startOfWeek) weekEarnings += amount;
+          if (orderDate >= startOfMonth) monthEarnings += amount;
+        }
+
+        return {
+          driverId: driver.id,
+          driverName: driver.application ? `${driver.application.firstName} ${driver.application.lastName}` : "Unknown",
+          phone: driver.application?.phone || null,
+          status: driver.status,
+          totalDeliveries: driverOrders.length,
+          totalEarnings: totalEarnings.toFixed(2),
+          weekEarnings: weekEarnings.toFixed(2),
+          monthEarnings: monthEarnings.toFixed(2),
+        };
+      });
+
+      const weekTotal = driverEarnings.reduce((sum, d) => sum + Number(d.weekEarnings), 0);
+      const monthTotal = driverEarnings.reduce((sum, d) => sum + Number(d.monthEarnings), 0);
+      const grandTotal = driverEarnings.reduce((sum, d) => sum + Number(d.totalEarnings), 0);
+
+      res.json({
+        drivers: driverEarnings,
+        summary: {
+          weekTotal: weekTotal.toFixed(2),
+          monthTotal: monthTotal.toFixed(2),
+          grandTotal: grandTotal.toFixed(2),
+          totalDrivers: allDrivers.length,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch driver earnings" });
     }
   });
 
