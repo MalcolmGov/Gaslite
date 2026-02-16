@@ -280,6 +280,38 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/orders/frequent-products", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const customerOrders = await storage.getOrdersByCustomer(userId);
+      const deliveredOrders = customerOrders.filter(o => o.status === "delivered");
+
+      const productCounts: Record<string, { productId: string; productName: string; productSize: string; count: number }> = {};
+
+      for (const order of deliveredOrders) {
+        const orderWithItems = await storage.getOrderWithItems(order.id);
+        if (orderWithItems) {
+          for (const item of orderWithItems.items) {
+            if (!productCounts[item.productId]) {
+              productCounts[item.productId] = {
+                productId: item.productId,
+                productName: item.productName,
+                productSize: item.productSize,
+                count: 0,
+              };
+            }
+            productCounts[item.productId].count += item.quantity;
+          }
+        }
+      }
+
+      const sorted = Object.values(productCounts).sort((a, b) => b.count - a.count);
+      res.json(sorted);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch frequent products" });
+    }
+  });
+
   app.post("/api/orders", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.userId!;
