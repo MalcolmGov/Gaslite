@@ -8,6 +8,7 @@ import {
   orders,
   orderItems,
   pushSubscriptions,
+  chatMessages,
   type Product,
   type InsertProduct,
   type UserProfile,
@@ -23,6 +24,8 @@ import {
   type OrderWithItems,
   type PushSubscription,
   type InsertPushSubscription,
+  type ChatMessage,
+  type InsertChatMessage,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -65,6 +68,10 @@ export interface IStorage {
 
   // Drivers with application info
   getDriversWithApplications(): Promise<(Driver & { application?: DriverApplication })[]>;
+
+  // Chat Messages
+  getChatMessages(threadType: string, threadId: string): Promise<ChatMessage[]>;
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
 
   // Stats
   getAdminStats(): Promise<{
@@ -228,6 +235,24 @@ export class DatabaseStorage implements IStorage {
       result.push({ ...driver, application: application || undefined });
     }
     return result;
+  }
+
+  // Chat Messages
+  async getChatMessages(threadType: string, threadId: string): Promise<ChatMessage[]> {
+    if (threadType === "order") {
+      return db.select().from(chatMessages)
+        .where(and(eq(chatMessages.threadType, "order"), eq(chatMessages.orderId, threadId)))
+        .orderBy(chatMessages.createdAt);
+    } else {
+      return db.select().from(chatMessages)
+        .where(and(eq(chatMessages.threadType, "admin_driver"), eq(chatMessages.driverId, threadId)))
+        .orderBy(chatMessages.createdAt);
+    }
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const [created] = await db.insert(chatMessages).values(message).returning();
+    return created;
   }
 
   // Stats
