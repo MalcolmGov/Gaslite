@@ -66,6 +66,13 @@ function AuthenticatedRouter() {
     retry: 1,
   });
 
+  const { data: driverAppStatus, isLoading: driverAppLoading } = useQuery<{ application: any; driver: any }>({
+    queryKey: ["/api/user/driver-application"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    enabled: !!user && !!profile?.onboardingCompleted && profile?.role === "customer",
+    retry: 1,
+  });
+
   if (authLoading || (user && profileLoading)) {
     return <LoadingScreen />;
   }
@@ -98,6 +105,10 @@ function AuthenticatedRouter() {
   clearIntent();
 
   const role = profile?.role || "customer";
+
+  if (role === "customer" && !driverAppLoading && driverAppStatus?.application) {
+    return <DriverOnboarding />;
+  }
 
   if (role === "admin") {
     return (
