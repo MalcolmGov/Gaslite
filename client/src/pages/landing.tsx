@@ -735,10 +735,6 @@ export default function LandingPage() {
               <p className="text-muted-foreground mb-6 max-w-sm">
                 South Africa's fastest and most reliable LPG gas delivery service. Order with confidence.
               </p>
-              <div className="flex items-center gap-3">
-                <Input placeholder="Enter your email" className="max-w-xs" data-testid="input-newsletter" />
-                <Button className="bg-gradient-to-r from-blue-500 to-cyan-400" data-testid="button-subscribe">Subscribe</Button>
-              </div>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Quick Links</h4>
