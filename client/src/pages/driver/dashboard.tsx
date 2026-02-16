@@ -35,6 +35,7 @@ import {
   Bell,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
+import { ChatPanel } from "@/components/chat-panel";
 import type { Order, Driver } from "@shared/schema";
 
 const driverIcon = L.divIcon({
@@ -969,6 +970,26 @@ export default function DriverDashboard() {
           </section>
         </div>
       </main>
+
+      {activeOrders.length > 0 && user && (
+        <ChatPanel
+          threadType="order"
+          threadId={activeOrders[0].id}
+          currentUserId={user.id}
+          title={`Chat - #${activeOrders[0].orderNumber}`}
+          collapsed
+        />
+      )}
+
+      {driver && user && activeOrders.length === 0 && (
+        <ChatPanel
+          threadType="admin_driver"
+          threadId={driver.id}
+          currentUserId={user.id}
+          title="Admin Support"
+          collapsed
+        />
+      )}
     </div>
   );
 }

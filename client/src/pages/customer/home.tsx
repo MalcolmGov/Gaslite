@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
+import { ChatPanel } from "@/components/chat-panel";
 import type { Product, Order, UserProfile } from "@shared/schema";
 
 const driverIcon = L.divIcon({
@@ -850,6 +851,16 @@ export default function CustomerHome() {
           </div>
         </div>
       </main>
+
+      {activeOrder && user && (
+        <ChatPanel
+          threadType="order"
+          threadId={activeOrder.id}
+          currentUserId={user.id}
+          title={`Chat - #${activeOrder.orderNumber}`}
+          collapsed
+        />
+      )}
     </div>
   );
 }

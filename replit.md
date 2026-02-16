@@ -55,7 +55,7 @@ The backend uses a modular structure with routes registered in `server/routes.ts
 ### Data Storage
 - **Primary Database**: PostgreSQL accessed via Drizzle ORM
 - **Schema Location**: `shared/schema.ts` for application entities, `shared/models/auth.ts` for auth entities
-- **Key Tables**: products, userProfiles, driverApplications, drivers, orders, orderItems, users, sessions, pushSubscriptions
+- **Key Tables**: products, userProfiles, driverApplications, drivers, orders, orderItems, users, sessions, pushSubscriptions, chatMessages
 
 The schema supports a multi-role user system where authentication users extend into role-specific profiles and capabilities.
 
@@ -115,6 +115,14 @@ The schema supports a multi-role user system where authentication users extend i
 - **@uppy/core, @uppy/dashboard, @uppy/aws-s3**: File upload handling
 - **framer-motion**: Animation library for premium UI effects
 - **react-hook-form + zod**: Form handling with validation
+
+### In-App Chat
+- **Schema**: `chatMessages` table with `thread_type` enum (order, admin_driver), orderId, driverId, sender info, body, timestamps
+- **Thread Types**: Order chat (customer ↔ driver on active orders), Admin-driver chat (admin ↔ driver)
+- **Endpoints**: GET/POST `/api/chat/order/:orderId`, GET/POST `/api/chat/admin-driver/:driverId`
+- **Authorization**: Order chat restricted to order customer, assigned driver, and admin; admin-driver chat restricted to admin and the specific driver
+- **Frontend**: `client/src/components/chat-panel.tsx` — reusable floating chat panel with 5s polling, integrated into customer home (active orders), driver dashboard (active orders + admin support), admin dashboard (per-driver chat)
+- **Polling**: 5-second refetch interval when chat panel is open
 
 ### Push Notifications
 - **Protocol**: Web Push API with VAPID authentication

@@ -38,6 +38,8 @@ import {
   Landmark,
   CreditCard
 } from "lucide-react";
+import { ChatPanel } from "@/components/chat-panel";
+import { MessageCircle } from "lucide-react";
 import type { Order, DriverApplication, Driver } from "@shared/schema";
 
 type DriverWithApplication = Driver & { application?: DriverApplication };
@@ -50,6 +52,7 @@ export default function AdminDashboard() {
   const [applicationFilter, setApplicationFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
   const [rejectingAppId, setRejectingAppId] = useState<string | null>(null);
   const [rejectNotes, setRejectNotes] = useState("");
+  const [chatDriverId, setChatDriverId] = useState<string | null>(null);
 
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/admin/orders"],
@@ -754,6 +757,16 @@ export default function AdminDashboard() {
                                   </div>
                                 </div>
                               </div>
+                              <Button
+                                variant="outline"
+                                size="default"
+                                className="gap-2"
+                                data-testid={`button-chat-driver-${driver.id}`}
+                                onClick={() => setChatDriverId(chatDriverId === driver.id ? null : driver.id)}
+                              >
+                                <MessageCircle className="h-4 w-4" />
+                                Chat
+                              </Button>
                             </div>
                           </CardContent>
                         </Card>
@@ -766,6 +779,22 @@ export default function AdminDashboard() {
           </Tabs>
         </div>
       </main>
+
+      {chatDriverId && user && (() => {
+        const chatDriver = drivers?.find(d => d.id === chatDriverId);
+        const driverName = chatDriver?.application
+          ? chatDriver.application.firstName
+          : "Driver";
+        return (
+          <ChatPanel
+            threadType="admin_driver"
+            threadId={chatDriverId}
+            currentUserId={user.id}
+            title={`Chat with ${driverName}`}
+            onClose={() => setChatDriverId(null)}
+          />
+        );
+      })()}
     </div>
   );
 }
