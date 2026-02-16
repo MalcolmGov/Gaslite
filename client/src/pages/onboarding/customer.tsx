@@ -34,7 +34,7 @@ const customerOnboardingSchema = insertUserProfileSchema
 type CustomerOnboardingData = z.infer<typeof customerOnboardingSchema>;
 
 const benefits = [
-  { icon: Truck, title: "Fast Delivery", desc: "Within 60 minutes" },
+  { icon: Truck, title: "Fast Delivery", desc: "Straight to your door" },
   { icon: Shield, title: "Safe & Certified", desc: "SABS approved cylinders" },
   { icon: Clock, title: "Track Live", desc: "Real-time order tracking" },
 ];

@@ -535,11 +535,6 @@ export default function CustomerHome() {
                           );
                         })}
                       </div>
-                      {trackingData?.estimatedDeliveryTime && (
-                        <p className="text-xs text-muted-foreground mt-2 text-center" data-testid="text-estimated-time">
-                          Estimated delivery: ~{trackingData.estimatedDeliveryTime} minutes
-                        </p>
-                      )}
                     </CardContent>
                   </Card>
 
@@ -775,11 +770,6 @@ export default function CustomerHome() {
                                   );
                                 })}
                               </div>
-                              {order.estimatedDeliveryTime && order.status !== "delivered" && (
-                                <p className="text-xs text-muted-foreground mt-2 text-center">
-                                  Estimated delivery: ~{order.estimatedDeliveryTime} minutes
-                                </p>
-                              )}
                             </div>
                           )}
                         </CardContent>

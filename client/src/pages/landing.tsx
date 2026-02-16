@@ -107,7 +107,7 @@ export default function LandingPage() {
   ];
 
   const testimonials = [
-    { name: "Sarah M.", location: "Johannesburg", rating: 5, text: "Incredibly fast delivery! Had gas within 30 minutes of ordering." },
+    { name: "Sarah M.", location: "Johannesburg", rating: 5, text: "Incredibly fast delivery! The driver was at my door before I knew it." },
     { name: "Thabo K.", location: "Pretoria", rating: 5, text: "The app is so easy to use. Best gas delivery service in SA!" },
     { name: "Priya N.", location: "Durban", rating: 5, text: "Reliable, safe, and affordable. Highly recommend Gaslite!" },
   ];
@@ -191,7 +191,7 @@ export default function LandingPage() {
               </motion.h1>
               
               <motion.p variants={fadeInUp} className="text-lg sm:text-xl text-muted-foreground max-w-lg leading-relaxed">
-                Order LPG gas cylinders with a tap. Fast, safe delivery by verified drivers within <span className="text-primary font-semibold">30-60 minutes</span>.
+                Order LPG gas cylinders with a tap. <span className="text-primary font-semibold">Fast, safe delivery</span> by verified drivers straight to your door.
               </motion.p>
               
               <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4">
@@ -416,7 +416,7 @@ export default function LandingPage() {
                     >
                       <Clock className="h-8 w-8" />
                     </motion.div>
-                    <h3 className="text-3xl font-bold mb-4">30-60 Min Delivery</h3>
+                    <h3 className="text-3xl font-bold mb-4">Rapid Delivery</h3>
                     <p className="text-white/80 text-lg">Our drivers are strategically located across major cities for lightning-fast delivery.</p>
                   </div>
                   <div className="mt-8 flex items-center gap-4">

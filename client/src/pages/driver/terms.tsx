@@ -130,7 +130,7 @@ export default function DriverTerms() {
                 <h2 className="text-xl font-semibold mb-3">6. Delivery Standards &amp; Performance</h2>
                 <p className="text-muted-foreground leading-relaxed mb-2">Drivers agree to:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
-                  <li>Accept and complete assigned deliveries within 30-60 minutes.</li>
+                  <li>Accept and complete assigned deliveries promptly.</li>
                   <li>Deliver within a 10km radius unless otherwise agreed.</li>
                   <li>Maintain professional conduct at all times.</li>
                   <li>Keep GPS location active while online.</li>

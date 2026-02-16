@@ -330,7 +330,7 @@ export default function AdminDashboard() {
                     <p className="text-xs text-muted-foreground">
                       {slaBreachedOrders.length > 0 && <span className="text-red-600 font-medium">{slaBreachedOrders.length} breached (&gt;{SLA_THRESHOLD_MINUTES} min)</span>}
                       {slaBreachedOrders.length > 0 && slaWarningOrders.length > 0 && " · "}
-                      {slaWarningOrders.length > 0 && <span className="text-yellow-600 font-medium">{slaWarningOrders.length} at risk (&gt;30 min)</span>}
+                      {slaWarningOrders.length > 0 && <span className="text-yellow-600 font-medium">{slaWarningOrders.length} at risk</span>}
                     </p>
                   </div>
                 </div>

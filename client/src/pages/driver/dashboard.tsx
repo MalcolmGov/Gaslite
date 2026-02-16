@@ -797,12 +797,6 @@ export default function DriverDashboard() {
                         <span className="font-medium">
                           Total: R{Number(order.total).toFixed(2)}
                         </span>
-                        {order.estimatedDeliveryTime && (
-                          <span className="text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            ~{order.estimatedDeliveryTime} min
-                          </span>
-                        )}
                       </div>
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <Clock className="h-3 w-3" />

@@ -27,7 +27,7 @@ function RoleCard({
       accentTo: "to-cyan-400",
       title: "Customer",
       subtitle: "Order gas delivery",
-      description: "Get LPG gas cylinders delivered straight to your door in under 60 minutes.",
+      description: "Get LPG gas cylinders delivered straight to your door, fast and hassle-free.",
       perks: [
         { icon: Flame, text: "Browse 9kg, 19kg & 48kg cylinders" },
         { icon: MapPin, text: "Track your delivery in real time" },
@@ -254,7 +254,7 @@ export default function SignUpPage() {
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Clock className="h-3.5 w-3.5" />
-                  <span>Under 60 min</span>
+                  <span>Fast delivery</span>
                 </div>
               </div>
             </div>
