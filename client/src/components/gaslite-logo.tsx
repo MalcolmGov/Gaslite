@@ -7,15 +7,15 @@ interface GasliteLogoProps {
   className?: string;
 }
 
-const heightMap = {
-  sm: 100,
-  md: 120,
-  lg: 140,
-  xl: 160,
+const widthMap = {
+  sm: "160px",
+  md: "200px",
+  lg: "260px",
+  xl: "320px",
 };
 
 export function GasliteLogo({ size = "md", className = "" }: GasliteLogoProps) {
-  const h = heightMap[size];
+  const w = widthMap[size];
 
   return (
     <Link href="/" className={`flex items-center ${className}`} data-testid="gaslite-logo">
@@ -23,8 +23,8 @@ export function GasliteLogo({ size = "md", className = "" }: GasliteLogoProps) {
         src={logoImage}
         alt="Gaslite - Trusted Delivery"
         style={{
-          height: `${h}px`,
-          width: "auto",
+          width: w,
+          height: "auto",
           display: "block",
           imageRendering: "-webkit-optimize-contrast" as React.CSSProperties["imageRendering"],
         }}
