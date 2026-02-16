@@ -13,7 +13,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { GasliteLogo } from "@/components/gaslite-logo";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { 
@@ -58,17 +58,28 @@ import type { Product, Order, UserProfile } from "@shared/schema";
 
 const driverIcon = L.divIcon({
   className: "driver-marker",
-  html: '<div style="width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
+  html: `<div style="position:relative;width:24px;height:24px;">
+    <div style="position:absolute;inset:0;border-radius:50%;background:rgba(59,130,246,0.3);animation:driverPulse 2s ease-in-out infinite"></div>
+    <div style="position:absolute;inset:4px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>
+  </div>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 
 const deliveryIcon = L.divIcon({
   className: "delivery-marker",
-  html: '<div style="width:16px;height:16px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
+  html: '<div style="width:20px;height:20px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
 });
+
+function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([lat, lng], map.getZoom(), { animate: true });
+  }, [lat, lng, map]);
+  return null;
+}
 
 interface CartItem {
   product: Product;
@@ -142,6 +153,7 @@ export default function CustomerHome() {
     queryKey: ["/api/orders", activeOrder?.id, "tracking"],
     enabled: !!activeOrder,
     refetchInterval: 5000,
+    staleTime: 0,
   });
 
   const createOrderMutation = useMutation({
@@ -431,7 +443,7 @@ export default function CustomerHome() {
                         <div className="rounded-md overflow-hidden" style={{ height: "300px" }} data-testid="map-tracking">
                           <MapContainer
                             center={mapCenter}
-                            zoom={14}
+                            zoom={15}
                             style={{ height: "100%", width: "100%" }}
                             scrollWheelZoom={false}
                           >
@@ -440,14 +452,17 @@ export default function CustomerHome() {
                               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             />
                             {trackingData.driverLocation && (
-                              <Marker
-                                position={[trackingData.driverLocation.latitude, trackingData.driverLocation.longitude]}
-                                icon={driverIcon}
-                              >
-                                <Popup>
-                                  <span data-testid="popup-driver-location">Driver Location</span>
-                                </Popup>
-                              </Marker>
+                              <>
+                                <RecenterMap lat={trackingData.driverLocation.latitude} lng={trackingData.driverLocation.longitude} />
+                                <Marker
+                                  position={[trackingData.driverLocation.latitude, trackingData.driverLocation.longitude]}
+                                  icon={driverIcon}
+                                >
+                                  <Popup>
+                                    <span data-testid="popup-driver-location">Driver Location</span>
+                                  </Popup>
+                                </Marker>
+                              </>
                             )}
                             {trackingData.deliveryLocation && (
                               <Marker

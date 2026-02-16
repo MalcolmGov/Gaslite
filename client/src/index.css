@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes driverPulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.8); opacity: 0; }
+}
+
 /* LIGHT MODE - Premium Gaslite Blue Theme */
 :root {
   --button-outline: rgba(0,0,0, .10);
