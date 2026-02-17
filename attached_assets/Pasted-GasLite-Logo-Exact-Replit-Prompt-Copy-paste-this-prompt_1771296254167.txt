@@ -1,0 +1,78 @@
+GasLite Logo - Exact Replit Prompt
+Copy-paste this prompt into Replit:
+
+PROMPT START:
+Create a GasLiteLogo React component that renders the GasLite brand logo. Follow these EXACT specifications — do not deviate:
+Text Layout:
+
+The word "Gas" in bold 700 weight, colored:
+
+Dark mode: pure #FFFFFF white
+Light mode: dark navy #1a1a2e
+
+
+The word "Lite" in bold 700 weight, with a CSS gradient text fill from top to bottom: #60B5FF (light blue) at top → #0066FF (vivid blue) at bottom. Use background: linear-gradient(180deg, #60B5FF 0%, #0066FF 100%) with WebkitBackgroundClip: text and WebkitTextFillColor: transparent.
+"Gas" and "Lite" sit on the same baseline, no gap between them, forming one word: GasLite
+Below the text, add the tagline "FAST. SAFE. RELIABLE" in:
+
+ALL CAPS
+Font size ~10px (roughly 28% of the main text size)
+Font weight 600
+Letter-spacing: 3px
+Color: rgba(255,255,255,0.6) in dark mode, #888888 in light mode
+Separated by periods with spaces: FAST. SAFE. RELIABLE
+
+
+
+Flame Icon (OPTIONAL — include ONLY if you can render it well):
+
+Positioned to the LEFT of the text
+It's a teardrop/flame shape pointing upward
+Filled with a vertical linear gradient: white at top → light blue (#60B5FF) in middle → deep blue (#0055CC) at bottom
+An inner lighter flame shape with slight transparency for depth
+SVG path: outer flame M16 0C16 0 6 12 4 22C2 32 8 42 16 44C24 42 30 32 28 22C26 12 16 0 16 0Z
+SVG path: inner flame M16 18C16 18 11 26 10 31C9 36 12 41 16 42C20 41 23 36 22 31C21 26 16 18 16 18Z at opacity 0.6
+Flame height should match approximately the text height
+
+IF YOU CANNOT render the flame well, just use the TEXT-ONLY version (GasLite + tagline). The text-only version is perfectly acceptable.
+Component Props:
+tsxinterface GasLiteLogoProps {
+  mode?: 'light' | 'dark';    // defaults based on app theme
+  size?: number;               // scale multiplier, default 1
+  showTagline?: boolean;       // default true
+  showFlame?: boolean;         // default true, set false for text-only
+}
+Critical Rules:
+
+"Gas" is white/dark, "Lite" is ALWAYS blue gradient — never solid color
+The gradient on "Lite" goes TOP to BOTTOM (not left to right)
+Letter-spacing on main text: -0.5px (slightly tightened)
+The tagline must be BELOW the main text, left-aligned with "Gas"
+Use display: flex; align-items: baseline for Gas + Lite alignment
+The component must accept a mode prop to switch between light/dark
+Line-height on the main text should be 1 (tight)
+
+Usage in app:
+jsx// In navbar (dark mode)
+<GasLiteLogo mode="dark" size={0.7} />
+
+// In navbar (light mode)  
+<GasLiteLogo mode="light" size={0.7} />
+
+// Splash/login screen
+<GasLiteLogo mode="dark" size={1.5} showFlame={true} />
+
+// Compact (no tagline)
+<GasLiteLogo mode="light" size={0.5} showTagline={false} />
+Color Reference:
+ElementDark ModeLight Mode"Gas" text#FFFFFF#1a1a2e"Lite" textgradient #60B5FF → #0066FFsame gradientTaglinergba(255,255,255,0.6)#888888Flame top#FFFFFFsameFlame middle#60B5FFsameFlame bottom#0055CCsame
+PROMPT END
+
+Alternative: If Replit still struggles, paste this EXACT component code:
+See the GasLiteLogo.jsx file — you can copy it directly into your Replit project.
+Tips for Replit:
+
+If the flame doesn't look right, just set showFlame={false} — the text-only version looks clean and professional
+Make sure you're importing the component where your navbar/header is
+The gradient text requires both WebkitBackgroundClip AND backgroundClip for cross-browser support
+Test both light and dark modes — the "Gas" text color must change but "Lite" gradient stays the same
