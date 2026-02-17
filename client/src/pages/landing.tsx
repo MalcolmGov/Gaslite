@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { DemoWalkthrough } from "@/components/demo-walkthrough";
-import gasCylinderImageLight from "@/assets/images/gas-cylinder.png";
-import gasCylinderImageDark from "@/assets/images/gas-cylinder-dark.png";
+import { img9kg, img19kg, img48kg, getProductImage } from "@/lib/product-images";
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -71,14 +70,9 @@ function FloatingGasCylinder() {
         transition={{ duration: 3, repeat: Infinity }}
       />
       <img 
-        src={gasCylinderImageLight} 
+        src={img19kg} 
         alt="LPG Gas Cylinder" 
-        className="relative w-full h-full object-contain drop-shadow-2xl dark:hidden rounded-xl"
-      />
-      <img 
-        src={gasCylinderImageDark} 
-        alt="LPG Gas Cylinder" 
-        className="relative w-full h-full object-contain drop-shadow-2xl hidden dark:block rounded-xl"
+        className="relative w-full h-full object-contain drop-shadow-2xl rounded-xl"
       />
     </motion.div>
   );
@@ -494,15 +488,14 @@ export default function LandingPage() {
                 <Card className={`h-full overflow-hidden transition-all duration-300 hover:shadow-2xl ${product.popular ? 'ring-2 ring-primary shadow-xl shadow-blue-500/20' : 'hover:shadow-blue-500/10'}`}>
                   <CardContent className="p-8 text-center">
                     <motion.div
-                      whileHover={{ scale: 1.05, rotateY: 10 }}
-                      className="w-24 h-32 mx-auto mb-6 relative"
+                      whileHover={{ scale: 1.05 }}
+                      className="w-28 h-36 mx-auto mb-6 relative"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 rounded-t-full rounded-b-lg shadow-xl">
-                        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-400 rounded-full" />
-                        <div className="absolute bottom-4 left-2 right-2 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                          <span className="text-white font-bold text-lg">{product.size}</span>
-                        </div>
-                      </div>
+                      <img
+                        src={getProductImage(product.size) || ""}
+                        alt={`${product.size} Gas Cylinder`}
+                        className="w-full h-full object-contain drop-shadow-lg"
+                      />
                     </motion.div>
                     <h3 className="text-xl font-bold mb-2">{product.name}</h3>
                     <p className="text-sm text-muted-foreground mb-4">{product.description}</p>

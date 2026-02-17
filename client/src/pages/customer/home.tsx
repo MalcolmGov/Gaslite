@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 import { GasliteLogo } from "@/components/gaslite-logo";
+import { getProductImage } from "@/lib/product-images";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
@@ -391,8 +392,12 @@ export default function CustomerHome() {
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-4">
-                              <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
-                                <Flame className="h-8 w-8 text-primary" />
+                              <div className="w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden bg-muted/50">
+                                {getProductImage(product.size) ? (
+                                  <img src={getProductImage(product.size)!} alt={product.size} className="w-full h-full object-contain" />
+                                ) : (
+                                  <Flame className="h-8 w-8 text-primary" />
+                                )}
                               </div>
                               <div>
                                 <h3 className="font-semibold">{product.name}</h3>
@@ -622,8 +627,12 @@ export default function CustomerHome() {
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-10 h-10 bg-primary/10 rounded-md flex items-center justify-center shrink-0">
-                                <Flame className="h-5 w-5 text-primary" />
+                              <div className="w-10 h-10 rounded-md flex items-center justify-center shrink-0 overflow-hidden bg-muted/50">
+                                {getProductImage(fp.productName) ? (
+                                  <img src={getProductImage(fp.productName)!} alt={fp.productName} className="w-full h-full object-contain" />
+                                ) : (
+                                  <Flame className="h-5 w-5 text-primary" />
+                                )}
                               </div>
                               <div className="min-w-0">
                                 <p className="text-sm font-medium truncate" data-testid={`text-freq-name-${fp.productId}`}>{fp.productName}</p>
@@ -852,8 +861,12 @@ export default function CustomerHome() {
                           <div key={item.product.id} className="space-y-2">
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
-                                  <Flame className="h-5 w-5 text-primary" />
+                                <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-muted/50">
+                                  {getProductImage(item.product.size) ? (
+                                    <img src={getProductImage(item.product.size)!} alt={item.product.size} className="w-full h-full object-contain" />
+                                  ) : (
+                                    <Flame className="h-5 w-5 text-primary" />
+                                  )}
                                 </div>
                                 <div className="min-w-0">
                                   <p className="text-sm font-medium truncate" data-testid={`text-cart-item-name-${item.product.id}`}>{item.product.name}</p>
