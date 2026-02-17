@@ -1,6 +1,6 @@
 import img9kg from "@assets/9kg_1771297736162.png";
-import img19kg from "@assets/19kg_1771297736162.png";
-import img48kg from "@assets/48kg_1771297736161.png";
+import img19kg from "@assets/19kg_clean.png";
+import img48kg from "@assets/48kg_clean.png";
 
 const sizeImageMap: Record<string, string> = {
   "9kg": img9kg,
