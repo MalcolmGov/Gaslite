@@ -38,8 +38,8 @@ export function GasliteLogoSvg({ size = "md", className = "", showTagline = fals
   const isDark = useIsDark();
   const { width } = sizeConfig[size];
 
-  const flameW = showFlame ? 22 : 0;
-  const textX = showFlame ? 26 : 4;
+  const flameW = showFlame ? 28 : 0;
+  const textX = showFlame ? 30 : 4;
   const svgW = showFlame ? 220 : 200;
   const viewBoxH = showTagline ? 58 : 44;
 
@@ -85,7 +85,7 @@ export function GasliteLogoSvg({ size = "md", className = "", showTagline = fals
           </defs>
 
           {showFlame && (
-            <g transform="translate(0, 2) scale(0.5)">
+            <g transform="translate(2, 3) scale(0.65)">
               <path
                 d="M16 0C16 0 6 12 4 22C2 32 8 42 16 44C24 42 30 32 28 22C26 12 16 0 16 0Z"
                 fill={`url(#${uid}-flame)`}
