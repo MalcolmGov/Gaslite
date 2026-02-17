@@ -126,8 +126,14 @@ export default function CustomerHome() {
   useEffect(() => {
     if (profile?.address && !deliveryAddress) {
       setDeliveryAddress(profile.address);
+      if (profile.latitude && profile.longitude && !deliveryCoordinates) {
+        setDeliveryCoordinates({
+          latitude: Number(profile.latitude),
+          longitude: Number(profile.longitude),
+        });
+      }
     }
-  }, [profile?.address]);
+  }, [profile?.address, profile?.latitude, profile?.longitude]);
 
   const { data: products, isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],

@@ -148,7 +148,7 @@ export async function registerRoutes(
   app.post("/api/onboarding/customer", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.userId!;
-      const { firstName, lastName, phone, address } = req.body;
+      const { firstName, lastName, phone, address, latitude, longitude } = req.body;
 
       if (!firstName || !lastName || !phone || !address) {
         return res.status(400).json({ error: "All fields are required" });
@@ -159,14 +159,20 @@ export async function registerRoutes(
         profile = await storage.createUserProfile({ userId, role: "customer" });
       }
 
-      const updated = await storage.updateUserProfile(userId, {
+      const updateData: Record<string, any> = {
         firstName,
         lastName,
         phone,
         address,
         role: "customer",
         onboardingCompleted: true,
-      });
+      };
+      if (latitude != null && longitude != null) {
+        updateData.latitude = String(latitude);
+        updateData.longitude = String(longitude);
+      }
+
+      const updated = await storage.updateUserProfile(userId, updateData);
 
       res.json(updated);
     } catch (error) {

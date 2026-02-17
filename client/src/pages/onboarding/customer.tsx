@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -43,6 +44,7 @@ export default function CustomerOnboarding() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user, logout } = useAuth();
+  const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
 
   const form = useForm<CustomerOnboardingData>({
     resolver: zodResolver(customerOnboardingSchema),
@@ -56,7 +58,12 @@ export default function CustomerOnboarding() {
 
   const onboardMutation = useMutation({
     mutationFn: async (data: CustomerOnboardingData) => {
-      const res = await apiRequest("POST", "/api/onboarding/customer", data);
+      const payload = {
+        ...data,
+        latitude: coordinates?.latitude,
+        longitude: coordinates?.longitude,
+      };
+      const res = await apiRequest("POST", "/api/onboarding/customer", payload);
       return res.json();
     },
     onSuccess: () => {
@@ -172,7 +179,14 @@ export default function CustomerOnboarding() {
                       <FormControl>
                         <GooglePlacesAutocomplete
                           value={field.value}
-                          onChange={field.onChange}
+                          onChange={(val) => {
+                            field.onChange(val);
+                            setCoordinates(null);
+                          }}
+                          onSelect={(address, _placeId, coords) => {
+                            field.onChange(address);
+                            if (coords) setCoordinates(coords);
+                          }}
                           placeholder="42 Long Street, Cape Town, 8001"
                           data-testid="input-onboard-address"
                         />
