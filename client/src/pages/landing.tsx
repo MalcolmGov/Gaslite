@@ -489,12 +489,14 @@ export default function LandingPage() {
                   <CardContent className="p-8 text-center">
                     <motion.div
                       whileHover={{ scale: 1.05 }}
-                      className="w-28 h-36 mx-auto mb-6 relative"
+                      className="mx-auto mb-6 flex items-center justify-center p-4 bg-white rounded-xl"
+                      style={{ height: "180px" }}
                     >
                       <img
                         src={getProductImage(product.size) || ""}
                         alt={`${product.size} Gas Cylinder`}
-                        className="w-full h-full object-contain drop-shadow-lg"
+                        className="max-h-full max-w-full object-contain"
+                        style={{ mixBlendMode: "multiply" }}
                       />
                     </motion.div>
                     <h3 className="text-xl font-bold mb-2">{product.name}</h3>

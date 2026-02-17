@@ -10,9 +10,9 @@ const sizeImageMap: Record<string, string> = {
 
 export function getProductImage(size: string): string | null {
   const normalized = size.toLowerCase().replace(/\s/g, "");
-  for (const [key, url] of Object.entries(sizeImageMap)) {
-    if (normalized.includes(key)) return url;
-  }
+  if (normalized.includes("48kg")) return sizeImageMap["48kg"];
+  if (normalized.includes("19kg")) return sizeImageMap["19kg"];
+  if (normalized.includes("9kg")) return sizeImageMap["9kg"];
   return null;
 }
 
