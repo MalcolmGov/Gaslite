@@ -1,5 +1,5 @@
 import img9kg from "@assets/9kg_1771297736162.png";
-import img19kg from "@assets/19kg_clean.png";
+import img19kg from "@assets/ChatGPT_Image_Feb_17,_2026,_05_19_27_AM_1771298392950.png";
 import img48kg from "@assets/48kg_clean.png";
 
 const sizeImageMap: Record<string, string> = {
