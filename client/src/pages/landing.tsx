@@ -128,9 +128,9 @@ export default function LandingPage() {
               <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
               <a href="#drivers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Drive With Us</a>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <ThemeToggle />
-              <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")}>
+              <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")} className="hidden sm:inline-flex">
                 <Button variant="ghost" size="sm" data-testid="link-become-driver">
                   Become a Driver
                 </Button>
