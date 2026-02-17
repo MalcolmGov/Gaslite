@@ -347,7 +347,7 @@ export default function AdminDashboard() {
             </Card>
           </div>
 
-          {(slaBreachedOrders.length > 0 || slaWarningOrders.length > 0) && (
+          {false && (slaBreachedOrders.length > 0 || slaWarningOrders.length > 0) && (
             <Card className={`overflow-visible ${slaBreachedOrders.length > 0 ? "border-red-500/40" : "border-yellow-500/30"}`}>
               <CardContent className="py-4">
                 <div className="flex items-center gap-3 mb-3">
@@ -461,29 +461,6 @@ export default function AdminDashboard() {
                                         {getDriverName(order.driverId)}
                                       </Badge>
                                     )}
-                                    {(() => {
-                                      const sla = getOrderSlaStatus(order);
-                                      const age = getOrderAgeMinutes(order);
-                                      if (sla === "breached") return (
-                                        <Badge className="bg-red-500/10 text-red-600" data-testid={`badge-sla-order-${order.id}`}>
-                                          <AlertTriangle className="h-3 w-3 mr-1" />
-                                          SLA Breached ({age >= 60 ? `${Math.floor(age / 60)}h ${age % 60}m` : `${age}m`})
-                                        </Badge>
-                                      );
-                                      if (sla === "warning") return (
-                                        <Badge className="bg-yellow-500/10 text-yellow-600" data-testid={`badge-sla-order-${order.id}`}>
-                                          <Timer className="h-3 w-3 mr-1" />
-                                          At Risk ({age}m)
-                                        </Badge>
-                                      );
-                                      if (order.status === "delivered" || order.status === "cancelled") return (
-                                        <Badge className="bg-green-500/10 text-green-600">
-                                          <CheckCircle className="h-3 w-3 mr-1" />
-                                          Within SLA
-                                        </Badge>
-                                      );
-                                      return null;
-                                    })()}
                                   </div>
                                   <p className="text-sm text-muted-foreground flex items-center gap-1">
                                     <MapPin className="h-3 w-3" />
