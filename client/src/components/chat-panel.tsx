@@ -70,7 +70,8 @@ export function ChatPanel({ threadType, threadId, currentUserId, title, collapse
         data-testid="button-open-chat"
         variant="default"
         size="default"
-        className="fixed bottom-4 right-4 z-50 gap-2 shadow-lg"
+        className="gap-2 shadow-lg"
+        style={{ position: "fixed", bottom: "16px", right: "16px", zIndex: 9999 }}
         onClick={() => setIsOpen(true)}
       >
         <MessageCircle className="h-4 w-4" />
@@ -83,7 +84,7 @@ export function ChatPanel({ threadType, threadId, currentUserId, title, collapse
   }
 
   return (
-    <Card className="fixed bottom-4 right-4 z-50 w-80 max-h-[28rem] flex flex-col shadow-lg" data-testid="chat-panel">
+    <Card className="w-80 max-h-[28rem] flex flex-col shadow-lg" style={{ position: "fixed", bottom: "16px", right: "16px", zIndex: 9999 }} data-testid="chat-panel">
       <CardHeader className="flex flex-row items-center justify-between gap-2 p-3 border-b">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <MessageCircle className="h-4 w-4" />
