@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GasLite Logo Preview</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    transition: background 0.4s ease;
+  }
+  
+  body.dark {
+    background: linear-gradient(160deg, #070E1A 0%, #0B1A30 50%, #070E1A 100%);
+  }
+  body.light {
+    background: #F3F4F6;
+  }
+  
+  .toggle {
+    display: flex;
+    gap: 8px;
+    margin: 40px 0 20px;
+  }
+  .toggle button {
+    padding: 8px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .toggle button.active {
+    background: linear-gradient(135deg, #0055FF, #0077FF);
+    color: #fff;
+  }
+  .dark .toggle button:not(.active) {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.5);
+  }
+  .light .toggle button:not(.active) {
+    background: #ddd;
+    color: #666;
+  }
+  
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin-top: 40px;
+    margin-bottom: 16px;
+  }
+  .dark .section-label { color: rgba(255,255,255,0.3); }
+  .light .section-label { color: #aaa; }
+  
+  /* === THE LOGO === */
+  .gaslite-logo {
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .gaslite-logo .logo-text-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .gaslite-logo .wordmark {
+    display: flex;
+    align-items: baseline;
+    line-height: 1;
+  }
+  
+  .gaslite-logo .word-gas {
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .dark .gaslite-logo .word-gas { color: #FFFFFF; }
+  .light .gaslite-logo .word-gas { color: #1B2A4A; }
+  
+  .gaslite-logo .word-lite {
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    background: linear-gradient(180deg, #5AB0FF 0%, #0052EE 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .gaslite-logo .tagline {
+    font-size: 0.265em;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .dark .gaslite-logo .tagline { color: rgba(255,255,255,0.5); }
+  .light .gaslite-logo .tagline { color: #8899AA; }
+  
+  /* Navbar mock */
+  .navbar-mock {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-radius: 12px;
+    width: min(620px, 90vw);
+  }
+  .dark .navbar-mock {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .light .navbar-mock {
+    background: #FFFFFF;
+    border: 1px solid #e5e5e5;
+  }
+  .navbar-mock .nav-links {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+  }
+  .dark .navbar-mock .nav-links { color: rgba(255,255,255,0.4); }
+  .light .navbar-mock .nav-links { color: #aaa; }
+</style>
+</head>
+<body class="dark">
+
+<div class="toggle">
+  <button class="active" onclick="setMode('dark')">Dark</button>
+  <button onclick="setMode('light')">Light</button>
+</div>
+
+<!-- ============================================ -->
+<!--  FULL LOGO WITH FLAME                        -->
+<!-- ============================================ -->
+<div class="section-label">Full Logo with Flame</div>
+
+<div class="gaslite-logo" style="font-size: 38px;">
+  <!-- FLAME SVG — this is the correct pointed flame, NOT a water droplet -->
+  <svg width="33" height="46" viewBox="0 0 33 46" fill="none" style="margin-right: 7px;" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="f1o" x1="16.5" y1="0" x2="16.5" y2="46" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#FFFFFF"/>
+        <stop offset="20%" stop-color="#C4E4FF"/>
+        <stop offset="50%" stop-color="#3399FF"/>
+        <stop offset="80%" stop-color="#0060DD"/>
+        <stop offset="100%" stop-color="#003DAA"/>
+      </linearGradient>
+      <linearGradient id="f1i" x1="16.5" y1="20" x2="16.5" y2="44" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85"/>
+        <stop offset="60%" stop-color="#80BBFF" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#0055DD" stop-opacity="0.1"/>
+      </linearGradient>
+    </defs>
+    <!--
+      OUTER FLAME: Pointed narrow tip at top, widens into a bulbous
+      body, tapers to a rounded bottom. Key: the top is a SHARP POINT,
+      the widest part is in the lower-middle, and the bottom is rounded.
+      This is a FLAME shape, not a symmetrical teardrop/water drop.
+    -->
+    <path d="
+      M16.5 0
+      C16.5 0, 15.8 2.5, 15 5
+      C13.5 10, 10 15.5, 7.5 21
+      C4.5 28, 4 33, 6 37
+      C8 41.5, 11.5 44.5, 16.5 46
+      C21.5 44.5, 25 41.5, 27 37
+      C29 33, 28.5 28, 25.5 21
+      C23 15.5, 19.5 10, 18 5
+      C17.2 2.5, 16.5 0, 16.5 0Z
+    " fill="url(#f1o)"/>
+    <!-- INNER FLAME: lighter core for depth -->
+    <path d="
+      M16.5 20
+      C16.5 20, 14 25, 12.5 29
+      C11 33, 11.5 37, 13.5 40
+      C14.5 42, 15.5 43, 16.5 43.5
+      C17.5 43, 18.5 42, 19.5 40
+      C21.5 37, 22 33, 20.5 29
+      C19 25, 16.5 20, 16.5 20Z
+    " fill="url(#f1i)"/>
+  </svg>
+  <div class="logo-text-group">
+    <div class="wordmark">
+      <span class="word-gas">Gas</span><span class="word-lite">Lite</span>
+    </div>
+    <span class="tagline">FAST.&ensp;SAFE.&ensp;RELIABLE</span>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!--  TEXT ONLY (NO FLAME)                         -->
+<!-- ============================================ -->
+<div class="section-label">Text Only (No Flame)</div>
+
+<div class="gaslite-logo" style="font-size: 38px;">
+  <div class="logo-text-group">
+    <div class="wordmark">
+      <span class="word-gas">Gas</span><span class="word-lite">Lite</span>
+    </div>
+    <span class="tagline">FAST.&ensp;SAFE.&ensp;RELIABLE</span>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!--  NAVBAR PREVIEW                               -->
+<!-- ============================================ -->
+<div class="section-label">Navbar Preview</div>
+
+<div class="navbar-mock">
+  <div class="gaslite-logo" style="font-size: 24px;">
+    <svg width="21" height="29" viewBox="0 0 33 46" fill="none" style="margin-right: 5px;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="f2o" x1="16.5" y1="0" x2="16.5" y2="46" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#FFFFFF"/>
+          <stop offset="20%" stop-color="#C4E4FF"/>
+          <stop offset="50%" stop-color="#3399FF"/>
+          <stop offset="80%" stop-color="#0060DD"/>
+          <stop offset="100%" stop-color="#003DAA"/>
+        </linearGradient>
+        <linearGradient id="f2i" x1="16.5" y1="20" x2="16.5" y2="44" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85"/>
+          <stop offset="60%" stop-color="#80BBFF" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#0055DD" stop-opacity="0.1"/>
+        </linearGradient>
+      </defs>
+      <path d="M16.5 0C16.5 0 15.8 2.5 15 5C13.5 10 10 15.5 7.5 21C4.5 28 4 33 6 37C8 41.5 11.5 44.5 16.5 46C21.5 44.5 25 41.5 27 37C29 33 28.5 28 25.5 21C23 15.5 19.5 10 18 5C17.2 2.5 16.5 0 16.5 0Z" fill="url(#f2o)"/>
+      <path d="M16.5 20C16.5 20 14 25 12.5 29C11 33 11.5 37 13.5 40C14.5 42 15.5 43 16.5 43.5C17.5 43 18.5 42 19.5 40C21.5 37 22 33 20.5 29C19 25 16.5 20 16.5 20Z" fill="url(#f2i)"/>
+    </svg>
+    <div class="logo-text-group">
+      <div class="wordmark">
+        <span class="word-gas">Gas</span><span class="word-lite">Lite</span>
+      </div>
+      <span class="tagline">FAST.&ensp;SAFE.&ensp;RELIABLE</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <span>Home</span>
+    <span>Orders</span>
+    <span>Profile</span>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!--  SIZE VARIANTS                                -->
+<!-- ============================================ -->
+<div class="section-label">Size Variants</div>
+
+<div style="display:flex; flex-direction:column; gap:28px; align-items:center; margin-bottom: 60px;">
+  <!-- 18px -->
+  <div class="gaslite-logo" style="font-size: 18px;">
+    <svg width="15" height="21" viewBox="0 0 33 46" fill="none" style="margin-right: 4px;">
+      <defs>
+        <linearGradient id="f3o" x1="16.5" y1="0" x2="16.5" y2="46" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="20%" stop-color="#C4E4FF"/><stop offset="50%" stop-color="#3399FF"/><stop offset="80%" stop-color="#0060DD"/><stop offset="100%" stop-color="#003DAA"/></linearGradient>
+        <linearGradient id="f3i" x1="16.5" y1="20" x2="16.5" y2="44" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85"/><stop offset="60%" stop-color="#80BBFF" stop-opacity="0.35"/><stop offset="100%" stop-color="#0055DD" stop-opacity="0.1"/></linearGradient>
+      </defs>
+      <path d="M16.5 0C16.5 0 15.8 2.5 15 5C13.5 10 10 15.5 7.5 21C4.5 28 4 33 6 37C8 41.5 11.5 44.5 16.5 46C21.5 44.5 25 41.5 27 37C29 33 28.5 28 25.5 21C23 15.5 19.5 10 18 5C17.2 2.5 16.5 0 16.5 0Z" fill="url(#f3o)"/><path d="M16.5 20C16.5 20 14 25 12.5 29C11 33 11.5 37 13.5 40C14.5 42 15.5 43 16.5 43.5C17.5 43 18.5 42 19.5 40C21.5 37 22 33 20.5 29C19 25 16.5 20 16.5 20Z" fill="url(#f3i)"/>
+    </svg>
+    <div class="logo-text-group">
+      <div class="wordmark"><span class="word-gas">Gas</span><span class="word-lite">Lite</span></div>
+    </div>
+  </div>
+  <!-- 28px -->
+  <div class="gaslite-logo" style="font-size: 28px;">
+    <svg width="24" height="34" viewBox="0 0 33 46" fill="none" style="margin-right: 5px;">
+      <defs>
+        <linearGradient id="f4o" x1="16.5" y1="0" x2="16.5" y2="46" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="20%" stop-color="#C4E4FF"/><stop offset="50%" stop-color="#3399FF"/><stop offset="80%" stop-color="#0060DD"/><stop offset="100%" stop-color="#003DAA"/></linearGradient>
+        <linearGradient id="f4i" x1="16.5" y1="20" x2="16.5" y2="44" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85"/><stop offset="60%" stop-color="#80BBFF" stop-opacity="0.35"/><stop offset="100%" stop-color="#0055DD" stop-opacity="0.1"/></linearGradient>
+      </defs>
+      <path d="M16.5 0C16.5 0 15.8 2.5 15 5C13.5 10 10 15.5 7.5 21C4.5 28 4 33 6 37C8 41.5 11.5 44.5 16.5 46C21.5 44.5 25 41.5 27 37C29 33 28.5 28 25.5 21C23 15.5 19.5 10 18 5C17.2 2.5 16.5 0 16.5 0Z" fill="url(#f4o)"/><path d="M16.5 20C16.5 20 14 25 12.5 29C11 33 11.5 37 13.5 40C14.5 42 15.5 43 16.5 43.5C17.5 43 18.5 42 19.5 40C21.5 37 22 33 20.5 29C19 25 16.5 20 16.5 20Z" fill="url(#f4i)"/>
+    </svg>
+    <div class="logo-text-group">
+      <div class="wordmark"><span class="word-gas">Gas</span><span class="word-lite">Lite</span></div>
+      <span class="tagline">FAST.&ensp;SAFE.&ensp;RELIABLE</span>
+    </div>
+  </div>
+  <!-- 48px -->
+  <div class="gaslite-logo" style="font-size: 48px;">
+    <svg width="41" height="57" viewBox="0 0 33 46" fill="none" style="margin-right: 8px;">
+      <defs>
+        <linearGradient id="f5o" x1="16.5" y1="0" x2="16.5" y2="46" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="20%" stop-color="#C4E4FF"/><stop offset="50%" stop-color="#3399FF"/><stop offset="80%" stop-color="#0060DD"/><stop offset="100%" stop-color="#003DAA"/></linearGradient>
+        <linearGradient id="f5i" x1="16.5" y1="20" x2="16.5" y2="44" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85"/><stop offset="60%" stop-color="#80BBFF" stop-opacity="0.35"/><stop offset="100%" stop-color="#0055DD" stop-opacity="0.1"/></linearGradient>
+      </defs>
+      <path d="M16.5 0C16.5 0 15.8 2.5 15 5C13.5 10 10 15.5 7.5 21C4.5 28 4 33 6 37C8 41.5 11.5 44.5 16.5 46C21.5 44.5 25 41.5 27 37C29 33 28.5 28 25.5 21C23 15.5 19.5 10 18 5C17.2 2.5 16.5 0 16.5 0Z" fill="url(#f5o)"/><path d="M16.5 20C16.5 20 14 25 12.5 29C11 33 11.5 37 13.5 40C14.5 42 15.5 43 16.5 43.5C17.5 43 18.5 42 19.5 40C21.5 37 22 33 20.5 29C19 25 16.5 20 16.5 20Z" fill="url(#f5i)"/>
+    </svg>
+    <div class="logo-text-group">
+      <div class="wordmark"><span class="word-gas">Gas</span><span class="word-lite">Lite</span></div>
+      <span class="tagline">FAST.&ensp;SAFE.&ensp;RELIABLE</span>
+    </div>
+  </div>
+  <!-- 64px -->
+  <div class="gaslite-logo" style="font-size: 64px;">
+    <svg width="55" height="76" viewBox="0 0 33 46" fill="none" style="margin-right: 10px;">
+      <defs>
+        <linearGradient id="f6o" x1="16.5" y1="0" x2="16.5" y2="46" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="20%" stop-color="#C4E4FF"/><stop offset="50%" stop-color="#3399FF"/><stop offset="80%" stop-color="#0060DD"/><stop offset="100%" stop-color="#003DAA"/></linearGradient>
+        <linearGradient id="f6i" x1="16.5" y1="20" x2="16.5" y2="44" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85"/><stop offset="60%" stop-color="#80BBFF" stop-opacity="0.35"/><stop offset="100%" stop-color="#0055DD" stop-opacity="0.1"/></linearGradient>
+      </defs>
+      <path d="M16.5 0C16.5 0 15.8 2.5 15 5C13.5 10 10 15.5 7.5 21C4.5 28 4 33 6 37C8 41.5 11.5 44.5 16.5 46C21.5 44.5 25 41.5 27 37C29 33 28.5 28 25.5 21C23 15.5 19.5 10 18 5C17.2 2.5 16.5 0 16.5 0Z" fill="url(#f6o)"/><path d="M16.5 20C16.5 20 14 25 12.5 29C11 33 11.5 37 13.5 40C14.5 42 15.5 43 16.5 43.5C17.5 43 18.5 42 19.5 40C21.5 37 22 33 20.5 29C19 25 16.5 20 16.5 20Z" fill="url(#f6i)"/>
+    </svg>
+    <div class="logo-text-group">
+      <div class="wordmark"><span class="word-gas">Gas</span><span class="word-lite">Lite</span></div>
+      <span class="tagline">FAST.&ensp;SAFE.&ensp;RELIABLE</span>
+    </div>
+  </div>
+</div>
+
+<script>
+function setMode(mode) {
+  document.body.className = mode;
+  document.querySelectorAll('.toggle button').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.toLowerCase() === mode);
+  });
+}
+</script>
+</body>
+</html>
