@@ -795,6 +795,27 @@ export default function DriverDashboard() {
             </Card>
           )}
 
+          {pushPermission === "granted" && (
+            <div className="flex items-center gap-2 px-1">
+              <Bell className="h-4 w-4 text-green-500" />
+              <span className="text-sm text-green-600 dark:text-green-400 font-medium">Notifications: On</span>
+            </div>
+          )}
+
+          {pushPermission === "denied" && (
+            <Card className="overflow-visible border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/30">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <Bell className="h-5 w-5 text-orange-500" />
+                  <div>
+                    <p className="font-medium text-sm">Notifications Blocked</p>
+                    <p className="text-xs text-muted-foreground">To receive order alerts, tap the lock icon in your browser address bar and allow notifications for this site.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="overflow-visible">
             <CardHeader>
               <CardTitle>Go Online</CardTitle>
