@@ -950,8 +950,26 @@ export async function registerRoutes(
 
       if (status === "delivered") {
         updateData.deliveredAt = new Date();
+
+        const commissionRates: Record<string, number> = {
+          "9kg": 80,
+          "19kg": 200,
+          "48kg": 500,
+        };
+        const orderWithItems = await storage.getOrderWithItems(order.id);
+        let commission = 0;
+        if (orderWithItems?.items) {
+          for (const item of orderWithItems.items) {
+            const rate = commissionRates[item.productSize] || 0;
+            commission += rate * (item.quantity || 1);
+          }
+        }
+        updateData.driverEarnings = commission.toFixed(2);
+
+        const currentTotal = parseFloat(driver.totalEarnings?.toString() || "0");
         await storage.updateDriver(driver.id, {
           totalDeliveries: (driver.totalDeliveries || 0) + 1,
+          totalEarnings: (currentTotal + commission).toFixed(2),
           status: "available",
         });
       }
