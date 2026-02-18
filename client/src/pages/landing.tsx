@@ -486,22 +486,22 @@ export default function LandingPage() {
                   </div>
                 )}
                 <Card className={`h-full overflow-hidden transition-all duration-300 hover:shadow-2xl ${product.popular ? 'ring-2 ring-primary shadow-xl shadow-blue-500/20' : 'hover:shadow-blue-500/10'}`}>
-                  <CardContent className="p-8 text-center">
+                  <CardContent className="p-6 text-center">
                     <motion.div
                       whileHover={{ scale: 1.05 }}
-                      className="mx-auto mb-6 flex items-center justify-center"
-                      style={{ height: "220px", padding: "12px" }}
+                      className="mx-auto mb-4 flex items-end justify-center"
+                      style={{ height: "180px" }}
                     >
                       <img
                         src={getProductImage(product.size) || ""}
                         alt={`${product.size} Gas Cylinder`}
-                        className="w-auto object-contain"
-                        style={{ height: product.size === "9kg" ? "150px" : product.size === "19kg" ? "180px" : "200px" }}
+                        className="w-auto object-contain max-w-full"
+                        style={{ height: product.size === "9kg" ? "130px" : product.size === "19kg" ? "155px" : "175px" }}
                       />
                     </motion.div>
-                    <h3 className="text-xl font-bold mb-2">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">{product.description}</p>
-                    <div className="mb-6">
+                    <h3 className="text-xl font-bold mb-1">{product.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{product.description}</p>
+                    <div className="mb-4">
                       <span className="text-sm text-muted-foreground">From</span>
                       <div className="text-4xl font-bold text-primary">R{product.price}</div>
                     </div>
