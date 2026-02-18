@@ -496,7 +496,7 @@ export default function LandingPage() {
                         src={getProductImage(product.size) || ""}
                         alt={`${product.size} Gas Cylinder`}
                         className="w-auto object-contain max-w-full"
-                        style={{ height: product.size === "9kg" ? "130px" : product.size === "19kg" ? "155px" : "175px" }}
+                        style={{ height: product.size === "9kg" ? "150px" : product.size === "19kg" ? "170px" : "180px" }}
                       />
                     </motion.div>
                     <h3 className="text-xl font-bold mb-1">{product.name}</h3>
