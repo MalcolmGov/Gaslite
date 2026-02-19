@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gaslite-v2';
+const CACHE_NAME = 'gaslite-v3';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
