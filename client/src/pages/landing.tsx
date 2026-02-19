@@ -114,23 +114,24 @@ export default function LandingPage() {
       />
 
       <nav className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-2">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-2 py-2">
             <motion.div 
-              className="flex items-center gap-2"
+              className="flex-shrink-0"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
             >
-              <GasliteLogo size="md" showTagline showFlame />
+              <GasliteLogo size="sm" showFlame className="sm:hidden" />
+              <GasliteLogo size="md" showTagline showFlame className="hidden sm:flex" />
             </motion.div>
             <div className="hidden md:flex items-center gap-6">
               <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
               <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
               <a href="#drivers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Drive With Us</a>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
               <ThemeToggle />
-              <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")} className="hidden sm:inline-flex">
+              <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")} className="hidden lg:inline-flex">
                 <Button variant="ghost" size="sm" data-testid="link-become-driver">
                   Become a Driver
                 </Button>
