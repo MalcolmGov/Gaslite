@@ -357,12 +357,11 @@ export async function registerRoutes(
       }
 
       const isTestOrder = orderItems.some(i => i.productSize === "Test");
-      const serviceFee = isTestOrder ? 1 : 0;
-      const beforeCardFee = subtotal + serviceFee;
+      const serviceFee = isTestOrder ? 1 : 29;
       const cardProcessingFee = method === "card"
-        ? Math.round(beforeCardFee * 0.026 * 1.15 * 100) / 100
+        ? Math.round(subtotal * 0.026 * 1.15 * 100) / 100
         : 0;
-      const total = beforeCardFee + cardProcessingFee;
+      const total = subtotal + cardProcessingFee;
 
       let finalLat = deliveryLatitude ? String(deliveryLatitude) : null;
       let finalLng = deliveryLongitude ? String(deliveryLongitude) : null;

@@ -265,10 +265,9 @@ export default function CustomerHome() {
     0
   );
   const isTestOrder = cart.some(item => item.product.size === "Test");
-  const serviceFee = cartTotal > 0 ? (isTestOrder ? 1 : 0) : 0;
-  const beforeCardFee = cartTotal + serviceFee;
-  const cardProcessingFee = Math.round(beforeCardFee * 0.026 * 1.15 * 100) / 100;
-  const total = beforeCardFee + cardProcessingFee;
+  const serviceFee = isTestOrder ? 1 : 29;
+  const cardProcessingFee = cartTotal > 0 ? Math.round(cartTotal * 0.026 * 1.15 * 100) / 100 : 0;
+  const total = cartTotal + cardProcessingFee;
 
   const handlePlaceOrder = () => {
     if (!deliveryAddress.trim()) {
@@ -924,12 +923,10 @@ export default function CustomerHome() {
                           <span className="text-muted-foreground">Subtotal</span>
                           <span data-testid="text-subtotal">R{cartTotal.toFixed(2)}</span>
                         </div>
-                        {serviceFee > 0 && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Service Fee</span>
-                            <span data-testid="text-service-fee">R{serviceFee.toFixed(2)}</span>
-                          </div>
-                        )}
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Service Fee <span className="text-xs italic">(included in pricing)</span></span>
+                          <span className="text-muted-foreground" data-testid="text-service-fee">R{serviceFee.toFixed(2)}</span>
+                        </div>
                         {cardProcessingFee > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Card Processing Fee</span>

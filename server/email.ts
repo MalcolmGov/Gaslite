@@ -308,8 +308,8 @@ function buildOrderConfirmationHtml(data: OrderEmailData): string {
                               <td style="padding: 5px 0; color: #334155; font-size: 14px; text-align: right; font-weight: 500;">R${Number(data.subtotal).toFixed(2)}</td>
                             </tr>
                             <tr>
-                              <td style="padding: 5px 0; color: #64748B; font-size: 14px;">Service Fee</td>
-                              <td style="padding: 5px 0; color: #334155; font-size: 14px; text-align: right; font-weight: 500;">R${Number(data.serviceFee).toFixed(2)}</td>
+                              <td style="padding: 5px 0; color: #64748B; font-size: 14px;">Service Fee <span style="font-size: 11px; color: #94A3B8;">(included in pricing)</span></td>
+                              <td style="padding: 5px 0; color: #64748B; font-size: 14px; text-align: right;">R${Number(data.serviceFee).toFixed(2)}</td>
                             </tr>
                             <tr>
                               <td style="padding: 5px 0; color: #64748B; font-size: 14px;">Card Processing Fee <span style="font-size: 11px; color: #94A3B8;">(2.6% + 15% VAT)</span></td>

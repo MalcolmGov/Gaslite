@@ -543,8 +543,8 @@ export default function LandingPage() {
                     <h3 className="text-lg font-bold mb-0.5">{product.name}</h3>
                     <p className="text-sm text-muted-foreground mb-2">{product.description}</p>
                     <div className="mb-3">
-                      <span className="text-xs text-muted-foreground">From</span>
                       <div className="text-3xl font-bold text-primary">R{product.price}</div>
+                      <span className="text-xs text-muted-foreground italic">Incl. R29 service fee</span>
                     </div>
                     <Button className={`w-full ${product.popular ? 'bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500' : ''}`} variant={product.popular ? "default" : "outline"}>
                       Order Now

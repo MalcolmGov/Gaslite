@@ -45,7 +45,7 @@ export default function TermsOfService() {
 
             <section>
               <h2 className="text-xl font-semibold mb-3">4. Orders and Payment</h2>
-              <p className="text-muted-foreground">All orders are subject to availability and confirmation. Prices are displayed in South African Rand (ZAR) and include VAT where applicable. A service fee of R29.00 applies to all orders. Card payments incur a processing fee of 2.6% plus 15% VAT on the processing fee. Payment is processed at the time of order placement. Gaslite accepts card payments only — no cash on delivery.</p>
+              <p className="text-muted-foreground">All orders are subject to availability and confirmation. Prices are displayed in South African Rand (ZAR) and include VAT where applicable. A service fee of R29.00 is included in all product prices. Card payments incur a processing fee of 2.6% plus 15% VAT on the processing fee. Payment is processed at the time of order placement. Gaslite accepts card payments only — no cash on delivery.</p>
             </section>
 
             <section>
