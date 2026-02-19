@@ -1,8 +1,9 @@
 {
   "name": "Gaslite - On-Demand LPG Gas Delivery",
   "short_name": "Gaslite",
-  "description": "South Africa's fastest on-demand LPG gas delivery. Order 9kg, 19kg, or 48kg cylinders delivered to your door within 30-60 minutes.",
+  "description": "South Africa's fastest on-demand LPG gas delivery. Order 9kg, 19kg, or 48kg cylinders delivered to your door.",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#0F172A",
   "theme_color": "#3B82F6",
@@ -13,18 +14,25 @@
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/favicon.png",
-      "sizes": "64x64",
-      "type": "image/png"
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
