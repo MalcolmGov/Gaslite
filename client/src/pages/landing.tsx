@@ -622,76 +622,37 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-start mb-12">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <Card className="bg-gradient-to-br from-blue-500 to-cyan-400 text-white border-0 overflow-hidden">
-                <CardContent className="p-8 relative">
-                  <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-                  <h3 className="text-2xl font-bold mb-6">Commission Per Delivery</h3>
-                  <div className="space-y-4 relative">
-                    {[
-                      { size: "9kg", commission: "R80", label: "Compact Cylinder" },
-                      { size: "19kg", commission: "R200", label: "Standard Cylinder" },
-                      { size: "48kg", commission: "R500", label: "Commercial Cylinder" },
-                    ].map((item) => (
-                      <div key={item.size} className="flex items-center justify-between p-4 bg-white/15 rounded-xl backdrop-blur-sm">
-                        <div>
-                          <p className="font-bold text-lg">{item.size}</p>
-                          <p className="text-white/70 text-sm">{item.label}</p>
-                        </div>
-                        <div className="text-3xl font-bold">{item.commission}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-6 p-4 bg-white/10 rounded-xl text-center">
-                    <p className="text-white/70 text-sm">Platform subscription</p>
-                    <p className="text-2xl font-bold">Only R39<span className="text-base font-normal text-white/70">/month</span></p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="space-y-4"
-            >
-              {[
-                { icon: ToggleRight, title: "Flexible Schedule", desc: "Go online or offline anytime — work when it suits you, no fixed shifts" },
-                { icon: MapPin, title: "Smart Order Matching", desc: "Orders matched within 10km of your location — no wasted trips" },
-                { icon: TrendingUp, title: "Earnings Dashboard", desc: "Track your earnings in real time: today, this week, this month, and total" },
-                { icon: Navigation, title: "GPS Navigation", desc: "One-tap navigation to delivery addresses via Google Maps" },
-                { icon: Bell, title: "Instant Order Alerts", desc: "Push notifications the moment new orders are available nearby" },
-                { icon: MessageCircle, title: "In-App Chat", desc: "Message customers directly, plus dedicated admin support chat" },
-                { icon: FileCheck, title: "Easy Onboarding", desc: "Structured 3-step application with simple document upload" },
-                { icon: Truck, title: "Clear Status Flow", desc: "Accept, Pick Up, In Transit, Delivered — simple delivery workflow" },
-              ].map((item, index) => (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Card className="border-border/50 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 group">
-                    <CardContent className="p-4 flex items-start gap-4">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <item.icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-0.5">{item.title}</h4>
-                        <p className="text-sm text-muted-foreground">{item.desc}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </motion.div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-12">
+            {[
+              { icon: ToggleRight, title: "Flexible Schedule", desc: "Go online or offline anytime — work when it suits you, no fixed shifts" },
+              { icon: MapPin, title: "Smart Order Matching", desc: "Orders matched within 10km of your location — no wasted trips" },
+              { icon: TrendingUp, title: "Earnings Dashboard", desc: "Track your earnings in real time: today, this week, this month, and total" },
+              { icon: Navigation, title: "GPS Navigation", desc: "One-tap navigation to delivery addresses via Google Maps" },
+              { icon: Bell, title: "Instant Order Alerts", desc: "Push notifications the moment new orders are available nearby" },
+              { icon: MessageCircle, title: "In-App Chat", desc: "Message customers directly, plus dedicated admin support chat" },
+              { icon: FileCheck, title: "Easy Onboarding", desc: "Structured 3-step application with simple document upload" },
+              { icon: Truck, title: "Clear Status Flow", desc: "Accept, Pick Up, In Transit, Delivered — simple delivery workflow" },
+            ].map((item, index) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <Card className="h-full border-border/50 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 group">
+                  <CardContent className="p-5 flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-0.5">{item.title}</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
 
           <motion.div
