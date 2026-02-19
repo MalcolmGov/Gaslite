@@ -70,9 +70,22 @@ self.addEventListener('push', (event) => {
       icon: '/icon-192.png',
       badge: '/icon-192.png',
       tag: data.tag || 'gaslite-notification',
-      data: { url: data.url || '/' },
+      data: {
+        url: data.url || '/',
+        orderId: data.orderId || null,
+        type: data.type || 'general',
+      },
       vibrate: [200, 100, 200],
+      requireInteraction: data.type === 'new-order',
     };
+
+    if (data.type === 'new-order' && data.orderId) {
+      options.actions = [
+        { action: 'accept', title: 'Accept Order' },
+        { action: 'dismiss', title: 'Dismiss' },
+      ];
+      options.requireInteraction = true;
+    }
 
     event.waitUntil(
       self.registration.showNotification(data.title || 'Gaslite', options)
@@ -83,20 +96,69 @@ self.addEventListener('push', (event) => {
 });
 
 self.addEventListener('notificationclick', (event) => {
+  const action = event.action;
+  const notificationData = event.notification.data || {};
+
   event.notification.close();
 
-  const url = event.notification.data?.url || '/';
+  if (action === 'accept' && notificationData.orderId) {
+    event.waitUntil(
+      fetch('/api/driver/accept-order/' + notificationData.orderId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      })
+        .then((response) => {
+          if (response.ok) {
+            return self.registration.showNotification('Gaslite', {
+              body: 'Order accepted! Open the app to start your delivery.',
+              icon: '/icon-192.png',
+              badge: '/icon-192.png',
+              tag: 'order-accepted',
+              data: { url: '/' },
+            }).then(() => openApp('/'));
+          } else {
+            return response.json().then((data) => {
+              return self.registration.showNotification('Gaslite', {
+                body: data.error || 'Could not accept order — it may already be taken.',
+                icon: '/icon-192.png',
+                badge: '/icon-192.png',
+                tag: 'order-accept-failed',
+                data: { url: '/' },
+              });
+            });
+          }
+        })
+        .catch(() => {
+          return self.registration.showNotification('Gaslite', {
+            body: 'Could not accept order. Please open the app and try again.',
+            icon: '/icon-192.png',
+            badge: '/icon-192.png',
+            tag: 'order-accept-failed',
+            data: { url: '/' },
+          });
+        })
+    );
+    return;
+  }
 
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-      for (const client of clients) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
-          client.focus();
-          client.navigate(url);
-          return;
-        }
-      }
-      return self.clients.openWindow(url);
-    })
-  );
+  if (action === 'dismiss') {
+    return;
+  }
+
+  const url = notificationData.url || '/';
+  event.waitUntil(openApp(url));
 });
+
+function openApp(url) {
+  return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+    for (const client of clients) {
+      if (client.url.includes(self.location.origin) && 'focus' in client) {
+        client.focus();
+        client.navigate(url);
+        return;
+      }
+    }
+    return self.clients.openWindow(url);
+  });
+}

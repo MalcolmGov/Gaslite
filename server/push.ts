@@ -34,7 +34,7 @@ export async function removeSubscription(endpoint: string) {
   await db.delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, endpoint));
 }
 
-async function sendToUser(userId: string, payload: { title: string; body: string; url?: string; tag?: string }) {
+async function sendToUser(userId: string, payload: Record<string, any>) {
   const subs = await db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
 
   for (const sub of subs) {
@@ -51,16 +51,22 @@ async function sendToUser(userId: string, payload: { title: string; body: string
   }
 }
 
-export async function notifyDriversNewOrder(orderId: string, orderNumber: string, deliveryAddress: string) {
+export async function notifyDriversNewOrder(orderId: string, orderNumber: string, deliveryAddress: string, itemsSummary?: string) {
   const allDrivers = await storage.getDrivers();
   const availableDrivers = allDrivers.filter(d => d.status === "available");
+
+  const body = itemsSummary
+    ? `${itemsSummary} — deliver to ${deliveryAddress}`
+    : `Order ${orderNumber} needs delivery to ${deliveryAddress}`;
 
   for (const driver of availableDrivers) {
     await sendToUser(driver.userId, {
       title: "New Order Available",
-      body: `Order ${orderNumber} needs delivery to ${deliveryAddress}`,
+      body,
       url: "/",
       tag: `new-order-${orderId}`,
+      type: "new-order",
+      orderId,
     });
   }
 }

@@ -563,7 +563,10 @@ export async function registerRoutes(
           }
         })();
 
-        notifyDriversNewOrder(order.id, order.orderNumber, order.deliveryAddress).catch(err =>
+        const itemsSummary = updatedOrder?.items
+          ?.map((item: any) => `${item.quantity}x ${item.productSize}`)
+          .join(', ') || '';
+        notifyDriversNewOrder(order.id, order.orderNumber, order.deliveryAddress, itemsSummary).catch(err =>
           console.error('Push notification to drivers failed:', err)
         );
 
@@ -647,7 +650,10 @@ export async function registerRoutes(
                 }
               })();
 
-              notifyDriversNewOrder(order.id, order.orderNumber, order.deliveryAddress).catch(err =>
+              const webhookItemsSummary = updatedOrder?.items
+                ?.map((item: any) => `${item.quantity}x ${item.productSize}`)
+                .join(', ') || '';
+              notifyDriversNewOrder(order.id, order.orderNumber, order.deliveryAddress, webhookItemsSummary).catch(err =>
                 console.error('Webhook push notification to drivers failed:', err)
               );
             } catch (verifyError) {
