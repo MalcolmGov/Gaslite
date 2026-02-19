@@ -487,16 +487,16 @@ export default function LandingPage() {
                   </div>
                 )}
                 <Card className={`h-full overflow-hidden transition-all duration-300 hover:shadow-2xl ${product.popular ? 'ring-2 ring-primary shadow-xl shadow-blue-500/20' : 'hover:shadow-blue-500/10'}`}>
-                  <div className="flex items-end justify-center px-4 pt-4 pb-1" style={{ height: "160px" }}>
+                  <div className="flex items-end justify-center px-2 pt-2 pb-0">
                     <motion.img
                       whileHover={{ scale: 1.05 }}
                       src={getProductImage(product.size) || ""}
                       alt={`${product.size} Gas Cylinder`}
-                      className="w-auto object-contain max-w-full drop-shadow-md"
-                      style={{ height: product.size === "9kg" ? "120px" : product.size === "19kg" ? "140px" : "150px" }}
+                      className="w-auto object-contain drop-shadow-md"
+                      style={{ height: product.size === "9kg" ? "180px" : product.size === "19kg" ? "200px" : "220px", maxWidth: "90%" }}
                     />
                   </div>
-                  <CardContent className="px-5 pb-5 pt-3 text-center">
+                  <CardContent className="px-5 pb-5 pt-2 text-center">
                     <h3 className="text-lg font-bold mb-0.5">{product.name}</h3>
                     <p className="text-sm text-muted-foreground mb-2">{product.description}</p>
                     <div className="mb-3">
