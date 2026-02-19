@@ -118,9 +118,11 @@ self.addEventListener('notificationclick', (event) => {
               data: { url: '/' },
             }).then(() => openApp('/'));
           } else {
-            return response.json().then((data) => {
+            return response.text().then((text) => {
+              let errorMsg = 'Could not accept order — it may already be taken.';
+              try { errorMsg = JSON.parse(text).error || errorMsg; } catch (_) {}
               return self.registration.showNotification('Gaslite', {
-                body: data.error || 'Could not accept order — it may already be taken.',
+                body: errorMsg,
                 icon: '/icon-192.png',
                 badge: '/icon-192.png',
                 tag: 'order-accept-failed',
