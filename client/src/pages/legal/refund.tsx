@@ -56,7 +56,7 @@ export default function RefundPolicy() {
 
             <section>
               <h2 className="text-xl font-semibold mb-3">4. Refund Processing</h2>
-              <p className="text-muted-foreground">Approved refunds are processed within 5-10 business days. Refunds are returned to the original payment method (card) used for the transaction. The delivery fee and card processing fee may be included in the refund for cancelled orders. Bank processing times may vary — please allow additional time for the refund to reflect in your account.</p>
+              <p className="text-muted-foreground">Approved refunds are processed within 5-10 business days. Refunds are returned to the original payment method (card) used for the transaction. The service fee and card processing fee may be included in the refund for cancelled orders. Bank processing times may vary — please allow additional time for the refund to reflect in your account.</p>
             </section>
 
             <section>
@@ -66,7 +66,7 @@ export default function RefundPolicy() {
 
             <section>
               <h2 className="text-xl font-semibold mb-3">6. Failed Deliveries</h2>
-              <p className="text-muted-foreground">If a delivery fails due to circumstances within Gaslite's or the driver's control (e.g., driver unavailable, system error), a full refund will be issued automatically. If a delivery fails because you were unavailable at the delivery address or provided an incorrect address, a re-delivery fee may apply.</p>
+              <p className="text-muted-foreground">If a delivery fails due to circumstances within Gaslite's or the driver's control (e.g., driver unavailable, system error), a full refund will be issued automatically. If a delivery fails because you were unavailable at the delivery address or provided an incorrect address, a re-delivery service fee may apply.</p>
             </section>
 
             <section>

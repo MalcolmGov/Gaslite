@@ -271,7 +271,7 @@ export default function LandingPage() {
                         <span className="font-medium">R523</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Delivery Fee</span>
+                        <span className="text-muted-foreground">Service Fee</span>
                         <span className="font-medium">R29</span>
                       </div>
                       <div className="h-px bg-border" />

@@ -83,7 +83,7 @@ The schema supports a multi-role user system where authentication users extend i
 - **Sender**: "Gaslite" <malcolmgov24@gmail.com>
 - **Implementation**: `server/email.ts` — Gmail client, MIME message builder, HTML email template
 - **Trigger**: Automatic on order creation (POST `/api/orders`), runs in background (non-blocking)
-- **Email content**: Professional branded HTML with order confirmation, item breakdown, payment receipt (subtotal, delivery fee, card processing fee, total), delivery address, order number, and "what happens next" section
+- **Email content**: Professional branded HTML with order confirmation, item breakdown, payment receipt (subtotal, service fee, card processing fee, total), delivery address, order number, and "what happens next" section
 - **Security**: HTML escaping on all user-supplied fields to prevent injection
 
 ### Yoco Card Payments

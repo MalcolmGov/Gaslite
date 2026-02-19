@@ -308,7 +308,7 @@ function buildOrderConfirmationHtml(data: OrderEmailData): string {
                               <td style="padding: 5px 0; color: #334155; font-size: 14px; text-align: right; font-weight: 500;">R${Number(data.subtotal).toFixed(2)}</td>
                             </tr>
                             <tr>
-                              <td style="padding: 5px 0; color: #64748B; font-size: 14px;">Delivery Fee</td>
+                              <td style="padding: 5px 0; color: #64748B; font-size: 14px;">Service Fee</td>
                               <td style="padding: 5px 0; color: #334155; font-size: 14px; text-align: right; font-weight: 500;">R${Number(data.serviceFee).toFixed(2)}</td>
                             </tr>
                             <tr>

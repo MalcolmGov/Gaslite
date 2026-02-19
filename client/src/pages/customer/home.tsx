@@ -925,8 +925,8 @@ export default function CustomerHome() {
                           <span data-testid="text-subtotal">R{cartTotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Delivery Fee</span>
-                          <span data-testid="text-delivery-fee">R{serviceFee.toFixed(2)}</span>
+                          <span className="text-muted-foreground">Service Fee</span>
+                          <span data-testid="text-service-fee">R{serviceFee.toFixed(2)}</span>
                         </div>
                         {cardProcessingFee > 0 && (
                           <div className="flex justify-between text-sm">
