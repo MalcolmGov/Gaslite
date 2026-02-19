@@ -265,7 +265,7 @@ export default function CustomerHome() {
     0
   );
   const isTestOrder = cart.some(item => item.product.size === "Test");
-  const serviceFee = cartTotal > 0 ? (isTestOrder ? 1 : 29) : 0;
+  const serviceFee = cartTotal > 0 ? (isTestOrder ? 1 : 0) : 0;
   const beforeCardFee = cartTotal + serviceFee;
   const cardProcessingFee = Math.round(beforeCardFee * 0.026 * 1.15 * 100) / 100;
   const total = beforeCardFee + cardProcessingFee;
@@ -924,10 +924,12 @@ export default function CustomerHome() {
                           <span className="text-muted-foreground">Subtotal</span>
                           <span data-testid="text-subtotal">R{cartTotal.toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Service Fee</span>
-                          <span data-testid="text-service-fee">R{serviceFee.toFixed(2)}</span>
-                        </div>
+                        {serviceFee > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Service Fee</span>
+                            <span data-testid="text-service-fee">R{serviceFee.toFixed(2)}</span>
+                          </div>
+                        )}
                         {cardProcessingFee > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Card Processing Fee</span>

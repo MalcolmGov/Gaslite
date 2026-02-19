@@ -38,9 +38,9 @@ const steps = [
       <div className="relative p-4">
         <div className="bg-muted/50 rounded-lg p-4 space-y-3">
           {[
-            { name: "9kg Cylinder", price: "R233", size: "9kg" },
-            { name: "19kg Cylinder", price: "R523", size: "19kg" },
-            { name: "48kg Cylinder", price: "R1,316", size: "48kg" },
+            { name: "9kg Cylinder", price: "R262", size: "9kg" },
+            { name: "19kg Cylinder", price: "R552", size: "19kg" },
+            { name: "48kg Cylinder", price: "R1,345", size: "48kg" },
           ].map((item) => (
             <div key={item.name} className="flex items-center justify-between bg-background rounded-md p-3">
               <div className="flex items-center gap-3">
@@ -210,7 +210,7 @@ const steps = [
               </div>
               <div className="flex items-center gap-1.5">
                 <CreditCard className="h-3.5 w-3.5" />
-                <span>R523 card</span>
+                <span>R552 card</span>
               </div>
             </div>
             <div className="flex gap-1 mt-3">

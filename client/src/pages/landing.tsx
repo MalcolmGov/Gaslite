@@ -103,9 +103,9 @@ export default function LandingPage() {
   const [demoOpen, setDemoOpen] = useState(false);
 
   const products = [
-    { size: "9kg", name: "Compact Cylinder", price: 233, popular: false, description: "Perfect for small households" },
-    { size: "19kg", name: "Standard Cylinder", price: 523, popular: true, description: "Most popular for families" },
-    { size: "48kg", name: "Commercial Cylinder", price: 1316, popular: false, description: "Ideal for businesses" },
+    { size: "9kg", name: "Compact Cylinder", price: 262, popular: false, description: "Perfect for small households" },
+    { size: "19kg", name: "Standard Cylinder", price: 552, popular: true, description: "Most popular for families" },
+    { size: "48kg", name: "Commercial Cylinder", price: 1345, popular: false, description: "Ideal for businesses" },
   ];
 
   const testimonials = [
@@ -268,11 +268,10 @@ export default function LandingPage() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">19kg Gas Cylinder</span>
-                        <span className="font-medium">R523</span>
+                        <span className="font-medium">R552</span>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Service Fee</span>
-                        <span className="font-medium">R29</span>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground italic">Incl. R29 service fee</span>
                       </div>
                       <div className="h-px bg-border" />
                       <div className="flex items-center justify-between">
