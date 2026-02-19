@@ -485,7 +485,7 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
               >
-                <Card className="h-full border-border/50 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 group">
+                <Card className="h-full border-2 border-blue-400/30 dark:border-blue-500/30 hover:border-blue-500/60 dark:hover:border-blue-400/60 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 group">
                   <CardContent className="p-5 flex items-start gap-4">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                       <item.icon className="h-5 w-5 text-primary" />
@@ -640,7 +640,7 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
               >
-                <Card className="h-full border-border/50 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 group">
+                <Card className="h-full border-2 border-blue-400/30 dark:border-blue-500/30 hover:border-blue-500/60 dark:hover:border-blue-400/60 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 group">
                   <CardContent className="p-5 flex items-start gap-4">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                       <item.icon className="h-5 w-5 text-primary" />
