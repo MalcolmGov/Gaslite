@@ -487,24 +487,21 @@ export default function LandingPage() {
                   </div>
                 )}
                 <Card className={`h-full overflow-hidden transition-all duration-300 hover:shadow-2xl ${product.popular ? 'ring-2 ring-primary shadow-xl shadow-blue-500/20' : 'hover:shadow-blue-500/10'}`}>
-                  <CardContent className="p-6 text-center">
-                    <motion.div
+                  <div className="flex items-end justify-center px-4 pt-4 pb-1" style={{ height: "160px" }}>
+                    <motion.img
                       whileHover={{ scale: 1.05 }}
-                      className="mx-auto mb-4 flex items-end justify-center"
-                      style={{ height: "180px" }}
-                    >
-                      <img
-                        src={getProductImage(product.size) || ""}
-                        alt={`${product.size} Gas Cylinder`}
-                        className="w-auto object-contain max-w-full"
-                        style={{ height: product.size === "9kg" ? "150px" : product.size === "19kg" ? "170px" : "180px" }}
-                      />
-                    </motion.div>
-                    <h3 className="text-xl font-bold mb-1">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{product.description}</p>
-                    <div className="mb-4">
-                      <span className="text-sm text-muted-foreground">From</span>
-                      <div className="text-4xl font-bold text-primary">R{product.price}</div>
+                      src={getProductImage(product.size) || ""}
+                      alt={`${product.size} Gas Cylinder`}
+                      className="w-auto object-contain max-w-full drop-shadow-md"
+                      style={{ height: product.size === "9kg" ? "120px" : product.size === "19kg" ? "140px" : "150px" }}
+                    />
+                  </div>
+                  <CardContent className="px-5 pb-5 pt-3 text-center">
+                    <h3 className="text-lg font-bold mb-0.5">{product.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-2">{product.description}</p>
+                    <div className="mb-3">
+                      <span className="text-xs text-muted-foreground">From</span>
+                      <div className="text-3xl font-bold text-primary">R{product.price}</div>
                     </div>
                     <Button className={`w-full ${product.popular ? 'bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500' : ''}`} variant={product.popular ? "default" : "outline"}>
                       Order Now
