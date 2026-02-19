@@ -1,17 +1,14 @@
-const CACHE_NAME = 'gaslite-v1';
-const STATIC_ASSETS = [
-  '/',
-  '/favicon.png',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/gaslite-logo.png',
-  '/manifest.json'
-];
+const CACHE_NAME = 'gaslite-v2';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      return Promise.allSettled([
+        cache.add('/favicon.png'),
+        cache.add('/icon-192.png'),
+        cache.add('/icon-512.png'),
+        cache.add('/manifest.json'),
+      ]);
     })
   );
   self.skipWaiting();
@@ -34,29 +31,32 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   if (url.pathname.startsWith('/api/')) return;
+  if (url.pathname.startsWith('/ws')) return;
 
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('/'))
-    );
-    return;
-  }
-
-  if (STATIC_ASSETS.includes(url.pathname)) {
-    event.respondWith(
-      caches.match(event.request).then((cached) => {
-        return cached || fetch(event.request).then((response) => {
+      fetch(event.request)
+        .then((response) => {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
-        });
-      })
+        })
+        .catch(() => caches.match('/') || caches.match(event.request))
     );
     return;
   }
 
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    caches.match(event.request).then((cached) => {
+      const fetchPromise = fetch(event.request).then((response) => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return response;
+      }).catch(() => cached);
+      return cached || fetchPromise;
+    })
   );
 });
 

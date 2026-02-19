@@ -13,7 +13,8 @@ export function PWAInstallBanner() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia("(display-mode: standalone)").matches) {
+    if (window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as any).standalone === true) {
       setIsInstalled(true);
       return;
     }
@@ -27,9 +28,15 @@ export function PWAInstallBanner() {
       }
     }
 
+    if (window.__pwaInstallPrompt) {
+      setDeferredPrompt(window.__pwaInstallPrompt as BeforeInstallPromptEvent);
+      window.__pwaInstallPrompt = undefined;
+    }
+
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
+      window.__pwaInstallPrompt = undefined;
     };
 
     window.addEventListener("beforeinstallprompt", handler);
