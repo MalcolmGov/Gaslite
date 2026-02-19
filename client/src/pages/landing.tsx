@@ -28,7 +28,15 @@ import {
   DollarSign,
   ChevronRight,
   Play,
-  Sparkles
+  Sparkles,
+  Smartphone,
+  MessageCircle,
+  Bell,
+  Receipt,
+  Navigation,
+  ToggleRight,
+  FileCheck,
+  Eye
 } from "lucide-react";
 import { SiInstagram, SiFacebook, SiX } from "react-icons/si";
 
@@ -391,9 +399,12 @@ export default function LandingPage() {
           >
             <Badge className="mb-4 bg-blue-500/10 text-blue-600">Why Gaslite</Badge>
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">Built for <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Trust & Speed</span></h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Everything you need for effortless gas delivery — from ordering to your doorstep.
+            </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -411,8 +422,8 @@ export default function LandingPage() {
                     >
                       <Clock className="h-8 w-8" />
                     </motion.div>
-                    <h3 className="text-3xl font-bold mb-4">Rapid Delivery</h3>
-                    <p className="text-white/80 text-lg">Our drivers are strategically located across major cities for lightning-fast delivery.</p>
+                    <h3 className="text-3xl font-bold mb-4">Order in Under 60 Seconds</h3>
+                    <p className="text-white/80 text-lg">No queues, no driving to depots. Browse, tap, pay — and your gas is on its way.</p>
                   </div>
                   <div className="mt-8 flex items-center gap-4">
                     <div className="text-center">
@@ -430,10 +441,10 @@ export default function LandingPage() {
             </motion.div>
 
             {[
-              { icon: Shield, title: "Verified Drivers", value: "100%", desc: "Background checked" },
-              { icon: Award, title: "Quality Gas", value: "SABS", desc: "Certified suppliers" },
-              { icon: Users, title: "Customers", value: "10K+", desc: "Happy users" },
-              { icon: Zap, title: "Instant Updates", value: "Real-time", desc: "Track every step" },
+              { icon: Shield, title: "Safe & Secure", value: "100%", desc: "Card-only payments, verified drivers, SABS-approved cylinders" },
+              { icon: Eye, title: "Transparent Pricing", value: "R0", desc: "All fees visible upfront — no hidden charges" },
+              { icon: Users, title: "Happy Customers", value: "10K+", desc: "Trusted across South Africa" },
+              { icon: Zap, title: "Real-Time Tracking", value: "Live", desc: "Uber-style map showing your driver's location" },
             ].map((item, index) => (
               <motion.div
                 key={item.title}
@@ -450,6 +461,39 @@ export default function LandingPage() {
                     <div className="text-2xl font-bold text-primary mb-1">{item.value}</div>
                     <h3 className="font-semibold mb-1">{item.title}</h3>
                     <p className="text-sm text-muted-foreground">{item.desc}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+            {[
+              { icon: MapPin, title: "Saved Addresses", desc: "GPS-pinned delivery address saved to your profile — no re-entering each time" },
+              { icon: Receipt, title: "Email Receipts", desc: "Professional branded confirmation emails with full payment breakdown" },
+              { icon: MessageCircle, title: "In-App Chat", desc: "Direct messaging with your assigned driver during active deliveries" },
+              { icon: Bell, title: "Push Notifications", desc: "Real-time alerts when your order is accepted, picked up, and delivered" },
+              { icon: Smartphone, title: "Multi-Device", desc: "Works on any phone, tablet, or desktop — no app store download needed" },
+              { icon: CreditCard, title: "Card-Only Payments", desc: "Visa, Mastercard, Amex, Apple Pay, Google Pay — safe and accountable" },
+              { icon: Award, title: "SABS Approved Gas", desc: "All cylinders sourced from certified suppliers meeting safety standards" },
+              { icon: CheckCircle, title: "Full Order History", desc: "View all past and active orders with status tracking and details" },
+            ].map((item, index) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <Card className="h-full border-border/50 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 group">
+                  <CardContent className="p-5 flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-1">{item.title}</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -563,74 +607,107 @@ export default function LandingPage() {
 
       <section id="drivers" className="py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <Badge className="mb-4 bg-blue-500/10 text-blue-600">Join Our Team</Badge>
+            <h2 className="text-4xl sm:text-5xl font-bold mb-6">
+              Earn Money <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Your Way</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Become a Gaslite driver and enjoy flexible hours, competitive commission, and the freedom to be your own boss. Only R39/month to get started.
+            </p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-start mb-12">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <Badge className="mb-4 bg-blue-500/10 text-blue-600">Join Our Team</Badge>
-              <h2 className="text-4xl sm:text-5xl font-bold mb-6">
-                Earn Money <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Your Way</span>
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8">
-                Become a Gaslite driver and enjoy flexible hours, competitive pay, and the freedom to be your own boss.
-              </p>
-              <div className="grid sm:grid-cols-2 gap-6 mb-8">
-                {[
-                  { icon: DollarSign, title: "Competitive Pay", desc: "Earn per delivery + tips" },
-                  { icon: Clock, title: "Flexible Hours", desc: "Work when you want" },
-                  { icon: TrendingUp, title: "Growth", desc: "Weekly bonuses available" },
-                  { icon: Shield, title: "Support", desc: "24/7 driver support" },
-                ].map((item) => (
-                  <div key={item.title} className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <item.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">{item.title}</h4>
-                      <p className="text-sm text-muted-foreground">{item.desc}</p>
-                    </div>
+              <Card className="bg-gradient-to-br from-blue-500 to-cyan-400 text-white border-0 overflow-hidden">
+                <CardContent className="p-8 relative">
+                  <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+                  <h3 className="text-2xl font-bold mb-6">Commission Per Delivery</h3>
+                  <div className="space-y-4 relative">
+                    {[
+                      { size: "9kg", commission: "R80", label: "Compact Cylinder" },
+                      { size: "19kg", commission: "R200", label: "Standard Cylinder" },
+                      { size: "48kg", commission: "R500", label: "Commercial Cylinder" },
+                    ].map((item) => (
+                      <div key={item.size} className="flex items-center justify-between p-4 bg-white/15 rounded-xl backdrop-blur-sm">
+                        <div>
+                          <p className="font-bold text-lg">{item.size}</p>
+                          <p className="text-white/70 text-sm">{item.label}</p>
+                        </div>
+                        <div className="text-3xl font-bold">{item.commission}</div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")}>
-                <Button size="lg" className="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 shadow-lg shadow-blue-500/25" data-testid="button-driver-apply">
-                  Apply Now
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </a>
+                  <div className="mt-6 p-4 bg-white/10 rounded-xl text-center">
+                    <p className="text-white/70 text-sm">Platform subscription</p>
+                    <p className="text-2xl font-bold">Only R39<span className="text-base font-normal text-white/70">/month</span></p>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
+              className="space-y-4"
             >
-              <Card className="bg-gradient-to-br from-card to-muted/50 border-border/50">
-                <CardContent className="p-8">
-                  <h3 className="text-xl font-bold mb-6">Why Drive With Us</h3>
-                  <div className="space-y-6">
-                    <div className="p-4 bg-blue-500/10 rounded-xl text-center">
-                      <p className="text-sm text-muted-foreground mb-2">Flexible Delivery Schedule</p>
-                      <div className="text-4xl font-bold text-primary">Your Hours</div>
-                      <p className="text-xs text-muted-foreground mt-2">Work when it suits you</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-center">
-                      <div className="p-4 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold">10km</div>
-                        <p className="text-xs text-muted-foreground">Delivery Radius</p>
+              {[
+                { icon: ToggleRight, title: "Flexible Schedule", desc: "Go online or offline anytime — work when it suits you, no fixed shifts" },
+                { icon: MapPin, title: "Smart Order Matching", desc: "Orders matched within 10km of your location — no wasted trips" },
+                { icon: TrendingUp, title: "Earnings Dashboard", desc: "Track your earnings in real time: today, this week, this month, and total" },
+                { icon: Navigation, title: "GPS Navigation", desc: "One-tap navigation to delivery addresses via Google Maps" },
+                { icon: Bell, title: "Instant Order Alerts", desc: "Push notifications the moment new orders are available nearby" },
+                { icon: MessageCircle, title: "In-App Chat", desc: "Message customers directly, plus dedicated admin support chat" },
+                { icon: FileCheck, title: "Easy Onboarding", desc: "Structured 3-step application with simple document upload" },
+                { icon: Truck, title: "Clear Status Flow", desc: "Accept, Pick Up, In Transit, Delivered — simple delivery workflow" },
+              ].map((item, index) => (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="border-border/50 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 group">
+                    <CardContent className="p-4 flex items-start gap-4">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <item.icon className="h-5 w-5 text-primary" />
                       </div>
-                      <div className="p-4 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold">24/7</div>
-                        <p className="text-xs text-muted-foreground">Support</p>
+                      <div>
+                        <h4 className="font-semibold mb-0.5">{item.title}</h4>
+                        <p className="text-sm text-muted-foreground">{item.desc}</p>
                       </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
             </motion.div>
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")}>
+              <Button size="lg" className="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 shadow-lg shadow-blue-500/25 h-14 px-10 text-lg" data-testid="button-driver-apply">
+                Start Earning Today
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </a>
+            <p className="text-sm text-muted-foreground mt-4">Commission calculated automatically on every delivery</p>
+          </motion.div>
         </div>
       </section>
 
