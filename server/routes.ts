@@ -16,7 +16,7 @@ import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { users } from "@shared/models/auth";
 import { orders } from "@shared/schema";
-import { saveSubscription, removeSubscription, notifyDriversNewOrder, notifyCustomerOrderUpdate, notifyDriverOrderCancelled } from "./push";
+import { saveSubscription, removeSubscription, notifyDriversNewOrder, notifyCustomerOrderUpdate, notifyDriverOrderCancelled, notifyDriverApplicationUpdate } from "./push";
 import { createYocoCheckout, getYocoCheckoutStatus } from "./yoco";
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -1140,6 +1140,12 @@ export async function registerRoutes(
           });
         }
         await storage.updateUserProfile(application.userId, { role: "driver" });
+      }
+
+      if (application.userId && (status === "approved" || status === "rejected")) {
+        notifyDriverApplicationUpdate(application.userId, status, reviewNotes).catch(err =>
+          console.error('Push notification for application update failed:', err)
+        );
       }
 
       res.json(updated);

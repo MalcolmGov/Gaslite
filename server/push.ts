@@ -90,6 +90,25 @@ export async function notifyCustomerOrderUpdate(customerId: string, orderNumber:
   });
 }
 
+export async function notifyDriverApplicationUpdate(userId: string, status: string, reviewNotes?: string | null) {
+  if (status === "approved") {
+    await sendToUser(userId, {
+      title: "Application Approved!",
+      body: "Congratulations! Your driver application has been approved. You can now go online and start accepting deliveries.",
+      url: "/",
+      tag: "application-approved",
+    });
+  } else if (status === "rejected") {
+    const reason = reviewNotes ? ` Reason: ${reviewNotes}` : "";
+    await sendToUser(userId, {
+      title: "Application Update",
+      body: `Your driver application was not approved.${reason} Please contact support for more information.`,
+      url: "/",
+      tag: "application-rejected",
+    });
+  }
+}
+
 export async function notifyDriverOrderCancelled(driverId: string, orderNumber: string) {
   const driver = await storage.getDriver(driverId);
   if (!driver) return;
