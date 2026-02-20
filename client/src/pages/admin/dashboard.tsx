@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -133,30 +133,70 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/stats"],
   });
 
+  const [earningsWeekOffset, setEarningsWeekOffset] = useState(0);
+  const [expandedDriver, setExpandedDriver] = useState<string | null>(null);
+
+  interface DeliveryItem {
+    productSize: string;
+    quantity: number;
+    commission: number;
+  }
+  interface DeliveryDetail {
+    orderId: string;
+    orderNumber: string;
+    deliveredAt: string;
+    items: DeliveryItem[];
+    commission: string;
+  }
   interface DriverEarningRow {
     driverId: string;
     driverName: string;
     phone: string | null;
+    bankName: string | null;
+    accountNumber: string | null;
     status: string;
-    totalDeliveries: number;
-    totalEarnings: string;
+    weekDeliveries: number;
     weekEarnings: string;
-    monthEarnings: string;
+    allTimeEarnings: string;
+    deliveries: DeliveryDetail[];
+    settlement: {
+      id: string;
+      status: string;
+      paidAt: string | null;
+      notes: string | null;
+    } | null;
   }
   interface EarningsResponse {
     drivers: DriverEarningRow[];
+    week: {
+      start: string;
+      end: string;
+      offset: number;
+    };
     summary: {
       weekTotal: string;
-      monthTotal: string;
       grandTotal: string;
       totalDrivers: number;
     };
   }
 
   const { data: earningsData, isLoading: earningsLoading } = useQuery<EarningsResponse>({
-    queryKey: ["/api/admin/driver-earnings"],
+    queryKey: [`/api/admin/driver-earnings?weekOffset=${earningsWeekOffset}`],
     enabled: selectedTab === "earnings",
     refetchInterval: selectedTab === "earnings" ? 30000 : false,
+  });
+
+  const markSettlementMutation = useMutation({
+    mutationFn: async (data: { driverId: string; weekStart: string; weekEnd: string; totalEarnings: string; deliveryCount: number; status: string }) => {
+      return apiRequest("POST", "/api/admin/settlements/mark", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Settlement updated" });
+      queryClient.invalidateQueries({ queryKey: [`/api/admin/driver-earnings?weekOffset=${earningsWeekOffset}`] });
+    },
+    onError: () => {
+      toast({ title: "Failed to update settlement", variant: "destructive" });
+    },
   });
 
   const updateOrderMutation = useMutation({
@@ -1066,7 +1106,35 @@ export default function AdminDashboard() {
                 </div>
               ) : earningsData ? (
                 <>
-                  <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="flex items-center justify-between">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEarningsWeekOffset(earningsWeekOffset - 1)}
+                      data-testid="button-prev-week"
+                    >
+                      <ChevronDown className="h-4 w-4 mr-1 rotate-90" /> Previous
+                    </Button>
+                    <div className="text-center">
+                      <p className="text-sm font-semibold" data-testid="text-week-range">
+                        {new Date(earningsData.week.start).toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short" })} – {new Date(earningsData.week.end).toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {earningsWeekOffset === 0 ? "Current Week" : earningsWeekOffset === -1 ? "Last Week" : `${Math.abs(earningsWeekOffset)} weeks ${earningsWeekOffset < 0 ? "ago" : "ahead"}`}
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEarningsWeekOffset(earningsWeekOffset + 1)}
+                      disabled={earningsWeekOffset >= 0}
+                      data-testid="button-next-week"
+                    >
+                      Next <ChevronDown className="h-4 w-4 ml-1 -rotate-90" />
+                    </Button>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
                     <Card className="overflow-visible">
                       <CardContent className="pt-6">
                         <div className="flex items-center gap-4">
@@ -1074,21 +1142,8 @@ export default function AdminDashboard() {
                             <Calendar className="h-6 w-6 text-blue-600" />
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground">This Week</p>
+                            <p className="text-sm text-muted-foreground">Week Total</p>
                             <p className="text-2xl font-bold" data-testid="text-admin-week-total">R{earningsData.summary.weekTotal}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card className="overflow-visible">
-                      <CardContent className="pt-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
-                            <Banknote className="h-6 w-6 text-purple-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">This Month</p>
-                            <p className="text-2xl font-bold" data-testid="text-admin-month-total">R{earningsData.summary.monthTotal}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1112,10 +1167,10 @@ export default function AdminDashboard() {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Wallet className="h-5 w-5" />
-                        Weekly Settlement Overview
+                        Weekly Settlement
                       </CardTitle>
                       <CardDescription>
-                        Earnings per driver for the current week (Sun - Sat). Use this for weekly payouts.
+                        Friday-to-Thursday earnings cycle. Click a driver row to see delivery details.
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -1127,48 +1182,152 @@ export default function AdminDashboard() {
                             <thead>
                               <tr className="border-b border-border">
                                 <th className="text-left py-3 px-2 font-medium text-muted-foreground">Driver</th>
-                                <th className="text-left py-3 px-2 font-medium text-muted-foreground">Phone</th>
-                                <th className="text-center py-3 px-2 font-medium text-muted-foreground">Status</th>
+                                <th className="text-left py-3 px-2 font-medium text-muted-foreground hidden sm:table-cell">Phone</th>
                                 <th className="text-center py-3 px-2 font-medium text-muted-foreground">Deliveries</th>
-                                <th className="text-right py-3 px-2 font-medium text-muted-foreground">This Week</th>
-                                <th className="text-right py-3 px-2 font-medium text-muted-foreground">This Month</th>
-                                <th className="text-right py-3 px-2 font-medium text-muted-foreground">All Time</th>
+                                <th className="text-right py-3 px-2 font-medium text-muted-foreground">Earnings</th>
+                                <th className="text-center py-3 px-2 font-medium text-muted-foreground">Payout</th>
+                                <th className="text-center py-3 px-2 font-medium text-muted-foreground w-8"></th>
                               </tr>
                             </thead>
                             <tbody>
                               {earningsData.drivers
                                 .sort((a, b) => Number(b.weekEarnings) - Number(a.weekEarnings))
                                 .map(driver => (
-                                <tr key={driver.driverId} className="border-b border-border last:border-0" data-testid={`row-driver-earnings-${driver.driverId}`}>
-                                  <td className="py-3 px-2 font-medium" data-testid={`text-driver-name-${driver.driverId}`}>{driver.driverName}</td>
-                                  <td className="py-3 px-2 text-muted-foreground" data-testid={`text-driver-phone-${driver.driverId}`}>{driver.phone || "-"}</td>
-                                  <td className="py-3 px-2 text-center">
-                                    <Badge
-                                      variant={driver.status === "available" ? "default" : driver.status === "busy" ? "secondary" : "outline"}
-                                      data-testid={`badge-driver-status-${driver.driverId}`}
-                                    >
-                                      {driver.status}
-                                    </Badge>
-                                  </td>
-                                  <td className="py-3 px-2 text-center" data-testid={`text-driver-deliveries-${driver.driverId}`}>{driver.totalDeliveries}</td>
-                                  <td className="py-3 px-2 text-right font-bold" data-testid={`text-driver-week-${driver.driverId}`}>
-                                    {Number(driver.weekEarnings) > 0 ? (
-                                      <span className="text-green-600">R{driver.weekEarnings}</span>
-                                    ) : (
-                                      <span className="text-muted-foreground">R0.00</span>
-                                    )}
-                                  </td>
-                                  <td className="py-3 px-2 text-right" data-testid={`text-driver-month-${driver.driverId}`}>R{driver.monthEarnings}</td>
-                                  <td className="py-3 px-2 text-right" data-testid={`text-driver-total-${driver.driverId}`}>R{driver.totalEarnings}</td>
-                                </tr>
+                                <Fragment key={driver.driverId}>
+                                  <tr
+                                    className="border-b border-border last:border-0 cursor-pointer hover:bg-muted/50 transition-colors"
+                                    onClick={() => setExpandedDriver(expandedDriver === driver.driverId ? null : driver.driverId)}
+                                    data-testid={`row-driver-earnings-${driver.driverId}`}
+                                  >
+                                    <td className="py-3 px-2">
+                                      <div className="font-medium" data-testid={`text-driver-name-${driver.driverId}`}>{driver.driverName}</div>
+                                      <div className="text-xs text-muted-foreground sm:hidden">{driver.phone || "-"}</div>
+                                    </td>
+                                    <td className="py-3 px-2 text-muted-foreground hidden sm:table-cell" data-testid={`text-driver-phone-${driver.driverId}`}>{driver.phone || "-"}</td>
+                                    <td className="py-3 px-2 text-center" data-testid={`text-driver-deliveries-${driver.driverId}`}>{driver.weekDeliveries}</td>
+                                    <td className="py-3 px-2 text-right font-bold" data-testid={`text-driver-week-${driver.driverId}`}>
+                                      {Number(driver.weekEarnings) > 0 ? (
+                                        <span className="text-green-600">R{driver.weekEarnings}</span>
+                                      ) : (
+                                        <span className="text-muted-foreground">R0.00</span>
+                                      )}
+                                    </td>
+                                    <td className="py-3 px-2 text-center">
+                                      {driver.settlement?.status === "paid" ? (
+                                        <Badge variant="default" className="bg-green-600" data-testid={`badge-settlement-${driver.driverId}`}>
+                                          <CheckCircle className="h-3 w-3 mr-1" /> Paid
+                                        </Badge>
+                                      ) : driver.settlement?.status === "processing" ? (
+                                        <Badge variant="secondary" data-testid={`badge-settlement-${driver.driverId}`}>
+                                          <Clock className="h-3 w-3 mr-1" /> Processing
+                                        </Badge>
+                                      ) : Number(driver.weekEarnings) > 0 ? (
+                                        <Badge variant="outline" className="text-amber-600 border-amber-600" data-testid={`badge-settlement-${driver.driverId}`}>
+                                          <AlertTriangle className="h-3 w-3 mr-1" /> Pending
+                                        </Badge>
+                                      ) : (
+                                        <span className="text-xs text-muted-foreground">-</span>
+                                      )}
+                                    </td>
+                                    <td className="py-3 px-2 text-center">
+                                      {expandedDriver === driver.driverId ? (
+                                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                                      ) : (
+                                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                      )}
+                                    </td>
+                                  </tr>
+                                  {expandedDriver === driver.driverId && (
+                                    <tr>
+                                      <td colSpan={6} className="bg-muted/30 px-4 py-4">
+                                        {driver.deliveries.length === 0 ? (
+                                          <p className="text-sm text-muted-foreground text-center py-2">No deliveries this week</p>
+                                        ) : (
+                                          <div className="space-y-3">
+                                            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Deliveries this week</div>
+                                            {driver.deliveries.map(del => (
+                                              <div key={del.orderId} className="flex items-center justify-between p-2 rounded bg-background border border-border">
+                                                <div>
+                                                  <span className="font-mono text-xs">{del.orderNumber}</span>
+                                                  <span className="text-xs text-muted-foreground ml-2">
+                                                    {new Date(del.deliveredAt).toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short" })}
+                                                  </span>
+                                                  <div className="text-xs text-muted-foreground mt-0.5">
+                                                    {del.items.map(i => `${i.quantity}x ${i.productSize} (R${i.commission})`).join(", ")}
+                                                  </div>
+                                                </div>
+                                                <span className="font-bold text-green-600">R{del.commission}</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
+
+                                        {driver.bankName && (
+                                          <div className="mt-3 p-2 rounded bg-background border border-border text-xs">
+                                            <span className="text-muted-foreground">Bank: </span>
+                                            <span className="font-medium">{driver.bankName}</span>
+                                            {driver.accountNumber && (
+                                              <>
+                                                <span className="text-muted-foreground ml-3">Acc: </span>
+                                                <span className="font-medium">{driver.accountNumber}</span>
+                                              </>
+                                            )}
+                                          </div>
+                                        )}
+
+                                        {Number(driver.weekEarnings) > 0 && driver.settlement?.status !== "paid" && (
+                                          <div className="mt-3 flex gap-2">
+                                            {driver.settlement?.status !== "processing" && (
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  markSettlementMutation.mutate({
+                                                    driverId: driver.driverId,
+                                                    weekStart: earningsData.week.start,
+                                                    weekEnd: earningsData.week.end,
+                                                    totalEarnings: driver.weekEarnings,
+                                                    deliveryCount: driver.weekDeliveries,
+                                                    status: "processing",
+                                                  });
+                                                }}
+                                                data-testid={`button-mark-processing-${driver.driverId}`}
+                                              >
+                                                <Clock className="h-3 w-3 mr-1" /> Mark Processing
+                                              </Button>
+                                            )}
+                                            <Button
+                                              size="sm"
+                                              className="bg-green-600 hover:bg-green-700"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                markSettlementMutation.mutate({
+                                                  driverId: driver.driverId,
+                                                  weekStart: earningsData.week.start,
+                                                  weekEnd: earningsData.week.end,
+                                                  totalEarnings: driver.weekEarnings,
+                                                  deliveryCount: driver.weekDeliveries,
+                                                  status: "paid",
+                                                });
+                                              }}
+                                              data-testid={`button-mark-paid-${driver.driverId}`}
+                                            >
+                                              <CheckCircle className="h-3 w-3 mr-1" /> Mark as Paid
+                                            </Button>
+                                          </div>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  )}
+                                </Fragment>
                               ))}
                             </tbody>
                             <tfoot>
                               <tr className="border-t-2 border-border">
-                                <td colSpan={4} className="py-3 px-2 font-bold">Total ({earningsData.summary.totalDrivers} drivers)</td>
+                                <td colSpan={3} className="py-3 px-2 font-bold">Total ({earningsData.summary.totalDrivers} drivers)</td>
                                 <td className="py-3 px-2 text-right font-bold text-green-600">R{earningsData.summary.weekTotal}</td>
-                                <td className="py-3 px-2 text-right font-bold">R{earningsData.summary.monthTotal}</td>
-                                <td className="py-3 px-2 text-right font-bold">R{earningsData.summary.grandTotal}</td>
+                                <td colSpan={2}></td>
                               </tr>
                             </tfoot>
                           </table>

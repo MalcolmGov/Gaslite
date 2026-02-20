@@ -1174,59 +1174,231 @@ export async function registerRoutes(
     }
   });
 
+  function getFridayWeekBounds(weekOffset: number = 0): { weekStart: Date; weekEnd: Date } {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToFriday = day >= 5 ? day - 5 : day + 2;
+    const weekStart = new Date(now);
+    weekStart.setDate(weekStart.getDate() - diffToFriday + (weekOffset * 7));
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+    return { weekStart, weekEnd };
+  }
+
+  const COMMISSION_RATES: Record<string, number> = {
+    "9kg": 80,
+    "19kg": 200,
+    "48kg": 500,
+    "Test": 1,
+  };
+
   app.get("/api/admin/driver-earnings", isAuthenticated, isAdmin, async (req, res) => {
     try {
+      const weekOffset = parseInt(req.query.weekOffset as string) || 0;
+      const { weekStart, weekEnd } = getFridayWeekBounds(weekOffset);
+
       const allDrivers = await storage.getDriversWithApplications();
       const allOrders = await storage.getOrders();
+      const existingSettlements = await storage.getSettlementsByWeek(weekStart);
+      const settlementMap = new Map(existingSettlements.map(s => [s.driverId, s]));
 
-      const now = new Date();
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-      startOfWeek.setHours(0, 0, 0, 0);
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const weekOrders = allOrders.filter(o => {
+        if (o.status !== "delivered") return false;
+        const orderDate = new Date(o.deliveredAt || o.createdAt!);
+        return orderDate >= weekStart && orderDate <= weekEnd;
+      });
+
+      const weekOrderIds = weekOrders.map(o => o.id);
+      const allItems = await storage.getOrderItemsByOrderIds(weekOrderIds);
+      const itemsByOrder = new Map<string, typeof allItems>();
+      for (const item of allItems) {
+        const existing = itemsByOrder.get(item.orderId) || [];
+        existing.push(item);
+        itemsByOrder.set(item.orderId, existing);
+      }
 
       const driverEarnings = allDrivers.map(driver => {
-        const driverOrders = allOrders.filter(o => o.driverId === driver.id && o.status === "delivered" && o.driverEarnings);
-
-        let totalEarnings = 0;
+        const driverWeekOrders = weekOrders.filter(o => o.driverId === driver.id);
         let weekEarnings = 0;
-        let monthEarnings = 0;
 
-        for (const o of driverOrders) {
-          const amount = Number(o.driverEarnings);
-          totalEarnings += amount;
-          const orderDate = new Date(o.deliveredAt || o.createdAt!);
-          if (orderDate >= startOfWeek) weekEarnings += amount;
-          if (orderDate >= startOfMonth) monthEarnings += amount;
+        const deliveries = driverWeekOrders.map(order => {
+          const items = itemsByOrder.get(order.id) || [];
+          let commission = 0;
+          for (const item of items) {
+            const rate = COMMISSION_RATES[item.productSize] || 0;
+            commission += rate * (item.quantity || 1);
+          }
+          weekEarnings += commission;
+
+          return {
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            deliveredAt: order.deliveredAt || order.createdAt,
+            items: items.map(i => ({
+              productSize: i.productSize,
+              quantity: i.quantity,
+              commission: (COMMISSION_RATES[i.productSize] || 0) * (i.quantity || 1),
+            })),
+            commission: commission.toFixed(2),
+          };
+        });
+
+        const allTimeOrders = allOrders.filter(o => o.driverId === driver.id && o.status === "delivered");
+        let allTimeEarnings = 0;
+        for (const o of allTimeOrders) {
+          allTimeEarnings += Number(o.driverEarnings) || 0;
         }
+
+        const settlement = settlementMap.get(driver.id);
 
         return {
           driverId: driver.id,
           driverName: driver.application ? `${driver.application.firstName} ${driver.application.lastName}` : "Unknown",
           phone: driver.application?.phone || null,
+          bankName: driver.application?.bankName || null,
+          accountNumber: driver.application?.accountNumber || null,
           status: driver.status,
-          totalDeliveries: driverOrders.length,
-          totalEarnings: totalEarnings.toFixed(2),
+          weekDeliveries: driverWeekOrders.length,
           weekEarnings: weekEarnings.toFixed(2),
-          monthEarnings: monthEarnings.toFixed(2),
+          allTimeEarnings: allTimeEarnings.toFixed(2),
+          deliveries,
+          settlement: settlement ? {
+            id: settlement.id,
+            status: settlement.status,
+            paidAt: settlement.paidAt,
+            notes: settlement.notes,
+          } : null,
         };
       });
 
       const weekTotal = driverEarnings.reduce((sum, d) => sum + Number(d.weekEarnings), 0);
-      const monthTotal = driverEarnings.reduce((sum, d) => sum + Number(d.monthEarnings), 0);
-      const grandTotal = driverEarnings.reduce((sum, d) => sum + Number(d.totalEarnings), 0);
+      const grandTotal = driverEarnings.reduce((sum, d) => sum + Number(d.allTimeEarnings), 0);
 
       res.json({
         drivers: driverEarnings,
+        week: {
+          start: weekStart.toISOString(),
+          end: weekEnd.toISOString(),
+          offset: weekOffset,
+        },
         summary: {
           weekTotal: weekTotal.toFixed(2),
-          monthTotal: monthTotal.toFixed(2),
           grandTotal: grandTotal.toFixed(2),
           totalDrivers: allDrivers.length,
         },
       });
     } catch (error) {
+      console.error("Failed to fetch driver earnings:", error);
       res.status(500).json({ error: "Failed to fetch driver earnings" });
+    }
+  });
+
+  app.post("/api/admin/settlements/mark", isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { driverId, weekStart, weekEnd, totalEarnings, deliveryCount, status, notes } = req.body;
+      if (!driverId || !weekStart || !weekEnd || !status) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      const settlement = await storage.upsertSettlement({
+        driverId,
+        weekStart: new Date(weekStart),
+        weekEnd: new Date(weekEnd),
+        totalEarnings: totalEarnings || "0",
+        deliveryCount: deliveryCount || 0,
+        status,
+        paidAt: status === "paid" ? new Date() : null,
+        notes: notes || null,
+      });
+
+      res.json(settlement);
+    } catch (error) {
+      console.error("Failed to update settlement:", error);
+      res.status(500).json({ error: "Failed to update settlement" });
+    }
+  });
+
+  app.get("/api/admin/settlements", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const driverId = req.query.driverId as string;
+      if (driverId) {
+        const settlements = await storage.getSettlementsByDriver(driverId);
+        return res.json(settlements);
+      }
+      const weekOffset = parseInt(req.query.weekOffset as string) || 0;
+      const { weekStart } = getFridayWeekBounds(weekOffset);
+      const settlements = await storage.getSettlementsByWeek(weekStart);
+      res.json(settlements);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch settlements" });
+    }
+  });
+
+  app.get("/api/driver/weekly-earnings", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const driver = await storage.getDriverByUserId(userId);
+      if (!driver) return res.status(404).json({ error: "Driver not found" });
+
+      const allOrders = await storage.getOrders();
+      const driverDelivered = allOrders.filter(o => o.status === "delivered" && o.driverId === driver.id);
+      const allDeliveredIds = driverDelivered.map(o => o.id);
+      const allItems = await storage.getOrderItemsByOrderIds(allDeliveredIds);
+
+      const weeks = [];
+      for (let offset = 0; offset >= -8; offset--) {
+        const { weekStart, weekEnd } = getFridayWeekBounds(offset);
+        const weekOrders = driverDelivered.filter(o => {
+          const orderDate = new Date(o.deliveredAt || o.createdAt!);
+          return orderDate >= weekStart && orderDate <= weekEnd;
+        });
+
+        const items = allItems.filter(i => weekOrders.some(o => o.id === i.orderId));
+
+        let weekEarnings = 0;
+        const deliveries = weekOrders.map(order => {
+          const orderItems = items.filter(i => i.orderId === order.id);
+          let commission = 0;
+          for (const item of orderItems) {
+            const rate = COMMISSION_RATES[item.productSize] || 0;
+            commission += rate * (item.quantity || 1);
+          }
+          weekEarnings += commission;
+          return {
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            deliveredAt: order.deliveredAt || order.createdAt,
+            items: orderItems.map(i => ({
+              productSize: i.productSize,
+              quantity: i.quantity,
+              commission: (COMMISSION_RATES[i.productSize] || 0) * (i.quantity || 1),
+            })),
+            commission: commission.toFixed(2),
+          };
+        });
+
+        const settlement = await storage.getSettlement(driver.id, weekStart);
+
+        weeks.push({
+          weekStart: weekStart.toISOString(),
+          weekEnd: weekEnd.toISOString(),
+          offset,
+          deliveryCount: weekOrders.length,
+          totalEarnings: weekEarnings.toFixed(2),
+          deliveries,
+          settlement: settlement ? {
+            status: settlement.status,
+            paidAt: settlement.paidAt,
+          } : null,
+        });
+      }
+
+      res.json({ weeks });
+    } catch (error) {
+      console.error("Failed to fetch driver weekly earnings:", error);
+      res.status(500).json({ error: "Failed to fetch weekly earnings" });
     }
   });
 

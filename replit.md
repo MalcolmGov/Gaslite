@@ -55,7 +55,7 @@ The backend uses a modular structure with routes registered in `server/routes.ts
 ### Data Storage
 - **Primary Database**: PostgreSQL accessed via Drizzle ORM
 - **Schema Location**: `shared/schema.ts` for application entities, `shared/models/auth.ts` for auth entities
-- **Key Tables**: products, userProfiles, driverApplications, drivers, orders, orderItems, users, sessions, pushSubscriptions, chatMessages
+- **Key Tables**: products, userProfiles, driverApplications, drivers, orders, orderItems, users, sessions, pushSubscriptions, chatMessages, settlements
 
 The schema supports a multi-role user system where authentication users extend into role-specific profiles and capabilities.
 
@@ -115,6 +115,19 @@ The schema supports a multi-role user system where authentication users extend i
 - **@uppy/core, @uppy/dashboard, @uppy/aws-s3**: File upload handling
 - **framer-motion**: Animation library for premium UI effects
 - **react-hook-form + zod**: Form handling with validation
+
+### Weekly Settlement System
+- **Cycle**: Friday 00:00 to Thursday 23:59 (7-day settlement periods)
+- **Schema**: `settlements` table with driverId, weekStart, weekEnd, totalEarnings, deliveryCount, status (pending/processing/paid), paidAt, notes
+- **Unique constraint**: (driver_id, week_start) ensures one settlement per driver per week
+- **Commission Rates**: R80 (9kg), R200 (19kg), R500 (48kg), R1 (Test) — per cylinder per delivery
+- **Admin Endpoints**:
+  - GET `/api/admin/driver-earnings?weekOffset=0` — weekly earnings with per-delivery breakdown, settlement status, week navigation (offset 0=current, -1=last week, etc.)
+  - POST `/api/admin/settlements/mark` — mark driver settlement as pending/processing/paid
+  - GET `/api/admin/settlements?weekOffset=0` or `?driverId=X` — fetch settlements
+- **Driver Endpoint**: GET `/api/driver/weekly-earnings` — returns 9-week history with delivery breakdown and settlement status
+- **Admin UI**: Earnings tab with week navigator (prev/next), expandable driver rows showing delivery details, settlement status badges, mark-as-paid/processing buttons
+- **Driver UI**: Weekly Earnings History section with expandable week cards, delivery breakdown, paid/pending/processing status
 
 ### In-App Chat
 - **Schema**: `chatMessages` table with `thread_type` enum (order, admin_driver), orderId, driverId, sender info, body, timestamps

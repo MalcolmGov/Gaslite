@@ -36,6 +36,8 @@ import {
   TrendingUp,
   Wallet,
   Calendar,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { ChatPanel } from "@/components/chat-panel";
@@ -391,6 +393,38 @@ export default function DriverDashboard() {
   const { data: earnings } = useQuery<EarningsSummary>({
     queryKey: ["/api/driver/earnings"],
     refetchInterval: 30000,
+  });
+
+  const [expandedWeek, setExpandedWeek] = useState<number | null>(null);
+
+  interface WeeklyDeliveryItem {
+    productSize: string;
+    quantity: number;
+    commission: number;
+  }
+  interface WeeklyDelivery {
+    orderId: string;
+    orderNumber: string;
+    deliveredAt: string;
+    items: WeeklyDeliveryItem[];
+    commission: string;
+  }
+  interface WeeklyEarningsWeek {
+    weekStart: string;
+    weekEnd: string;
+    offset: number;
+    deliveryCount: number;
+    totalEarnings: string;
+    deliveries: WeeklyDelivery[];
+    settlement: {
+      status: string;
+      paidAt: string | null;
+    } | null;
+  }
+
+  const { data: weeklyEarnings } = useQuery<{ weeks: WeeklyEarningsWeek[] }>({
+    queryKey: ["/api/driver/weekly-earnings"],
+    refetchInterval: 60000,
   });
 
   const sendLocationToServer = useCallback(async (lat: number, lng: number) => {
@@ -773,6 +807,100 @@ export default function DriverDashboard() {
                   <p className="text-lg font-bold" data-testid="text-rate-48kg">R500</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Wallet className="h-5 w-5" />
+                Weekly Earnings History
+              </CardTitle>
+              <CardDescription>
+                Friday-to-Thursday settlement cycles. Payouts processed weekly.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {weeklyEarnings?.weeks ? (
+                <div className="space-y-2">
+                  {weeklyEarnings.weeks.map((week, index) => (
+                    <div key={week.weekStart} className="border border-border rounded-lg overflow-hidden">
+                      <button
+                        className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors text-left"
+                        onClick={() => setExpandedWeek(expandedWeek === index ? null : index)}
+                        data-testid={`button-week-${index}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <p className="text-sm font-medium">
+                              {new Date(week.weekStart).toLocaleDateString("en-ZA", { day: "numeric", month: "short" })} – {new Date(week.weekEnd).toLocaleDateString("en-ZA", { day: "numeric", month: "short" })}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {week.deliveryCount} {week.deliveryCount === 1 ? "delivery" : "deliveries"}
+                              {week.offset === 0 ? " · Current week" : ""}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <p className={`font-bold ${Number(week.totalEarnings) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
+                              R{week.totalEarnings}
+                            </p>
+                            {week.settlement?.status === "paid" ? (
+                              <Badge variant="default" className="bg-green-600 text-xs">Paid</Badge>
+                            ) : week.settlement?.status === "processing" ? (
+                              <Badge variant="secondary" className="text-xs">Processing</Badge>
+                            ) : Number(week.totalEarnings) > 0 ? (
+                              <Badge variant="outline" className="text-amber-600 border-amber-600 text-xs">Pending</Badge>
+                            ) : null}
+                          </div>
+                          {expandedWeek === index ? (
+                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
+                      </button>
+
+                      {expandedWeek === index && (
+                        <div className="border-t border-border px-3 py-3 bg-muted/20">
+                          {week.deliveries.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-2">No deliveries this week</p>
+                          ) : (
+                            <div className="space-y-2">
+                              {week.deliveries.map(del => (
+                                <div key={del.orderId} className="flex items-center justify-between p-2 rounded bg-background border border-border">
+                                  <div>
+                                    <span className="font-mono text-xs">{del.orderNumber}</span>
+                                    <span className="text-xs text-muted-foreground ml-2">
+                                      {new Date(del.deliveredAt).toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short" })}
+                                    </span>
+                                    <div className="text-xs text-muted-foreground mt-0.5">
+                                      {del.items.map(i => `${i.quantity}x ${i.productSize}`).join(", ")}
+                                    </div>
+                                  </div>
+                                  <span className="font-bold text-green-600 text-sm">R{del.commission}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {week.settlement?.paidAt && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Paid on {new Date(week.settlement.paidAt).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Skeleton className="h-14 w-full" />
+                  <Skeleton className="h-14 w-full" />
+                  <Skeleton className="h-14 w-full" />
+                </div>
+              )}
             </CardContent>
           </Card>
 

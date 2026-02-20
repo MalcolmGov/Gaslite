@@ -9,6 +9,7 @@ import {
   orderItems,
   pushSubscriptions,
   chatMessages,
+  settlements,
   type Product,
   type InsertProduct,
   type UserProfile,
@@ -26,6 +27,8 @@ import {
   type InsertPushSubscription,
   type ChatMessage,
   type InsertChatMessage,
+  type Settlement,
+  type InsertSettlement,
 } from "@shared/schema";
 import { users } from "@shared/models/auth";
 
@@ -81,6 +84,16 @@ export interface IStorage {
     activeDrivers: number;
     pendingApplications: number;
   }>;
+
+  // Settlements
+  getSettlement(driverId: string, weekStart: Date): Promise<Settlement | undefined>;
+  getSettlementsByWeek(weekStart: Date): Promise<Settlement[]>;
+  getSettlementsByDriver(driverId: string): Promise<Settlement[]>;
+  upsertSettlement(settlement: InsertSettlement): Promise<Settlement>;
+  updateSettlementStatus(id: string, status: string, notes?: string): Promise<Settlement | undefined>;
+
+  // Order items by order IDs
+  getOrderItemsByOrderIds(orderIds: string[]): Promise<OrderItem[]>;
 
   // Customer sign-ups
   getCustomerSignups(): Promise<Array<{
@@ -355,6 +368,59 @@ export class DatabaseStorage implements IStorage {
         totalSpent: orderData.spent,
       };
     });
+  }
+
+  // Settlements
+  async getSettlement(driverId: string, weekStart: Date): Promise<Settlement | undefined> {
+    const [settlement] = await db.select().from(settlements)
+      .where(and(eq(settlements.driverId, driverId), eq(settlements.weekStart, weekStart)));
+    return settlement;
+  }
+
+  async getSettlementsByWeek(weekStart: Date): Promise<Settlement[]> {
+    return db.select().from(settlements).where(eq(settlements.weekStart, weekStart));
+  }
+
+  async getSettlementsByDriver(driverId: string): Promise<Settlement[]> {
+    return db.select().from(settlements)
+      .where(eq(settlements.driverId, driverId))
+      .orderBy(desc(settlements.weekStart));
+  }
+
+  async upsertSettlement(settlement: InsertSettlement): Promise<Settlement> {
+    const existing = await this.getSettlement(settlement.driverId, settlement.weekStart);
+    if (existing) {
+      const updateData: Partial<Settlement> = {
+        totalEarnings: settlement.totalEarnings,
+        deliveryCount: settlement.deliveryCount,
+        weekEnd: settlement.weekEnd,
+        status: settlement.status || existing.status,
+      };
+      if (settlement.status === "paid" && existing.status !== "paid") {
+        updateData.paidAt = new Date();
+      }
+      if (settlement.notes !== undefined) updateData.notes = settlement.notes;
+      const [updated] = await db.update(settlements)
+        .set(updateData)
+        .where(eq(settlements.id, existing.id))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(settlements).values(settlement).returning();
+    return created;
+  }
+
+  async updateSettlementStatus(id: string, status: string, notes?: string): Promise<Settlement | undefined> {
+    const updateData: any = { status };
+    if (status === "paid") updateData.paidAt = new Date();
+    if (notes !== undefined) updateData.notes = notes;
+    const [updated] = await db.update(settlements).set(updateData).where(eq(settlements.id, id)).returning();
+    return updated;
+  }
+
+  async getOrderItemsByOrderIds(orderIds: string[]): Promise<OrderItem[]> {
+    if (orderIds.length === 0) return [];
+    return db.select().from(orderItems).where(sql`${orderItems.orderId} IN (${sql.join(orderIds.map(id => sql`${id}`), sql`, `)})`);
   }
 }
 
