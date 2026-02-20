@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -40,6 +40,10 @@ import {
   Landmark,
   CreditCard,
   ChevronDown,
+  Gift,
+  CheckCircle2,
+  XCircle,
+  Loader2,
 } from "lucide-react";
 import { insertDriverApplicationSchema, type DriverApplication } from "@shared/schema";
 
@@ -80,6 +84,7 @@ const driverSchema = insertDriverApplicationSchema
     branchCode: z.string().min(1, "Branch code is required"),
     accountNumber: z.string().min(5, "Valid account number required").max(20, "Account number too long"),
     accountType: z.string().min(1, "Please select account type"),
+    referralCode: z.string().optional(),
   });
 
 type DriverFormData = z.infer<typeof driverSchema>;
@@ -220,6 +225,26 @@ export default function DriverOnboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const [licenseDocUrl, setLicenseDocUrl] = useState<string | null>(null);
   const [vehicleDocUrl, setVehicleDocUrl] = useState<string | null>(null);
+  const [referralStatus, setReferralStatus] = useState<{ checking: boolean; valid?: boolean; referrerName?: string; error?: string }>({ checking: false });
+
+  const validateReferralCode = useCallback(async (code: string) => {
+    if (!code || code.trim().length < 4) {
+      setReferralStatus({ checking: false });
+      return;
+    }
+    setReferralStatus({ checking: true });
+    try {
+      const res = await fetch("/api/referral/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referralCode: code.trim().toUpperCase() }),
+      });
+      const data = await res.json();
+      setReferralStatus({ checking: false, valid: data.valid, referrerName: data.referrerName, error: data.valid ? undefined : data.error });
+    } catch {
+      setReferralStatus({ checking: false, valid: false, error: "Failed to validate" });
+    }
+  }, []);
 
   const { data: appStatus, isLoading: appStatusLoading } = useQuery<{ application: DriverApplication | null; driver: any }>({
     queryKey: ["/api/user/driver-application"],
@@ -260,6 +285,7 @@ export default function DriverOnboarding() {
       branchCode: "",
       accountNumber: "",
       accountType: "",
+      referralCode: "",
     },
   });
 
@@ -496,6 +522,67 @@ export default function DriverOnboarding() {
                         </FormItem>
                       )}
                     />
+                    <div className="border border-dashed border-border rounded-lg p-4 bg-muted/30">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Gift className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm font-medium">Have a referral code?</span>
+                        <Badge variant="secondary" className="text-[10px]">Optional</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-3">If another Gaslite driver referred you, enter their code to skip the subscription fee.</p>
+                      <FormField
+                        control={form.control}
+                        name="referralCode"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="relative">
+                                <Gift className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  placeholder="e.g. GL-ABC123"
+                                  className="pl-9 pr-10 uppercase"
+                                  {...field}
+                                  data-testid="input-referral-code"
+                                  onChange={(e) => {
+                                    const val = e.target.value.toUpperCase();
+                                    field.onChange(val);
+                                    if (val.length >= 4) {
+                                      validateReferralCode(val);
+                                    } else {
+                                      setReferralStatus({ checking: false });
+                                    }
+                                  }}
+                                  onBlur={() => {
+                                    if (field.value && field.value.length >= 4) {
+                                      validateReferralCode(field.value);
+                                    }
+                                  }}
+                                />
+                                {referralStatus.checking && (
+                                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                                )}
+                                {!referralStatus.checking && referralStatus.valid === true && (
+                                  <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                                )}
+                                {!referralStatus.checking && referralStatus.valid === false && (
+                                  <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+                                )}
+                              </div>
+                            </FormControl>
+                            {referralStatus.valid === true && referralStatus.referrerName && (
+                              <p className="text-xs text-green-600 dark:text-green-400 mt-1" data-testid="text-referral-valid">
+                                Referred by {referralStatus.referrerName} — No subscription fee!
+                              </p>
+                            )}
+                            {referralStatus.valid === false && referralStatus.error && (
+                              <p className="text-xs text-red-600 dark:text-red-400 mt-1" data-testid="text-referral-invalid">
+                                {referralStatus.error}
+                              </p>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
                 )}
 

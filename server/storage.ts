@@ -10,6 +10,8 @@ import {
   pushSubscriptions,
   chatMessages,
   settlements,
+  appSettings,
+  driverReferrals,
   type Product,
   type InsertProduct,
   type UserProfile,
@@ -29,6 +31,9 @@ import {
   type InsertChatMessage,
   type Settlement,
   type InsertSettlement,
+  type DriverReferral,
+  type InsertDriverReferral,
+  type AppSetting,
 } from "@shared/schema";
 import { users } from "@shared/models/auth";
 
@@ -94,6 +99,19 @@ export interface IStorage {
 
   // Order items by order IDs
   getOrderItemsByOrderIds(orderIds: string[]): Promise<OrderItem[]>;
+
+  // App Settings
+  getAppSetting(key: string): Promise<string | null>;
+  setAppSetting(key: string, value: string): Promise<void>;
+  getAllAppSettings(): Promise<AppSetting[]>;
+
+  // Driver Referrals
+  getDriverByReferralCode(code: string): Promise<Driver | undefined>;
+  createDriverReferral(referral: InsertDriverReferral): Promise<DriverReferral>;
+  getReferralsByDriver(driverId: string): Promise<DriverReferral[]>;
+  getReferralCount(driverId: string): Promise<number>;
+  getFoundingDriverCount(): Promise<number>;
+  getAllReferralStats(): Promise<Array<{ driverId: string; referralCount: number }>>;
 
   // Customer sign-ups
   getCustomerSignups(): Promise<Array<{
@@ -421,6 +439,58 @@ export class DatabaseStorage implements IStorage {
   async getOrderItemsByOrderIds(orderIds: string[]): Promise<OrderItem[]> {
     if (orderIds.length === 0) return [];
     return db.select().from(orderItems).where(sql`${orderItems.orderId} IN (${sql.join(orderIds.map(id => sql`${id}`), sql`, `)})`);
+  }
+
+  // App Settings
+  async getAppSetting(key: string): Promise<string | null> {
+    const [setting] = await db.select().from(appSettings).where(eq(appSettings.key, key));
+    return setting?.value ?? null;
+  }
+
+  async setAppSetting(key: string, value: string): Promise<void> {
+    await db.insert(appSettings).values({ key, value }).onConflictDoUpdate({
+      target: appSettings.key,
+      set: { value, updatedAt: new Date() },
+    });
+  }
+
+  async getAllAppSettings(): Promise<AppSetting[]> {
+    return db.select().from(appSettings);
+  }
+
+  // Driver Referrals
+  async getDriverByReferralCode(code: string): Promise<Driver | undefined> {
+    const [driver] = await db.select().from(drivers).where(eq(drivers.referralCode, code.toUpperCase()));
+    return driver;
+  }
+
+  async createDriverReferral(referral: InsertDriverReferral): Promise<DriverReferral> {
+    const [created] = await db.insert(driverReferrals).values(referral).returning();
+    return created;
+  }
+
+  async getReferralsByDriver(driverId: string): Promise<DriverReferral[]> {
+    return db.select().from(driverReferrals).where(eq(driverReferrals.referrerDriverId, driverId)).orderBy(desc(driverReferrals.createdAt));
+  }
+
+  async getReferralCount(driverId: string): Promise<number> {
+    const [result] = await db.select({ count: count() }).from(driverReferrals).where(eq(driverReferrals.referrerDriverId, driverId));
+    return result?.count || 0;
+  }
+
+  async getFoundingDriverCount(): Promise<number> {
+    const [result] = await db.select({ count: count() }).from(drivers).where(
+      and(eq(drivers.subscriptionExempt, true), sql`${drivers.referredByDriverId} IS NULL`)
+    );
+    return result?.count || 0;
+  }
+
+  async getAllReferralStats(): Promise<Array<{ driverId: string; referralCount: number }>> {
+    const results = await db.select({
+      driverId: driverReferrals.referrerDriverId,
+      referralCount: count(),
+    }).from(driverReferrals).groupBy(driverReferrals.referrerDriverId);
+    return results.map(r => ({ driverId: r.driverId, referralCount: r.referralCount }));
   }
 }
 

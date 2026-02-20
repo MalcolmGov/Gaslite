@@ -50,6 +50,10 @@ import {
   Wallet,
   Banknote,
   Calendar,
+  Gift,
+  Rocket,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { ChatPanel } from "@/components/chat-panel";
 import { MessageCircle } from "lucide-react";
@@ -184,6 +188,35 @@ export default function AdminDashboard() {
     queryKey: [`/api/admin/driver-earnings?weekOffset=${earningsWeekOffset}`],
     enabled: selectedTab === "earnings",
     refetchInterval: selectedTab === "earnings" ? 30000 : false,
+  });
+
+  interface LaunchSpecialData {
+    launchSpecialActive: boolean;
+    foundingDriverLimit: number;
+    referralLimitPerDriver: number;
+    subscriptionFeeActive: boolean;
+    totalFoundingDrivers: number;
+    totalReferredDrivers: number;
+    totalExemptDrivers: number;
+    totalDrivers: number;
+  }
+
+  const { data: launchSpecialData, isLoading: launchSpecialLoading } = useQuery<LaunchSpecialData>({
+    queryKey: ["/api/admin/launch-special"],
+    enabled: selectedTab === "launch-special",
+  });
+
+  const toggleLaunchSpecialMutation = useMutation({
+    mutationFn: async (data: Record<string, unknown>) => {
+      return apiRequest("POST", "/api/admin/launch-special", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Setting updated" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/launch-special"] });
+    },
+    onError: () => {
+      toast({ title: "Failed to update setting", variant: "destructive" });
+    },
   });
 
   const markSettlementMutation = useMutation({
@@ -429,7 +462,7 @@ export default function AdminDashboard() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="orders" data-testid="tab-orders">
                 <Package className="h-4 w-4 mr-2" />
                 Orders
@@ -459,6 +492,10 @@ export default function AdminDashboard() {
               <TabsTrigger value="driver-map" data-testid="tab-driver-map">
                 <Map className="h-4 w-4 mr-2" />
                 Map
+              </TabsTrigger>
+              <TabsTrigger value="launch-special" data-testid="tab-launch-special">
+                <Rocket className="h-4 w-4 mr-2" />
+                Launch
               </TabsTrigger>
             </TabsList>
 
@@ -1516,6 +1553,172 @@ export default function AdminDashboard() {
                         <p className="text-xs text-muted-foreground">Not accepting orders</p>
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="launch-special" className="space-y-4">
+              {launchSpecialLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-32 w-full" />
+                  <Skeleton className="h-48 w-full" />
+                </div>
+              ) : launchSpecialData ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <Rocket className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-2xl font-bold" data-testid="text-founding-count">{launchSpecialData.totalFoundingDrivers}</p>
+                            <p className="text-xs text-muted-foreground">Founding Drivers</p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          of {launchSpecialData.foundingDriverLimit} spots
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-blue-500/10">
+                            <Gift className="h-5 w-5 text-blue-500" />
+                          </div>
+                          <div>
+                            <p className="text-2xl font-bold" data-testid="text-referred-count">{launchSpecialData.totalReferredDrivers}</p>
+                            <p className="text-xs text-muted-foreground">Referred Drivers</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-green-500/10">
+                            <UserCheck className="h-5 w-5 text-green-500" />
+                          </div>
+                          <div>
+                            <p className="text-2xl font-bold" data-testid="text-exempt-count">{launchSpecialData.totalExemptDrivers}</p>
+                            <p className="text-xs text-muted-foreground">Fee-Exempt Drivers</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-slate-500/10">
+                            <Users className="h-5 w-5 text-slate-500" />
+                          </div>
+                          <div>
+                            <p className="text-2xl font-bold" data-testid="text-total-driver-count">{launchSpecialData.totalDrivers}</p>
+                            <p className="text-xs text-muted-foreground">Total Drivers</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Launch Special Settings</CardTitle>
+                      <CardDescription>
+                        Control the driver referral program and subscription fee settings.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+                        <div className="flex items-center gap-3">
+                          <Rocket className="h-5 w-5 text-primary" />
+                          <div>
+                            <p className="font-medium">Launch Special</p>
+                            <p className="text-sm text-muted-foreground">
+                              First {launchSpecialData.foundingDriverLimit} drivers skip subscription fee and can refer others
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant={launchSpecialData.launchSpecialActive ? "default" : "outline"}
+                          size="sm"
+                          data-testid="button-toggle-launch-special"
+                          disabled={toggleLaunchSpecialMutation.isPending}
+                          onClick={() => {
+                            toggleLaunchSpecialMutation.mutate({
+                              launchSpecialActive: !launchSpecialData.launchSpecialActive,
+                            });
+                          }}
+                        >
+                          {launchSpecialData.launchSpecialActive ? (
+                            <>
+                              <ToggleRight className="h-4 w-4 mr-2" />
+                              Active
+                            </>
+                          ) : (
+                            <>
+                              <ToggleLeft className="h-4 w-4 mr-2" />
+                              Inactive
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+                        <div className="flex items-center gap-3">
+                          <Banknote className="h-5 w-5 text-amber-500" />
+                          <div>
+                            <p className="font-medium">Subscription Fee (R39/month)</p>
+                            <p className="text-sm text-muted-foreground">
+                              Charge non-exempt drivers the monthly platform fee
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant={launchSpecialData.subscriptionFeeActive ? "default" : "outline"}
+                          size="sm"
+                          data-testid="button-toggle-subscription-fee"
+                          disabled={toggleLaunchSpecialMutation.isPending}
+                          onClick={() => {
+                            toggleLaunchSpecialMutation.mutate({
+                              subscriptionFeeActive: !launchSpecialData.subscriptionFeeActive,
+                            });
+                          }}
+                        >
+                          {launchSpecialData.subscriptionFeeActive ? (
+                            <>
+                              <ToggleRight className="h-4 w-4 mr-2" />
+                              Active
+                            </>
+                          ) : (
+                            <>
+                              <ToggleLeft className="h-4 w-4 mr-2" />
+                              Inactive
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      <div className="p-4 rounded-lg bg-muted/50 space-y-2">
+                        <p className="text-sm font-medium">How the Referral Program Works</p>
+                        <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                          <li>The first {launchSpecialData.foundingDriverLimit} approved drivers become "Founding Drivers" with no subscription fee</li>
+                          <li>Each founding driver gets a referral code (GL-XXXXXX) and can refer up to {launchSpecialData.referralLimitPerDriver} drivers</li>
+                          <li>Referred drivers also skip the subscription fee</li>
+                          <li>New drivers enter a referral code during sign-up (optional)</li>
+                          <li>Turning off the launch special stops new founding driver sign-ups but existing benefits remain</li>
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : (
+                <Card>
+                  <CardContent className="pt-6">
+                    <p className="text-muted-foreground text-center">Failed to load launch special data</p>
                   </CardContent>
                 </Card>
               )}

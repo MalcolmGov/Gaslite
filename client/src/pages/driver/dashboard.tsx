@@ -38,6 +38,10 @@ import {
   Calendar,
   ChevronDown,
   ChevronUp,
+  Gift,
+  Users,
+  Copy,
+  Share2,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { ChatPanel } from "@/components/chat-panel";
@@ -427,6 +431,22 @@ export default function DriverDashboard() {
     refetchInterval: 60000,
   });
 
+  interface ReferralData {
+    referralCode: string;
+    referralCount: number;
+    referralLimit: number;
+    referrals: Array<{ id: string; driverName: string; createdAt: string }>;
+    subscriptionExempt: boolean;
+    isFoundingDriver: boolean;
+    isReferred: boolean;
+    launchSpecialActive: boolean;
+  }
+
+  const { data: referralData } = useQuery<ReferralData>({
+    queryKey: ["/api/driver/referral"],
+    refetchInterval: 60000,
+  });
+
   const sendLocationToServer = useCallback(async (lat: number, lng: number) => {
     const now = Date.now();
     if (now - lastSentRef.current < 8000) return;
@@ -809,6 +829,105 @@ export default function DriverDashboard() {
               </div>
             </CardContent>
           </Card>
+
+          {referralData && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Gift className="h-5 w-5" />
+                  Referral Program
+                </CardTitle>
+                <CardDescription>
+                  {referralData.launchSpecialActive
+                    ? "Share your code with other drivers — they skip the subscription fee!"
+                    : "The launch special has ended. Thanks for being part of it!"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {referralData.subscriptionExempt && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                    <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                        {referralData.isFoundingDriver ? "Founding Driver — No subscription fee!" : "Referred Driver — No subscription fee!"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {referralData.isFoundingDriver
+                          ? "You're one of the first 50 drivers on Gaslite."
+                          : "You were referred by another Gaslite driver."}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {referralData.referralCode && referralData.launchSpecialActive && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">Your Referral Code</p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-muted rounded-lg px-4 py-3 font-mono text-lg font-bold tracking-wider text-center" data-testid="text-referral-code">
+                        {referralData.referralCode}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        data-testid="button-copy-referral"
+                        onClick={() => {
+                          navigator.clipboard.writeText(referralData.referralCode);
+                          toast({ title: "Copied!", description: "Referral code copied to clipboard." });
+                        }}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      {typeof navigator.share === "function" && (
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          data-testid="button-share-referral"
+                          onClick={() => {
+                            navigator.share({
+                              title: "Join Gaslite as a Driver!",
+                              text: `Use my referral code ${referralData.referralCode} when you sign up as a Gaslite driver and skip the subscription fee!`,
+                            }).catch(() => {});
+                          }}
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                    <Users className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-lg font-bold" data-testid="text-referral-count">{referralData.referralCount}</p>
+                    <p className="text-xs text-muted-foreground">Drivers Referred</p>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                    <Gift className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-lg font-bold" data-testid="text-referral-remaining">{Math.max(0, referralData.referralLimit - referralData.referralCount)}</p>
+                    <p className="text-xs text-muted-foreground">Referrals Left</p>
+                  </div>
+                </div>
+
+                {referralData.referrals.length > 0 && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">Recent Referrals</p>
+                    <div className="space-y-1.5">
+                      {referralData.referrals.slice(0, 5).map((ref, idx) => (
+                        <div key={ref.id} className="flex items-center justify-between p-2 rounded bg-muted/30 text-sm" data-testid={`row-referral-${idx}`}>
+                          <span className="font-medium">{ref.driverName}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(ref.createdAt).toLocaleDateString("en-ZA", { day: "numeric", month: "short" })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

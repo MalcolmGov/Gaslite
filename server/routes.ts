@@ -184,10 +184,27 @@ export async function registerRoutes(
   app.post("/api/onboarding/driver", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.userId!;
-      const { firstName, lastName, email, phone, address, licenseNumber, vehicleRegistration, licenseDocumentUrl, vehicleDocumentUrl, bankName, branchCode, accountNumber, accountType } = req.body;
+      const { firstName, lastName, email, phone, address, licenseNumber, vehicleRegistration, licenseDocumentUrl, vehicleDocumentUrl, bankName, branchCode, accountNumber, accountType, referralCode } = req.body;
 
       if (!firstName || !lastName || !email || !phone || !address || !licenseNumber || !vehicleRegistration) {
         return res.status(400).json({ error: "All required fields must be filled" });
+      }
+
+      if (referralCode) {
+        const referrer = await storage.getDriverByReferralCode(referralCode);
+        if (!referrer) {
+          return res.status(400).json({ error: "Invalid referral code. Please check and try again." });
+        }
+        const launchActive = await storage.getAppSetting("launch_special_active");
+        if (launchActive !== "true") {
+          return res.status(400).json({ error: "The referral program is not currently active." });
+        }
+        const limitStr = await storage.getAppSetting("referral_limit_per_driver");
+        const limit = parseInt(limitStr || "50");
+        const count = await storage.getReferralCount(referrer.id);
+        if (count >= limit) {
+          return res.status(400).json({ error: "This driver has reached their referral limit." });
+        }
       }
 
       const existingApp = await storage.getDriverApplicationByUserId(userId);
@@ -210,6 +227,7 @@ export async function registerRoutes(
         branchCode: branchCode || null,
         accountNumber: accountNumber || null,
         accountType: accountType || null,
+        referralCode: referralCode || null,
       });
 
       let profile = await storage.getUserProfile(userId);
@@ -1132,11 +1150,45 @@ export async function registerRoutes(
       if (status === "approved" && application.userId) {
         const existingDriver = await storage.getDriverByUserId(application.userId);
         if (!existingDriver) {
-          await storage.createDriver({
+          const referralCodeGen = "GL-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+          let subscriptionExempt = false;
+          let referredByDriverId: string | null = null;
+          const appReferralCode = (application as any).referralCode;
+
+          if (appReferralCode) {
+            const referrer = await storage.getDriverByReferralCode(appReferralCode);
+            if (referrer) {
+              referredByDriverId = referrer.id;
+              subscriptionExempt = true;
+            }
+          } else {
+            const launchActive = await storage.getAppSetting("launch_special_active");
+            if (launchActive === "true") {
+              const limitStr = await storage.getAppSetting("founding_driver_limit");
+              const limit = parseInt(limitStr || "50");
+              const currentCount = await storage.getFoundingDriverCount();
+              if (currentCount < limit) {
+                subscriptionExempt = true;
+              }
+            }
+          }
+
+          const newDriver = await storage.createDriver({
             userId: application.userId,
             applicationId: applicationId,
             status: "offline",
+            referralCode: referralCodeGen,
+            referredByDriverId,
+            subscriptionExempt,
           });
+
+          if (referredByDriverId) {
+            await storage.createDriverReferral({
+              referrerDriverId: referredByDriverId,
+              referredDriverId: newDriver.id,
+            });
+          }
         }
         await storage.updateUserProfile(application.userId, { role: "driver" });
       }
@@ -1581,6 +1633,144 @@ export async function registerRoutes(
       res.json(message);
     } catch (error) {
       res.status(500).json({ error: "Failed to send message" });
+    }
+  });
+
+  // ===== Launch Special & Referral Routes =====
+
+  app.get("/api/admin/launch-special", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getAllAppSettings();
+      const settingsMap: Record<string, string> = {};
+      for (const s of settings) settingsMap[s.key] = s.value;
+
+      const foundingDriverCount = await storage.getFoundingDriverCount();
+      const allDrivers = await storage.getDrivers();
+      const totalDrivers = allDrivers.length;
+      const exemptDrivers = allDrivers.filter(d => d.subscriptionExempt).length;
+      const referralStats = await storage.getAllReferralStats();
+
+      const driverApps = await storage.getDriverApplications();
+      const referralDetails = [];
+      for (const driver of allDrivers) {
+        const app = driverApps.find(a => a.id === driver.applicationId);
+        const stats = referralStats.find(r => r.driverId === driver.id);
+        referralDetails.push({
+          driverId: driver.id,
+          name: app ? `${app.firstName} ${app.lastName}` : "Unknown",
+          referralCode: driver.referralCode,
+          referralCount: stats?.referralCount || 0,
+          subscriptionExempt: driver.subscriptionExempt,
+          isFoundingDriver: driver.subscriptionExempt && !driver.referredByDriverId,
+          isReferred: !!driver.referredByDriverId,
+          createdAt: driver.createdAt,
+        });
+      }
+
+      res.json({
+        launchSpecialActive: settingsMap["launch_special_active"] === "true",
+        subscriptionFeeActive: settingsMap["subscription_fee_active"] === "true",
+        foundingDriverLimit: parseInt(settingsMap["founding_driver_limit"] || "50"),
+        referralLimitPerDriver: parseInt(settingsMap["referral_limit_per_driver"] || "50"),
+        foundingDriverCount,
+        totalDrivers,
+        exemptDrivers,
+        drivers: referralDetails,
+      });
+    } catch (error) {
+      console.error("Failed to fetch launch special data:", error);
+      res.status(500).json({ error: "Failed to fetch launch special data" });
+    }
+  });
+
+  app.post("/api/admin/launch-special", isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { launchSpecialActive, subscriptionFeeActive, foundingDriverLimit, referralLimitPerDriver } = req.body;
+
+      if (launchSpecialActive !== undefined) {
+        await storage.setAppSetting("launch_special_active", String(launchSpecialActive));
+      }
+      if (subscriptionFeeActive !== undefined) {
+        await storage.setAppSetting("subscription_fee_active", String(subscriptionFeeActive));
+      }
+      if (foundingDriverLimit !== undefined) {
+        await storage.setAppSetting("founding_driver_limit", String(foundingDriverLimit));
+      }
+      if (referralLimitPerDriver !== undefined) {
+        await storage.setAppSetting("referral_limit_per_driver", String(referralLimitPerDriver));
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to update launch special:", error);
+      res.status(500).json({ error: "Failed to update settings" });
+    }
+  });
+
+  app.get("/api/driver/referral", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const driver = await storage.getDriverByUserId(userId);
+      if (!driver) return res.status(404).json({ error: "Driver not found" });
+
+      const referralCount = await storage.getReferralCount(driver.id);
+      const referrals = await storage.getReferralsByDriver(driver.id);
+      const launchActive = await storage.getAppSetting("launch_special_active");
+      const limitStr = await storage.getAppSetting("referral_limit_per_driver");
+      const referralLimit = parseInt(limitStr || "50");
+
+      const referralDetails = [];
+      for (const ref of referrals) {
+        const refDriver = await storage.getDriver(ref.referredDriverId);
+        if (refDriver) {
+          const refApp = await storage.getDriverApplication(refDriver.applicationId);
+          referralDetails.push({
+            id: ref.id,
+            driverName: refApp ? `${refApp.firstName} ${refApp.lastName}` : "Driver",
+            createdAt: ref.createdAt,
+          });
+        }
+      }
+
+      res.json({
+        referralCode: driver.referralCode,
+        referralCount,
+        referralLimit,
+        referrals: referralDetails,
+        subscriptionExempt: driver.subscriptionExempt,
+        isFoundingDriver: driver.subscriptionExempt && !driver.referredByDriverId,
+        isReferred: !!driver.referredByDriverId,
+        launchSpecialActive: launchActive === "true",
+      });
+    } catch (error) {
+      console.error("Failed to fetch referral data:", error);
+      res.status(500).json({ error: "Failed to fetch referral data" });
+    }
+  });
+
+  app.post("/api/referral/validate", async (req, res) => {
+    try {
+      const { referralCode } = req.body;
+      if (!referralCode) return res.status(400).json({ valid: false, error: "Referral code required" });
+
+      const driver = await storage.getDriverByReferralCode(referralCode);
+      if (!driver) return res.json({ valid: false, error: "Invalid referral code" });
+
+      const launchActive = await storage.getAppSetting("launch_special_active");
+      if (launchActive !== "true") return res.json({ valid: false, error: "Referral program not active" });
+
+      const limitStr = await storage.getAppSetting("referral_limit_per_driver");
+      const limit = parseInt(limitStr || "50");
+      const count = await storage.getReferralCount(driver.id);
+      if (count >= limit) return res.json({ valid: false, error: "This driver has reached their referral limit" });
+
+      const app = await storage.getDriverApplication(driver.applicationId);
+      res.json({
+        valid: true,
+        referrerName: app ? `${app.firstName} ${app.lastName.charAt(0)}.` : "A Gaslite Driver",
+      });
+    } catch (error) {
+      res.status(500).json({ valid: false, error: "Failed to validate" });
     }
   });
 

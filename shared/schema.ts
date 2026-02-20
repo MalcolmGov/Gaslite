@@ -58,6 +58,7 @@ export const driverApplications = pgTable("driver_applications", {
   branchCode: text("branch_code"),
   accountNumber: text("account_number"),
   accountType: text("account_type"),
+  referralCode: text("referral_code"),
   status: driverApplicationStatusEnum("status").default("pending").notNull(),
   reviewNotes: text("review_notes"),
   reviewedAt: timestamp("reviewed_at"),
@@ -70,6 +71,9 @@ export const drivers = pgTable("drivers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().unique(),
   applicationId: varchar("application_id").notNull(),
+  referralCode: varchar("referral_code").unique(),
+  referredByDriverId: varchar("referred_by_driver_id"),
+  subscriptionExempt: boolean("subscription_exempt").default(false),
   status: driverStatusEnum("status").default("offline").notNull(),
   currentLatitude: decimal("current_latitude", { precision: 10, scale: 8 }),
   currentLongitude: decimal("current_longitude", { precision: 11, scale: 8 }),
@@ -147,6 +151,21 @@ export const settlements = pgTable("settlements", {
   status: settlementStatusEnum("status").default("pending").notNull(),
   paidAt: timestamp("paid_at"),
   notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// App settings table (key-value store for admin-controlled settings)
+export const appSettings = pgTable("app_settings", {
+  key: varchar("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Driver referrals table
+export const driverReferrals = pgTable("driver_referrals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referrerDriverId: varchar("referrer_driver_id").notNull(),
+  referredDriverId: varchar("referred_driver_id").notNull().unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -247,6 +266,15 @@ export const insertSettlementSchema = createInsertSchema(settlements).omit({
   createdAt: true,
 });
 
+export const insertDriverReferralSchema = createInsertSchema(driverReferrals).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAppSettingSchema = createInsertSchema(appSettings).omit({
+  updatedAt: true,
+});
+
 // Types
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
@@ -274,6 +302,12 @@ export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 
 export type Settlement = typeof settlements.$inferSelect;
 export type InsertSettlement = z.infer<typeof insertSettlementSchema>;
+
+export type DriverReferral = typeof driverReferrals.$inferSelect;
+export type InsertDriverReferral = z.infer<typeof insertDriverReferralSchema>;
+
+export type AppSetting = typeof appSettings.$inferSelect;
+export type InsertAppSetting = z.infer<typeof insertAppSettingSchema>;
 
 // Extended types for API responses
 export type OrderWithItems = Order & {
