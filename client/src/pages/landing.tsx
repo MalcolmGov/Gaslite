@@ -36,7 +36,9 @@ import {
   Navigation,
   ToggleRight,
   FileCheck,
-  Eye
+  Eye,
+  Rocket,
+  Gift
 } from "lucide-react";
 import { SiInstagram, SiFacebook, SiX } from "react-icons/si";
 
@@ -617,7 +619,7 @@ export default function LandingPage() {
               Earn Money <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Your Way</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Become a Gaslite driver and enjoy flexible hours, competitive commission, and the freedom to be your own boss. Only R39/month to get started.
+              Become a Gaslite driver and enjoy flexible hours, competitive commission, and the freedom to be your own boss. Join now during our launch special and pay zero subscription fees.
             </p>
           </motion.div>
 
@@ -653,6 +655,51 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="mb-12"
+          >
+            <div className="relative overflow-hidden rounded-2xl border-2 border-amber-400/50 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 dark:from-amber-500/20 dark:via-orange-500/15 dark:to-amber-500/20 p-6 sm:p-8" data-testid="banner-launch-special">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-400/20 to-transparent rounded-bl-full" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-orange-400/20 to-transparent rounded-tr-full" />
+              <div className="relative flex flex-col sm:flex-row items-center gap-6">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                    <Rocket className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
+                    <Badge className="bg-amber-500 text-white border-amber-500 font-bold text-xs uppercase tracking-wider">Launch Special</Badge>
+                    <Badge variant="outline" className="border-amber-400 text-amber-600 dark:text-amber-400 text-xs">Limited Spots</Badge>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-2">
+                    First 50 Drivers — <span className="text-amber-600 dark:text-amber-400">No Subscription Fee!</span>
+                  </h3>
+                  <p className="text-muted-foreground mb-3">
+                    Be one of the first 50 founding drivers and skip the R39/month platform fee completely. Plus, get a referral code to share with other drivers — they skip the fee too!
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm">
+                    <span className="flex items-center gap-1.5">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>R0 subscription fee</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Gift className="h-4 w-4 text-blue-500" />
+                      <span>Refer up to 50 drivers</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Users className="h-4 w-4 text-purple-500" />
+                      <span>Your referrals skip fees too</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
