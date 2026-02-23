@@ -462,42 +462,45 @@ export default function AdminDashboard() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-            <TabsList className="grid w-full grid-cols-7">
-              <TabsTrigger value="orders" data-testid="tab-orders">
-                <Package className="h-4 w-4 mr-2" />
-                Orders
-                {pendingOrders.length > 0 && (
-                  <Badge variant="secondary" className="ml-2">{pendingOrders.length}</Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="customers" data-testid="tab-customers">
-                <Users className="h-4 w-4 mr-2" />
-                Customers
-              </TabsTrigger>
-              <TabsTrigger value="applications" data-testid="tab-applications">
-                <FileText className="h-4 w-4 mr-2" />
-                Apps
-                {pendingApplications.length > 0 && (
-                  <Badge variant="secondary" className="ml-2">{pendingApplications.length}</Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="drivers" data-testid="tab-drivers">
-                <Truck className="h-4 w-4 mr-2" />
-                Drivers
-              </TabsTrigger>
-              <TabsTrigger value="earnings" data-testid="tab-earnings">
-                <Wallet className="h-4 w-4 mr-2" />
-                Earnings
-              </TabsTrigger>
-              <TabsTrigger value="driver-map" data-testid="tab-driver-map">
-                <Map className="h-4 w-4 mr-2" />
-                Map
-              </TabsTrigger>
-              <TabsTrigger value="launch-special" data-testid="tab-launch-special">
-                <Rocket className="h-4 w-4 mr-2" />
-                Launch
-              </TabsTrigger>
-            </TabsList>
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-2">
+              <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-7 gap-1">
+                <TabsTrigger value="orders" data-testid="tab-orders" className="shrink-0">
+                  <Package className="h-4 w-4 mr-1.5" />
+                  <span>Orders</span>
+                  {pendingOrders.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 text-[10px] px-1.5">{pendingOrders.length}</Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="customers" data-testid="tab-customers" className="shrink-0">
+                  <Users className="h-4 w-4 mr-1.5" />
+                  <span className="hidden sm:inline">Customers</span>
+                  <span className="sm:hidden">Cust.</span>
+                </TabsTrigger>
+                <TabsTrigger value="applications" data-testid="tab-applications" className="shrink-0">
+                  <FileText className="h-4 w-4 mr-1.5" />
+                  <span>Apps</span>
+                  {pendingApplications.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 text-[10px] px-1.5">{pendingApplications.length}</Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="drivers" data-testid="tab-drivers" className="shrink-0">
+                  <Truck className="h-4 w-4 mr-1.5" />
+                  <span>Drivers</span>
+                </TabsTrigger>
+                <TabsTrigger value="earnings" data-testid="tab-earnings" className="shrink-0">
+                  <Wallet className="h-4 w-4 mr-1.5" />
+                  <span>Earnings</span>
+                </TabsTrigger>
+                <TabsTrigger value="driver-map" data-testid="tab-driver-map" className="shrink-0">
+                  <Map className="h-4 w-4 mr-1.5" />
+                  <span>Map</span>
+                </TabsTrigger>
+                <TabsTrigger value="launch-special" data-testid="tab-launch-special" className="shrink-0">
+                  <Rocket className="h-4 w-4 mr-1.5" />
+                  <span>Launch</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="orders" className="space-y-4">
               <Card>
