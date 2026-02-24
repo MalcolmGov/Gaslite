@@ -34,48 +34,36 @@ function useIsDark() {
 }
 
 function FlameIcon({ uid, height }: { uid: string; height: number }) {
-  const width = Math.round(height * 0.6);
+  const width = Math.round(height * 0.7);
   return (
     <svg
       width={width}
       height={height}
-      viewBox="0 0 60 100"
+      viewBox="0 0 70 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{ alignSelf: "center", flexShrink: 0 }}
     >
       <defs>
-        <linearGradient id={`${uid}-fo`} x1="30" y1="0" x2="30" y2="100" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#22D3EE" />
-          <stop offset="30%" stopColor="#38BDF8" />
-          <stop offset="60%" stopColor="#3B82F6" />
+        <linearGradient id={`${uid}-fo`} x1="35" y1="0" x2="35" y2="100" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#38BDF8" />
+          <stop offset="40%" stopColor="#3B82F6" />
           <stop offset="100%" stopColor="#1D4ED8" />
         </linearGradient>
-        <linearGradient id={`${uid}-fi`} x1="30" y1="35" x2="30" y2="90" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#F0F9FF" />
-          <stop offset="40%" stopColor="#BAE6FD" />
-          <stop offset="100%" stopColor="#7DD3FC" stopOpacity="0.4" />
+        <linearGradient id={`${uid}-fi`} x1="35" y1="20" x2="35" y2="80" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#7DD3FC" />
+          <stop offset="50%" stopColor="#38BDF8" />
+          <stop offset="100%" stopColor="#0EA5E9" />
         </linearGradient>
-        <filter id={`${uid}-glow`} x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
-          <feFlood floodColor="#38BDF8" floodOpacity="0.4" />
-          <feComposite in2="blur" operator="in" />
-          <feMerge>
-            <feMergeNode />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
-      <g filter={`url(#${uid}-glow)`}>
-        <path
-          d="M30 2 C30 2, 24 18, 18 32 C12 46, 6 58, 5 68 C3 80, 8 90, 18 95 C23 97.5, 27 98.5, 30 99 C33 98.5, 37 97.5, 42 95 C52 90, 57 80, 55 68 C54 58, 48 46, 42 32 C36 18, 30 2, 30 2Z"
-          fill={`url(#${uid}-fo)`}
-        />
-        <path
-          d="M30 40 C30 40, 26 50, 23 58 C20 66, 19 73, 21 79 C23 85, 26 88, 30 90 C34 88, 37 85, 39 79 C41 73, 40 66, 37 58 C34 50, 30 40, 30 40Z"
-          fill={`url(#${uid}-fi)`}
-        />
-      </g>
+      <path
+        d="M35 2 C35 2, 22 20, 16 35 C8 54, 4 65, 6 76 C8 87, 16 95, 28 98 C36 100, 44 98, 50 93 C58 86, 62 75, 58 62 C56 55, 50 46, 46 40 C42 34, 40 28, 42 22 C43 18, 46 14, 50 10 C50 10, 44 16, 40 24 C37 30, 38 36, 42 42 C48 50, 56 58, 58 68 C60 78, 56 88, 46 94 C40 97, 32 98, 24 95 C14 90, 8 80, 10 68 C12 58, 18 48, 24 38 C30 28, 35 16, 35 2Z"
+        fill={`url(#${uid}-fo)`}
+      />
+      <path
+        d="M32 42 C32 42, 24 55, 22 65 C20 74, 22 82, 30 86 C35 88, 40 86, 43 82 C47 76, 46 68, 42 60 C39 54, 34 48, 32 42Z"
+        fill={`url(#${uid}-fi)`}
+      />
     </svg>
   );
 }
@@ -161,44 +149,32 @@ export function GasliteFlameIcon({ className = "h-10 w-10" }: { className?: stri
   return (
     <svg
       className={className}
-      viewBox="0 0 60 100"
+      viewBox="0 0 70 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label="Gaslite"
     >
       <defs>
-        <linearGradient id={`${uid}-fo`} x1="30" y1="0" x2="30" y2="100" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#22D3EE" />
-          <stop offset="30%" stopColor="#38BDF8" />
-          <stop offset="60%" stopColor="#3B82F6" />
+        <linearGradient id={`${uid}-fo`} x1="35" y1="0" x2="35" y2="100" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#38BDF8" />
+          <stop offset="40%" stopColor="#3B82F6" />
           <stop offset="100%" stopColor="#1D4ED8" />
         </linearGradient>
-        <linearGradient id={`${uid}-fi`} x1="30" y1="35" x2="30" y2="90" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#F0F9FF" />
-          <stop offset="40%" stopColor="#BAE6FD" />
-          <stop offset="100%" stopColor="#7DD3FC" stopOpacity="0.4" />
+        <linearGradient id={`${uid}-fi`} x1="35" y1="20" x2="35" y2="80" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#7DD3FC" />
+          <stop offset="50%" stopColor="#38BDF8" />
+          <stop offset="100%" stopColor="#0EA5E9" />
         </linearGradient>
-        <filter id={`${uid}-glow`} x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
-          <feFlood floodColor="#38BDF8" floodOpacity="0.4" />
-          <feComposite in2="blur" operator="in" />
-          <feMerge>
-            <feMergeNode />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
-      <g filter={`url(#${uid}-glow)`}>
-        <path
-          d="M30 2 C30 2, 24 18, 18 32 C12 46, 6 58, 5 68 C3 80, 8 90, 18 95 C23 97.5, 27 98.5, 30 99 C33 98.5, 37 97.5, 42 95 C52 90, 57 80, 55 68 C54 58, 48 46, 42 32 C36 18, 30 2, 30 2Z"
-          fill={`url(#${uid}-fo)`}
-        />
-        <path
-          d="M30 40 C30 40, 26 50, 23 58 C20 66, 19 73, 21 79 C23 85, 26 88, 30 90 C34 88, 37 85, 39 79 C41 73, 40 66, 37 58 C34 50, 30 40, 30 40Z"
-          fill={`url(#${uid}-fi)`}
-        />
-      </g>
+      <path
+        d="M35 2 C35 2, 22 20, 16 35 C8 54, 4 65, 6 76 C8 87, 16 95, 28 98 C36 100, 44 98, 50 93 C58 86, 62 75, 58 62 C56 55, 50 46, 46 40 C42 34, 40 28, 42 22 C43 18, 46 14, 50 10 C50 10, 44 16, 40 24 C37 30, 38 36, 42 42 C48 50, 56 58, 58 68 C60 78, 56 88, 46 94 C40 97, 32 98, 24 95 C14 90, 8 80, 10 68 C12 58, 18 48, 24 38 C30 28, 35 16, 35 2Z"
+        fill={`url(#${uid}-fo)`}
+      />
+      <path
+        d="M32 42 C32 42, 24 55, 22 65 C20 74, 22 82, 30 86 C35 88, 40 86, 43 82 C47 76, 46 68, 42 60 C39 54, 34 48, 32 42Z"
+        fill={`url(#${uid}-fi)`}
+      />
     </svg>
   );
 }

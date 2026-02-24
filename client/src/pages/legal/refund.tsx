@@ -16,7 +16,7 @@ export default function RefundPolicy() {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <GasliteLogo size="sm" />
+            <GasliteLogo size="sm" showFlame />
           </div>
           <ThemeToggle />
         </div>

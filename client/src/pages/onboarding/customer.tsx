@@ -81,7 +81,7 @@ export default function CustomerOnboarding() {
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4 h-16">
-            <GasliteLogo size="sm" />
+            <GasliteLogo size="sm" showFlame />
             <div className="flex items-center gap-3 flex-wrap">
               <ThemeToggle />
               <Button variant="ghost" size="sm" data-testid="button-logout" onClick={() => logout()}>

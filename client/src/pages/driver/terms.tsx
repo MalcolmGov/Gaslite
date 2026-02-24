@@ -11,7 +11,7 @@ export default function DriverTerms() {
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
-            <GasliteLogo size="sm" />
+            <GasliteLogo size="sm" showFlame />
           </div>
           <ThemeToggle />
         </div>

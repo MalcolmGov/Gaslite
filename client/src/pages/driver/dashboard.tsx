@@ -656,7 +656,7 @@ export default function DriverDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-2 py-2">
             <div className="flex items-center gap-2">
-              <GasliteLogo size="sm" />
+              <GasliteLogo size="sm" showFlame />
               <Badge variant="outline">Driver</Badge>
             </div>
             <div className="flex items-center gap-4 flex-wrap">
