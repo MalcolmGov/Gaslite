@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Flame, ArrowLeft, Mail } from "lucide-react";
+import { ArrowLeft, Mail } from "lucide-react";
+import { GasliteLogo } from "@/components/gaslite-logo";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function ForgotPasswordPage() {
@@ -48,9 +49,8 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <Flame className="h-8 w-8 text-blue-500" />
-            <span className="text-2xl font-bold">Gaslite</span>
+          <div className="flex items-center justify-center">
+            <GasliteLogo size="sm" animate={false} />
           </div>
           <h1 className="text-xl font-semibold" data-testid="text-page-title">
             {submitted ? "Check your email" : "Forgot password"}

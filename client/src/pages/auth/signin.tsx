@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Flame, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { GasliteLogo } from "@/components/gaslite-logo";
 
 export default function SignInPage() {
   const [, navigate] = useLocation();
@@ -54,9 +55,8 @@ export default function SignInPage() {
         </div>
 
         <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <Flame className="h-8 w-8 text-blue-500" />
-            <span className="text-2xl font-bold">Gaslite</span>
+          <div className="flex items-center justify-center">
+            <GasliteLogo size="sm" animate={false} />
           </div>
           <h1 className="text-xl font-semibold" data-testid="text-page-title">Welcome back</h1>
           <p className="text-sm text-muted-foreground">Sign in to your account</p>

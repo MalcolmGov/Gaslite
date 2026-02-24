@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Flame, ArrowLeft, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { GasliteLogo } from "@/components/gaslite-logo";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function ResetPasswordPage() {
@@ -54,9 +55,8 @@ export default function ResetPasswordPage() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center space-y-2">
-            <div className="flex items-center justify-center gap-2">
-              <Flame className="h-8 w-8 text-blue-500" />
-              <span className="text-2xl font-bold">Gaslite</span>
+            <div className="flex items-center justify-center">
+              <GasliteLogo size="sm" animate={false} />
             </div>
             <h1 className="text-xl font-semibold" data-testid="text-page-title">Invalid reset link</h1>
             <p className="text-sm text-muted-foreground">
@@ -94,9 +94,8 @@ export default function ResetPasswordPage() {
         </div>
 
         <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <Flame className="h-8 w-8 text-blue-500" />
-            <span className="text-2xl font-bold">Gaslite</span>
+          <div className="flex items-center justify-center">
+            <GasliteLogo size="sm" animate={false} />
           </div>
           <h1 className="text-xl font-semibold" data-testid="text-page-title">
             {success ? "Password reset" : "Create new password"}

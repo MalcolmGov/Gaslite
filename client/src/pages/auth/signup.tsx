@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Flame, Eye, EyeOff, ArrowLeft, ShoppingBag, Truck, Check, Mail, Phone, Zap, MapPin, Shield, Clock, DollarSign, Users } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, ShoppingBag, Truck, Check, Mail, Phone, Zap, MapPin, Shield, Clock, DollarSign, Users, Flame } from "lucide-react";
+import { GasliteLogo } from "@/components/gaslite-logo";
 
 type RoleOption = "customer" | "driver";
 type IdentifierType = "email" | "phone";
@@ -190,11 +191,8 @@ export default function SignUpPage() {
           </div>
 
           <div className="text-center space-y-3">
-            <div className="flex items-center justify-center gap-2.5 mb-1">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Flame className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-2xl font-bold tracking-tight">Gaslite</span>
+            <div className="flex items-center justify-center mb-1">
+              <GasliteLogo size="sm" animate={false} />
             </div>
             {!selectedRole ? (
               <>
