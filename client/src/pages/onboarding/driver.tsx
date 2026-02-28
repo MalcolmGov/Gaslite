@@ -44,6 +44,7 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
+  TrendingUp,
 } from "lucide-react";
 import { insertDriverApplicationSchema, type DriverApplication } from "@shared/schema";
 
@@ -105,7 +106,7 @@ function ApplicationStatusView({ application }: { application: DriverApplication
     },
     approved: {
       label: "Approved",
-      description: "Your application has been approved! You're now a registered Gaslite driver. Go online to start receiving delivery requests and making deliveries.",
+      description: "Your application has been approved! You're now a verified Gaslite operator. Go online to start receiving delivery requests from customers in your area.",
     },
     rejected: {
       label: "Not Approved",
@@ -144,7 +145,7 @@ function ApplicationStatusView({ application }: { application: DriverApplication
                 <Clock className="h-10 w-10 text-yellow-500" />
               )}
             </div>
-            <h2 className="text-2xl font-bold mb-2" data-testid="text-application-status-title">Driver Application</h2>
+            <h2 className="text-2xl font-bold mb-2" data-testid="text-application-status-title">Operator Application</h2>
             <Badge
               variant={application.status === "approved" ? "default" : application.status === "rejected" ? "destructive" : "secondary"}
               className="mb-4"
@@ -184,9 +185,9 @@ function ApplicationStatusView({ application }: { application: DriverApplication
                 <div className="bg-green-500/10 border border-green-500/20 rounded-md p-4 text-sm text-green-700 dark:text-green-400">
                   <div className="flex items-center gap-2 font-medium mb-1">
                     <Truck className="h-4 w-4" />
-                    You're ready to deliver!
+                    You're verified and ready to deliver!
                   </div>
-                  <p>Go online on your dashboard to start receiving orders from customers near you. Earn money with every delivery.</p>
+                  <p>Go online on your dashboard to start receiving orders from customers in your area. Earn commission on every delivery.</p>
                 </div>
                 <a href="/">
                   <Button className="w-full" data-testid="button-start-delivering">
@@ -372,9 +373,9 @@ export default function DriverOnboarding() {
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center mx-auto mb-4">
             <Truck className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2" data-testid="text-driver-onboarding-title">Become a Gaslite Driver</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2" data-testid="text-driver-onboarding-title">Join as Licensed Operator</h1>
           <p className="text-muted-foreground">
-            Complete your application to start making flexible deliveries.
+            Complete your application to join South Africa's verified LPG delivery network. Dangerous goods licence and compliant vehicle required.
           </p>
         </div>
 
@@ -401,18 +402,18 @@ export default function DriverOnboarding() {
         <div className="grid grid-cols-3 gap-3 mb-8">
           <div className="text-center p-3 rounded-md bg-muted/50" data-testid="benefit-earn">
             <DollarSign className="h-5 w-5 text-muted-foreground mx-auto mb-1.5" />
-            <p className="text-xs font-medium">Earn R75-R120</p>
-            <p className="text-[10px] text-muted-foreground">per delivery</p>
+            <p className="text-xs font-medium">R80–R500</p>
+            <p className="text-[10px] text-muted-foreground">commission per delivery</p>
           </div>
           <div className="text-center p-3 rounded-md bg-muted/50" data-testid="benefit-hours">
-            <Clock className="h-5 w-5 text-muted-foreground mx-auto mb-1.5" />
-            <p className="text-xs font-medium">Flexible Hours</p>
-            <p className="text-[10px] text-muted-foreground">work when you want</p>
+            <Shield className="h-5 w-5 text-muted-foreground mx-auto mb-1.5" />
+            <p className="text-xs font-medium">Verified Network</p>
+            <p className="text-[10px] text-muted-foreground">licensed operators only</p>
           </div>
           <div className="text-center p-3 rounded-md bg-muted/50" data-testid="benefit-vehicle">
-            <Truck className="h-5 w-5 text-muted-foreground mx-auto mb-1.5" />
-            <p className="text-xs font-medium">Use Your Vehicle</p>
-            <p className="text-[10px] text-muted-foreground">be your own boss</p>
+            <TrendingUp className="h-5 w-5 text-muted-foreground mx-auto mb-1.5" />
+            <p className="text-xs font-medium">Grow Revenue</p>
+            <p className="text-[10px] text-muted-foreground">expand your customer base</p>
           </div>
         </div>
 
@@ -421,7 +422,7 @@ export default function DriverOnboarding() {
             <CardTitle className="text-lg">Step {currentStep} of 4: {steps[currentStep - 1].title}</CardTitle>
             <CardDescription>
               {currentStep === 1 && "Tell us about yourself so we can verify your identity."}
-              {currentStep === 2 && "We need your license and vehicle details for verification."}
+              {currentStep === 2 && "We need your dangerous goods licence and vehicle compliance details."}
               {currentStep === 3 && "Add your banking details for payment processing."}
               {currentStep === 4 && "Upload your documents to speed up the review process (optional)."}
             </CardDescription>
@@ -840,7 +841,7 @@ export default function DriverOnboarding() {
         </Card>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          By submitting, you agree to Gaslite's Driver Terms and Background Check Policy.
+          By submitting, you agree to Gaslite's Operator Terms and Compliance Verification Policy.
         </p>
       </main>
     </div>

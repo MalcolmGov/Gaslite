@@ -28,7 +28,7 @@ export default function DriverTerms() {
         <Card className="overflow-visible">
           <CardContent className="pt-8 pb-10 px-6 sm:px-10">
             <p className="text-sm font-semibold text-primary mb-1">GASLITE (PTY) LTD</p>
-            <h1 className="text-3xl font-bold mb-2" data-testid="text-terms-title">Driver Terms &amp; Conditions</h1>
+            <h1 className="text-3xl font-bold mb-2" data-testid="text-terms-title">Operator Terms &amp; Conditions</h1>
             <p className="text-sm text-muted-foreground mb-8">Last Updated: February 2026</p>
 
             <div className="prose prose-sm dark:prose-invert max-w-none space-y-6">
@@ -38,7 +38,7 @@ export default function DriverTerms() {
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1">
                   <li><strong className="text-foreground">"Gaslite"</strong> means Gaslite (Pty) Ltd, a company registered in the Republic of South Africa.</li>
                   <li><strong className="text-foreground">"Platform"</strong> means the Gaslite mobile application, website, and related technology systems.</li>
-                  <li><strong className="text-foreground">"Driver"</strong> means an independent contractor registered to perform LPG cylinder delivery services via the Platform.</li>
+                  <li><strong className="text-foreground">"Operator"</strong> means a licensed, independent contractor registered to perform LPG cylinder delivery services via the Platform, holding the required dangerous goods permits and operating a compliant vehicle.</li>
                   <li><strong className="text-foreground">"Customer"</strong> means a person or entity requesting LPG delivery services through the Platform.</li>
                   <li><strong className="text-foreground">"Delivery Services"</strong> means the collection and transport of LPG gas cylinders from an authorised supplier to a Customer.</li>
                 </ul>
@@ -47,30 +47,31 @@ export default function DriverTerms() {
               <section>
                 <h2 className="text-xl font-semibold mb-3">2. Nature of the Relationship</h2>
                 <p className="text-muted-foreground leading-relaxed mb-2">
-                  2.1 The Driver is engaged as an independent contractor. Nothing in this Agreement constitutes an employment relationship, partnership, joint venture, or agency between the Driver and Gaslite.
+                  2.1 The Operator is engaged as an independent contractor. Nothing in this Agreement constitutes an employment relationship, partnership, joint venture, or agency between the Operator and Gaslite.
                 </p>
-                <p className="text-muted-foreground leading-relaxed mb-2">2.2 The Driver:</p>
+                <p className="text-muted-foreground leading-relaxed mb-2">2.2 The Operator:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>Is not entitled to employee benefits, leave, UIF, PAYE deductions, or any statutory employment protections.</li>
                   <li>Is responsible for their own tax obligations, including income tax and VAT (if applicable).</li>
-                  <li>Controls their own working hours and availability.</li>
+                  <li>Manages their own availability on the platform.</li>
                   <li>Is not guaranteed any minimum number of delivery assignments.</li>
                 </ul>
                 <p className="text-muted-foreground leading-relaxed">
-                  2.3 The Driver may perform services for other entities, provided such services do not conflict with this Agreement.
+                  2.3 The Operator may perform services for other entities, provided such services do not conflict with this Agreement.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-xl font-semibold mb-3">3. Eligibility &amp; Registration</h2>
-                <p className="text-muted-foreground leading-relaxed mb-2">To qualify as a Driver, you must:</p>
+                <p className="text-muted-foreground leading-relaxed mb-2">To qualify as an Operator, you must:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>Be at least 21 years of age.</li>
                   <li>Hold a valid South African driver's licence.</li>
+                  <li>Hold a valid dangerous goods transport permit as required by applicable regulations.</li>
                   <li>Hold a valid Professional Driving Permit (PDP) where required.</li>
-                  <li>Maintain valid vehicle registration documentation.</li>
-                  <li>Provide accurate personal and banking information.</li>
-                  <li>Pass any identity verification or background checks required by Gaslite.</li>
+                  <li>Operate a vehicle that is registered and compliant for LPG transport.</li>
+                  <li>Provide accurate personal, business, and banking information.</li>
+                  <li>Pass identity verification, compliance checks, and any background checks required by Gaslite.</li>
                 </ul>
                 <p className="text-muted-foreground leading-relaxed">
                   Gaslite reserves the right to reject or revoke registration at its sole discretion.
@@ -80,7 +81,7 @@ export default function DriverTerms() {
               <section>
                 <h2 className="text-xl font-semibold mb-3">4. Platform Subscription Fee</h2>
                 <p className="text-muted-foreground leading-relaxed mb-2">
-                  4.1 A monthly platform subscription fee of <strong className="text-foreground">R39.00</strong> is payable by all active Drivers.
+                  4.1 A monthly platform subscription fee of <strong className="text-foreground">R39.00</strong> is payable by all active Operators.
                 </p>
                 <p className="text-muted-foreground leading-relaxed mb-2">4.2 The subscription fee provides access to:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
@@ -88,10 +89,10 @@ export default function DriverTerms() {
                   <li>GPS tracking systems</li>
                   <li>Customer matching</li>
                   <li>Settlement processing</li>
-                  <li>Driver support services</li>
+                  <li>Operator support services</li>
                 </ul>
                 <p className="text-muted-foreground leading-relaxed mb-2">
-                  4.3 The subscription fee shall be deducted from the Driver's first settlement in each calendar month.
+                  4.3 The subscription fee shall be deducted from the Operator's first settlement in each calendar month.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
                   4.4 Failure to maintain the subscription fee may result in account suspension.
@@ -101,7 +102,7 @@ export default function DriverTerms() {
               <section>
                 <h2 className="text-xl font-semibold mb-3">5. Compensation &amp; Settlement</h2>
                 <p className="text-muted-foreground leading-relaxed mb-2">
-                  5.1 Drivers receive a commission per completed delivery based on the cylinder size delivered:
+                  5.1 Operators receive a commission per completed delivery based on the cylinder size delivered:
                 </p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li><strong className="text-foreground">9kg cylinder</strong> — R80.00 per delivery</li>
@@ -109,7 +110,7 @@ export default function DriverTerms() {
                   <li><strong className="text-foreground">48kg cylinder</strong> — R500.00 per delivery</li>
                 </ul>
                 <p className="text-muted-foreground leading-relaxed mb-2">
-                  5.2 Commission rates are subject to change at the sole discretion of Gaslite. Drivers will be notified in advance of any changes to commission rates.
+                  5.2 Commission rates are subject to change at the sole discretion of Gaslite. Operators will be notified in advance of any changes to commission rates.
                 </p>
                 <p className="text-muted-foreground leading-relaxed mb-2">5.3 Compensation is confirmed only once:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
@@ -127,16 +128,16 @@ export default function DriverTerms() {
                   <li>Platform subscription fees</li>
                   <li>Refunds or chargebacks</li>
                   <li>Penalties for fraud or misconduct</li>
-                  <li>Regulatory fines caused by Driver negligence</li>
+                  <li>Regulatory fines caused by Operator negligence</li>
                 </ul>
                 <p className="text-muted-foreground leading-relaxed">
-                  5.6 Gaslite reserves the right to adjust commission rates. Updated rates will be communicated to Drivers and reflected on the Platform.
+                  5.6 Gaslite reserves the right to adjust commission rates. Updated rates will be communicated to Operators and reflected on the Platform.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-xl font-semibold mb-3">6. Delivery Standards &amp; Performance</h2>
-                <p className="text-muted-foreground leading-relaxed mb-2">Drivers agree to:</p>
+                <p className="text-muted-foreground leading-relaxed mb-2">Operators agree to:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>Accept and complete assigned deliveries promptly.</li>
                   <li>Deliver within a 10km radius unless otherwise agreed.</li>
@@ -157,14 +158,14 @@ export default function DriverTerms() {
                 <p className="text-muted-foreground leading-relaxed mb-2">
                   7.1 LPG cylinders constitute dangerous goods under South African law.
                 </p>
-                <p className="text-muted-foreground leading-relaxed mb-2">7.2 The Driver agrees to comply with:</p>
+                <p className="text-muted-foreground leading-relaxed mb-2">7.2 The Operator agrees to comply with:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>The National Road Traffic Act</li>
                   <li>The Hazardous Substances Act</li>
                   <li>SANS 10231 and applicable dangerous goods transport regulations</li>
                   <li>Any other applicable South African legislation</li>
                 </ul>
-                <p className="text-muted-foreground leading-relaxed mb-2">7.3 The Driver must ensure:</p>
+                <p className="text-muted-foreground leading-relaxed mb-2">7.3 The Operator must ensure:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>Vehicle suitability for LPG transport</li>
                   <li>Adequate ventilation</li>
@@ -180,7 +181,7 @@ export default function DriverTerms() {
 
               <section>
                 <h2 className="text-xl font-semibold mb-3">8. Vehicle &amp; Insurance Requirements</h2>
-                <p className="text-muted-foreground leading-relaxed mb-2">8.1 The Driver must maintain:</p>
+                <p className="text-muted-foreground leading-relaxed mb-2">8.1 The Operator must maintain:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>Roadworthy vehicle</li>
                   <li>Valid licence disc</li>
@@ -199,10 +200,10 @@ export default function DriverTerms() {
               <section>
                 <h2 className="text-xl font-semibold mb-3">9. Indemnity</h2>
                 <p className="text-muted-foreground leading-relaxed mb-2">
-                  The Driver indemnifies and holds Gaslite, its directors, officers, and affiliates harmless from and against any claims, damages, losses, fines, penalties, legal costs, or liabilities arising from:
+                  The Operator indemnifies and holds Gaslite, its directors, officers, and affiliates harmless from and against any claims, damages, losses, fines, penalties, legal costs, or liabilities arising from:
                 </p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1">
-                  <li>The Driver's negligence or misconduct</li>
+                  <li>The Operator's negligence or misconduct</li>
                   <li>Breach of this Agreement</li>
                   <li>Violation of safety regulations</li>
                   <li>Injury or property damage during delivery</li>
@@ -213,14 +214,14 @@ export default function DriverTerms() {
                 <h2 className="text-xl font-semibold mb-3">10. Limitation of Liability</h2>
                 <p className="text-muted-foreground leading-relaxed mb-2">To the maximum extent permitted by law:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1">
-                  <li>Gaslite's total liability arising from the use of the Platform shall not exceed the total subscription fees paid by the Driver in the preceding three (3) months.</li>
+                  <li>Gaslite's total liability arising from the use of the Platform shall not exceed the total subscription fees paid by the Operator in the preceding three (3) months.</li>
                   <li>Gaslite shall not be liable for indirect, incidental, or consequential damages.</li>
                 </ul>
               </section>
 
               <section>
                 <h2 className="text-xl font-semibold mb-3">11. Non-Circumvention &amp; Platform Protection</h2>
-                <p className="text-muted-foreground leading-relaxed mb-2">Drivers may not:</p>
+                <p className="text-muted-foreground leading-relaxed mb-2">Operators may not:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>Solicit Customers outside the Platform</li>
                   <li>Accept direct cash payments from Customers introduced via Gaslite</li>
@@ -235,7 +236,7 @@ export default function DriverTerms() {
               <section>
                 <h2 className="text-xl font-semibold mb-3">12. Data Protection &amp; POPIA Compliance</h2>
                 <p className="text-muted-foreground leading-relaxed mb-2">
-                  12.1 By using the Platform, the Driver consents to the collection and processing of personal data, including GPS location data, for:
+                  12.1 By using the Platform, the Operator consents to the collection and processing of personal data, including GPS location data, for:
                 </p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>Order matching</li>
@@ -251,7 +252,7 @@ export default function DriverTerms() {
               <section>
                 <h2 className="text-xl font-semibold mb-3">13. Suspension &amp; Termination</h2>
                 <p className="text-muted-foreground leading-relaxed mb-2">
-                  Gaslite may suspend or terminate a Driver account for:
+                  Gaslite may suspend or terminate an Operator account for:
                 </p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-2">
                   <li>Repeated late deliveries</li>
@@ -262,7 +263,7 @@ export default function DriverTerms() {
                   <li>Non-payment of subscription fees</li>
                 </ul>
                 <p className="text-muted-foreground leading-relaxed">
-                  Drivers may terminate their registration at any time by written notice.
+                  Operators may terminate their registration at any time by written notice.
                 </p>
               </section>
 

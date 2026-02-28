@@ -39,13 +39,13 @@ function RoleCard({
       icon: Truck,
       accentFrom: "from-emerald-500",
       accentTo: "to-teal-400",
-      title: "Driver",
-      subtitle: "Earn delivering gas",
-      description: "Earn money delivering gas cylinders in your area on your own schedule.",
+      title: "Licensed Operator",
+      subtitle: "Grow your LPG business",
+      description: "Expand your existing LPG delivery operations with new digital customers through our verified network.",
       perks: [
-        { icon: Clock, text: "Flexible hours, be your own boss" },
-        { icon: DollarSign, text: "Earn per delivery within 10km" },
-        { icon: Zap, text: "Quick & simple onboarding" },
+        { icon: Shield, text: "Licensed operators & compliant vehicles only" },
+        { icon: DollarSign, text: "Earn commission per delivery within 10km" },
+        { icon: Zap, text: "Structured onboarding with document verification" },
       ],
     },
   };
@@ -128,7 +128,7 @@ export default function SignUpPage() {
     e.preventDefault();
 
     if (selectedRole === "driver" && !agreedToTerms) {
-      toast({ title: "Terms & Conditions required", description: "Please agree to the Driver Terms & Conditions to continue.", variant: "destructive" });
+      toast({ title: "Terms & Conditions required", description: "Please agree to the Operator Terms & Conditions to continue.", variant: "destructive" });
       return;
     }
 
@@ -392,7 +392,7 @@ export default function SignUpPage() {
                           className="text-primary font-semibold hover:underline underline-offset-2"
                           data-testid="link-driver-terms"
                         >
-                          Driver Terms & Conditions
+                          Operator Terms & Conditions
                         </a>
                       </label>
                     </div>

@@ -137,13 +137,13 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center gap-6">
               <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
               <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-              <a href="#drivers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Drive With Us</a>
+              <a href="#drivers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">For Operators</a>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
               <ThemeToggle />
               <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")} className="hidden lg:inline-flex">
                 <Button variant="ghost" size="sm" data-testid="link-become-driver">
-                  Become a Driver
+                  Join as Operator
                 </Button>
               </a>
               <a href="/auth/signin">
@@ -196,7 +196,7 @@ export default function LandingPage() {
               </motion.h1>
               
               <motion.p variants={fadeInUp} className="text-lg sm:text-xl text-muted-foreground max-w-lg leading-relaxed">
-                Order LPG gas cylinders with a tap. <span className="text-primary font-semibold">Fast, safe delivery</span> by verified drivers straight to your door.
+                Order LPG gas cylinders with a tap. <span className="text-primary font-semibold">Fast, safe delivery</span> by licensed, verified operators straight to your door.
               </motion.p>
               
               <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4">
@@ -442,7 +442,7 @@ export default function LandingPage() {
             </motion.div>
 
             {[
-              { icon: Shield, title: "Safe & Secure", value: "100%", desc: "Card-only payments, verified drivers, SABS-approved cylinders" },
+              { icon: Shield, title: "Safe & Secure", value: "100%", desc: "Card-only payments, licensed operators, SABS-approved cylinders" },
               { icon: Eye, title: "Transparent Pricing", value: "R0", desc: "All fees visible upfront — no hidden charges" },
               { icon: Users, title: "Happy Customers", value: "10K+", desc: "Trusted across South Africa" },
               { icon: Zap, title: "Real-Time Tracking", value: "Live", desc: "Uber-style map showing your driver's location" },
@@ -614,25 +614,25 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <Badge className="mb-4 bg-blue-500/10 text-blue-600">Join Our Team</Badge>
+            <Badge className="mb-4 bg-blue-500/10 text-blue-600">For Licensed Operators</Badge>
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
-              Earn Money <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Your Way</span>
+              South Africa's <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">Verified LPG Delivery Network</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Become a Gaslite driver and enjoy flexible hours, competitive commission, and the freedom to be your own boss. Join now during our launch special and pay zero subscription fees.
+              Grow your existing LPG delivery business with Gaslite. We connect licensed dangerous goods operators with customers who need reliable gas delivery — expanding your reach and revenue through our digital platform.
             </p>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-12">
             {[
-              { icon: ToggleRight, title: "Flexible Schedule", desc: "Go online or offline anytime — work when it suits you, no fixed shifts" },
-              { icon: MapPin, title: "Smart Order Matching", desc: "Orders matched within 10km of your location — no wasted trips" },
-              { icon: TrendingUp, title: "Earnings Dashboard", desc: "Track your earnings in real time: today, this week, this month, and total" },
+              { icon: Shield, title: "Licensed Operators Only", desc: "We verify dangerous goods permits, vehicle compliance, and operator credentials before approval" },
+              { icon: MapPin, title: "Smart Order Matching", desc: "Orders matched within 10km of your location — efficient routing, no wasted trips" },
+              { icon: TrendingUp, title: "Earnings Dashboard", desc: "Track your revenue in real time: today, this week, this month, and total earnings" },
               { icon: Navigation, title: "GPS Navigation", desc: "One-tap navigation to delivery addresses via Google Maps" },
-              { icon: Bell, title: "Instant Order Alerts", desc: "Push notifications the moment new orders are available nearby" },
-              { icon: MessageCircle, title: "In-App Chat", desc: "Message customers directly, plus dedicated admin support chat" },
-              { icon: FileCheck, title: "Easy Onboarding", desc: "Structured 3-step application with simple document upload" },
-              { icon: Truck, title: "Clear Status Flow", desc: "Accept, Pick Up, In Transit, Delivered — simple delivery workflow" },
+              { icon: Bell, title: "Instant Order Alerts", desc: "Push notifications the moment new customer orders are available in your area" },
+              { icon: FileCheck, title: "Compliance Documentation", desc: "Upload your dangerous goods licence, vehicle permits, and operator certificates during onboarding" },
+              { icon: ToggleRight, title: "Go Online Anytime", desc: "Manage your availability — go online when you're ready to accept deliveries" },
+              { icon: Truck, title: "Professional Workflow", desc: "Accept, Pick Up, In Transit, Delivered — structured delivery management" },
             ].map((item, index) => (
               <motion.div
                 key={item.title}
@@ -677,10 +677,10 @@ export default function LandingPage() {
                     <Badge variant="outline" className="border-amber-400 text-amber-600 dark:text-amber-400 text-xs">Limited Spots</Badge>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold mb-2">
-                    First 50 Drivers — <span className="text-amber-600 dark:text-amber-400">No Subscription Fee!</span>
+                    First 50 Operators — <span className="text-amber-600 dark:text-amber-400">No Subscription Fee!</span>
                   </h3>
                   <p className="text-muted-foreground mb-3">
-                    Be one of the first 50 founding drivers and skip the R39/month platform fee completely. Plus, get a referral code to share with other drivers — they skip the fee too!
+                    Be one of the first 50 founding operators and skip the R39/month platform fee completely. Plus, get a referral code to share with other licensed operators — they skip the fee too!
                   </p>
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm">
                     <span className="flex items-center gap-1.5">
@@ -689,11 +689,11 @@ export default function LandingPage() {
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Gift className="h-4 w-4 text-blue-500" />
-                      <span>Refer up to 50 drivers</span>
+                      <span>Refer up to 50 operators</span>
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Users className="h-4 w-4 text-purple-500" />
-                      <span>Your referrals skip fees too</span>
+                      <span>Referred operators skip fees too</span>
                     </span>
                   </div>
                 </div>
@@ -709,11 +709,11 @@ export default function LandingPage() {
           >
             <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")}>
               <Button size="lg" className="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 shadow-lg shadow-blue-500/25 h-14 px-10 text-lg" data-testid="button-driver-apply">
-                Start Earning Today
+                Apply as Licensed Operator
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </a>
-            <p className="text-sm text-muted-foreground mt-4">Commission calculated automatically on every delivery</p>
+            <p className="text-sm text-muted-foreground mt-4">Dangerous goods licence and compliant vehicle required. Commission per delivery.</p>
           </motion.div>
         </div>
       </section>
@@ -818,7 +818,7 @@ export default function LandingPage() {
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li><a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a></li>
                 <li><a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
-                <li><a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")} className="hover:text-foreground transition-colors">Become a Driver</a></li>
+                <li><a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "driver")} className="hover:text-foreground transition-colors">For Operators</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">Safety</a></li>
               </ul>
             </div>

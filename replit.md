@@ -2,7 +2,7 @@
 
 ## Overview
 
-Gaslite is a premium on-demand LPG gas delivery application designed for the South African market. The platform connects customers who need gas cylinder deliveries with drivers who fulfill those orders, using Uber-style real-time delivery tracking. The system supports three user roles: customers (ordering gas), drivers (delivering orders), and admins (managing the platform).
+Gaslite is a premium on-demand LPG gas delivery application designed for the South African market. The platform connects customers who need gas cylinder deliveries with licensed, verified LPG operators who fulfill those orders, using Uber-style real-time delivery tracking. The system supports three user roles: customers (ordering gas), operators/drivers (delivering orders — must hold dangerous goods licences and operate compliant vehicles), and admins (managing the platform). Gaslite is positioned as a compliance-first professional network for existing licensed LPG operators — not a gig platform.
 
 The application features a visually stunning premium landing page with Framer Motion animations, glassmorphism effects, and a modern blue/white/cyan gradient color scheme. Key functionality includes product catalog browsing, order placement with location tracking, driver onboarding with document uploads, real-time GPS tracking with live maps, and Uber-style delivery status management.
 
@@ -22,7 +22,7 @@ The application features a visually stunning premium landing page with Framer Mo
 - Bento grid features section with animated stats
 - Pricing cards for 9kg, 19kg, 48kg cylinders with hover animations
 - Customer testimonials carousel
-- Driver recruitment section with earnings calculator
+- Licensed operator recruitment section (compliance-first positioning, not gig-style)
 - Modern footer with newsletter signup and social links
 - Dark/light mode toggle with smooth transitions
 - Scroll progress indicator

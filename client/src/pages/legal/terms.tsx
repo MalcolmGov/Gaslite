@@ -59,8 +59,8 @@ export default function TermsOfService() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3">7. Driver Terms</h2>
-              <p className="text-muted-foreground">Drivers using the Gaslite platform are independent contractors, not employees of Gaslite. Drivers must maintain valid licences, vehicle registration, and comply with all applicable South African road and transport regulations. Drivers are subject to a monthly platform subscription fee of R39.00. Drivers must handle LPG cylinders in accordance with safety regulations set out by the South African Bureau of Standards (SABS) and relevant legislation.</p>
+              <h2 className="text-xl font-semibold mb-3">7. Operator Terms</h2>
+              <p className="text-muted-foreground">Operators using the Gaslite platform are independent contractors, not employees of Gaslite. Operators must hold valid dangerous goods licences, maintain compliant LPG transport vehicles, and comply with all applicable South African road, transport, and dangerous goods regulations. Operators are subject to a monthly platform subscription fee of R39.00. Operators must handle LPG cylinders in accordance with safety regulations set out by the South African Bureau of Standards (SABS) and relevant legislation.</p>
             </section>
 
             <section>
