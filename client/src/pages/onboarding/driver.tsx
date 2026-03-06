@@ -226,6 +226,7 @@ export default function DriverOnboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const [licenseDocUrl, setLicenseDocUrl] = useState<string | null>(null);
   const [vehicleDocUrl, setVehicleDocUrl] = useState<string | null>(null);
+  const [prdpCertUrl, setPrdpCertUrl] = useState<string | null>(null);
   const [referralStatus, setReferralStatus] = useState<{ checking: boolean; valid?: boolean; referrerName?: string; error?: string }>({ checking: false });
 
   const validateReferralCode = useCallback(async (code: string) => {
@@ -272,6 +273,16 @@ export default function DriverOnboarding() {
     },
   });
 
+  const { uploadFile: uploadPrdp, isUploading: prdpUploading } = useUpload({
+    onSuccess: (response) => {
+      setPrdpCertUrl(response.objectPath);
+      toast({ title: "PrDP certificate uploaded" });
+    },
+    onError: () => {
+      toast({ title: "Upload failed", description: "Please try again or skip this step.", variant: "destructive" });
+    },
+  });
+
   const form = useForm<DriverFormData>({
     resolver: zodResolver(driverSchema),
     defaultValues: {
@@ -296,6 +307,7 @@ export default function DriverOnboarding() {
         ...data,
         licenseDocumentUrl: licenseDocUrl,
         vehicleDocumentUrl: vehicleDocUrl,
+        prdpCertificateUrl: prdpCertUrl,
         bankName: data.bankName,
         branchCode: data.branchCode,
         accountNumber: data.accountNumber,
@@ -424,7 +436,7 @@ export default function DriverOnboarding() {
               {currentStep === 1 && "Tell us about yourself so we can verify your identity."}
               {currentStep === 2 && "Enter your vehicle registration details."}
               {currentStep === 3 && "Add your banking details for payment processing."}
-              {currentStep === 4 && "Upload your documents to speed up the review process (optional)."}
+              {currentStep === 4 && "Upload your documents including your PrDP 'D' certificate (optional but recommended)."}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -777,6 +789,38 @@ export default function DriverOnboarding() {
                                 onChange={(e) => e.target.files?.[0] && uploadVehicle(e.target.files[0])}
                                 disabled={vehicleUploading}
                                 data-testid="input-driver-vehicle-upload"
+                              />
+                            </label>
+                            <p className="text-xs text-muted-foreground mt-1">JPG, PNG or PDF (max 10MB)</p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">PrDP 'D' Certificate (Dangerous Goods)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Professional Driving Permit with 'D' (Dangerous Goods) endorsement is required to transport LPG in South Africa. Must be valid and renewed annually.
+                      </p>
+                      <div className="border-2 border-dashed border-border rounded-md p-6 text-center">
+                        {prdpCertUrl ? (
+                          <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
+                            <CheckCircle className="h-5 w-5" />
+                            <span className="text-sm font-medium" data-testid="text-prdp-uploaded">PrDP certificate uploaded</span>
+                          </div>
+                        ) : (
+                          <>
+                            <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                            <label className="cursor-pointer">
+                              <span className="text-sm text-foreground hover:underline font-medium">
+                                {prdpUploading ? "Uploading..." : "Upload PrDP certificate"}
+                              </span>
+                              <input
+                                type="file"
+                                className="hidden"
+                                accept="image/*,.pdf"
+                                onChange={(e) => e.target.files?.[0] && uploadPrdp(e.target.files[0])}
+                                disabled={prdpUploading}
+                                data-testid="input-prdp-upload"
                               />
                             </label>
                             <p className="text-xs text-muted-foreground mt-1">JPG, PNG or PDF (max 10MB)</p>

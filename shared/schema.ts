@@ -54,6 +54,7 @@ export const driverApplications = pgTable("driver_applications", {
   licenseDocumentUrl: text("license_document_url"),
   vehicleRegistration: text("vehicle_registration").notNull(),
   vehicleDocumentUrl: text("vehicle_document_url"),
+  prdpCertificateUrl: text("prdp_certificate_url"),
   bankName: text("bank_name"),
   branchCode: text("branch_code"),
   accountNumber: text("account_number"),
