@@ -79,7 +79,7 @@ const driverSchema = insertDriverApplicationSchema
     email: z.string().email("Valid email is required"),
     phone: z.string().min(10, "Valid SA phone number required"),
     address: z.string().min(5, "Home address is required"),
-    licenseNumber: z.string().min(5, "License number is required"),
+    licenseNumber: z.string().optional(),
     vehicleRegistration: z.string().min(3, "Vehicle registration is required"),
     bankName: z.string().min(1, "Please select your bank"),
     branchCode: z.string().min(1, "Branch code is required"),
@@ -335,7 +335,7 @@ export default function DriverOnboarding() {
       return form.trigger(["firstName", "lastName", "email", "phone", "address"]);
     }
     if (currentStep === 2) {
-      return form.trigger(["licenseNumber", "vehicleRegistration"]);
+      return form.trigger(["vehicleRegistration"]);
     }
     if (currentStep === 3) {
       return form.trigger(["bankName", "branchCode", "accountNumber", "accountType"]);
@@ -422,7 +422,7 @@ export default function DriverOnboarding() {
             <CardTitle className="text-lg">Step {currentStep} of 4: {steps[currentStep - 1].title}</CardTitle>
             <CardDescription>
               {currentStep === 1 && "Tell us about yourself so we can verify your identity."}
-              {currentStep === 2 && "We need your dangerous goods licence and vehicle compliance details."}
+              {currentStep === 2 && "Enter your vehicle registration details."}
               {currentStep === 3 && "Add your banking details for payment processing."}
               {currentStep === 4 && "Upload your documents to speed up the review process (optional)."}
             </CardDescription>
@@ -591,22 +591,6 @@ export default function DriverOnboarding() {
                   <div className="space-y-4">
                     <FormField
                       control={form.control}
-                      name="licenseNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Driver's License Number</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                              <Input placeholder="e.g. WC-DL-2024-12345" className="pl-9" {...field} data-testid="input-driver-license" />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
                       name="vehicleRegistration"
                       render={({ field }) => (
                         <FormItem>
@@ -623,7 +607,7 @@ export default function DriverOnboarding() {
                     />
                     <div className="bg-muted/50 rounded-md p-4">
                       <p className="text-sm text-muted-foreground">
-                        Make sure your license is valid and your vehicle is roadworthy. We'll verify these details during the review process.
+                        Make sure your vehicle is roadworthy. We'll verify these details during the review process.
                       </p>
                     </div>
                   </div>
