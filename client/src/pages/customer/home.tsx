@@ -266,7 +266,7 @@ export default function CustomerHome() {
   );
   const isTestOrder = cart.some(item => item.product.size === "Test");
   const serviceFee = isTestOrder ? 1 : 29;
-  const cardProcessingFee = cartTotal > 0 ? Math.round(cartTotal * 0.026 * 1.15 * 100) / 100 : 0;
+  const cardProcessingFee = cartTotal > 0 ? Math.round(cartTotal * 0.026 * 100) / 100 : 0;
   const total = cartTotal + cardProcessingFee;
 
   const handlePlaceOrder = () => {
@@ -924,12 +924,12 @@ export default function CustomerHome() {
                           <span data-testid="text-subtotal">R{cartTotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Service Fee <span className="text-xs italic">(included in pricing)</span></span>
+                          <span className="text-muted-foreground">Service Fee <span className="text-xs italic">(included)</span></span>
                           <span className="text-muted-foreground" data-testid="text-service-fee">R{serviceFee.toFixed(2)}</span>
                         </div>
                         {cardProcessingFee > 0 && (
                           <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Card Processing Fee</span>
+                            <span className="text-muted-foreground">Card Processing Fee (2.6%)</span>
                             <span data-testid="text-card-fee">R{cardProcessingFee.toFixed(2)}</span>
                           </div>
                         )}
@@ -985,7 +985,7 @@ export default function CustomerHome() {
                               <span className="text-sm font-medium">Card Payment via Yoco</span>
                             </div>
                             <p className="text-xs text-muted-foreground" data-testid="text-card-fee-info">
-                              Card processing fee: 2.6% + 15% VAT applies
+                              Card processing fee of 2.6% applies
                             </p>
                           </div>
                           <div className="space-y-3 p-3 border border-border rounded-md bg-muted/30">

@@ -105,7 +105,7 @@ export default function LandingPage() {
   const [demoOpen, setDemoOpen] = useState(false);
 
   const products = [
-    { size: "9kg", name: "Compact Cylinder", price: 262, popular: false, description: "Perfect for small households" },
+    { size: "9kg", name: "Compact Cylinder", price: 280.71, popular: false, description: "Perfect for small households" },
     { size: "19kg", name: "Standard Cylinder", price: 552, popular: true, description: "Most popular for families" },
     { size: "48kg", name: "Commercial Cylinder", price: 1345, popular: false, description: "Ideal for businesses" },
   ];
