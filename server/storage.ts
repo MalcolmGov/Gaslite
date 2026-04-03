@@ -496,30 +496,31 @@ export class DatabaseStorage implements IStorage {
 
 export const storage = new DatabaseStorage();
 
-// Seed default products if they don't exist
+// Seed default products if they don't exist, and keep prices up to date
 export async function seedProducts() {
+  const CANONICAL_PRODUCTS = [
+    { name: "9kg Gas Cylinder", size: "9kg", price: "280.71", description: "Standard household gas cylinder" },
+    { name: "19kg Gas Cylinder", size: "19kg", price: "552.00", description: "Medium size gas cylinder" },
+    { name: "48kg Gas Cylinder", size: "48kg", price: "1345.00", description: "Large commercial gas cylinder" },
+  ];
+
   const existingProducts = await db.select().from(products);
-  if (existingProducts.length === 0) {
-    const defaultProducts: InsertProduct[] = [
-      { name: "Test Cylinder (R5)", size: "Test", price: "5.00", description: "Test product for payment testing" },
-      { name: "9kg Gas Cylinder", size: "9kg", price: "233.00", description: "Standard household gas cylinder" },
-      { name: "19kg Gas Cylinder", size: "19kg", price: "523.00", description: "Medium size gas cylinder" },
-      { name: "48kg Gas Cylinder", size: "48kg", price: "1316.00", description: "Large commercial gas cylinder" },
-    ];
-    for (const product of defaultProducts) {
-      await db.insert(products).values(product);
+
+  for (const canonical of CANONICAL_PRODUCTS) {
+    const existing = existingProducts.find(p => p.size === canonical.size);
+    if (!existing) {
+      await db.insert(products).values(canonical);
+      console.log(`Seeded product: ${canonical.name}`);
+    } else if (Number(existing.price) !== Number(canonical.price)) {
+      await db.update(products).set({ price: canonical.price }).where(eq(products.id, existing.id));
+      console.log(`Updated price for ${canonical.name}: ${existing.price} -> ${canonical.price}`);
     }
-    console.log("Seeded default products");
-  } else {
-    const hasTestCylinder = existingProducts.some(p => p.name === "Test Cylinder (R5)");
-    if (!hasTestCylinder) {
-      await db.insert(products).values({
-        name: "Test Cylinder (R5)",
-        size: "Test",
-        price: "5.00",
-        description: "Test product for payment testing",
-      });
-      console.log("Added test cylinder product");
-    }
+  }
+
+  // Remove test cylinder if present
+  const testProduct = existingProducts.find(p => p.size === "Test");
+  if (testProduct) {
+    await db.delete(products).where(eq(products.id, testProduct.id));
+    console.log("Removed test cylinder product");
   }
 }
