@@ -43,7 +43,7 @@ export function setupSession(app: Express) {
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
+    createTableIfMissing: true,
     ttl: sessionTtl,
     tableName: "sessions",
   });
@@ -269,9 +269,7 @@ export function registerAuthRoutes(app: Express) {
         expiresAt,
       });
 
-      const baseUrl = process.env.REPLIT_DEV_DOMAIN
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-        : process.env.REPLIT_DEPLOYMENT_URL || "https://gaslite.replit.app";
+      const baseUrl = process.env.APP_URL || "https://www.gaslite.co.za";
 
       const resetLink = `${baseUrl}/auth/reset-password?token=${token}`;
       const name = user.firstName || "there";
