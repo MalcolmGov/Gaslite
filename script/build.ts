@@ -65,7 +65,7 @@ async function buildAll() {
   // custom buildCommand is in use, so we pre-bundle everything here.
   console.log("building Vercel function bundle...");
   await esbuild({
-    entryPoints: ["api/index.ts"],
+    entryPoints: ["server/vercel-handler.ts"],
     platform: "node",
     bundle: true,
     format: "esm",

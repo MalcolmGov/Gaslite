@@ -4,7 +4,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// api/index.ts
+// server/vercel-handler.ts
 import express from "express";
 import serverless from "serverless-http";
 
@@ -2675,7 +2675,7 @@ async function seedAdmin() {
   }
 }
 
-// api/index.ts
+// server/vercel-handler.ts
 var app = express();
 app.use(
   express.json({
@@ -2715,10 +2715,10 @@ async function ensureInitialized() {
   });
 }
 var handler = serverless(app);
-async function index_default(req, res) {
+async function vercel_handler_default(req, res) {
   await ensureInitialized();
   return handler(req, res);
 }
 export {
-  index_default as default
+  vercel_handler_default as default
 };
