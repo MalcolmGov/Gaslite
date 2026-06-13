@@ -972,11 +972,15 @@ import { eq as eq4 } from "drizzle-orm";
 // server/push.ts
 import webpush from "web-push";
 import { eq as eq3 } from "drizzle-orm";
-var vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
-var vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-var vapidSubject = process.env.VAPID_SUBJECT || "mailto:support@gaslite.co.za";
+var vapidPublicKey = process.env.VAPID_PUBLIC_KEY?.trim();
+var vapidPrivateKey = process.env.VAPID_PRIVATE_KEY?.trim();
+var vapidSubject = (process.env.VAPID_SUBJECT || "mailto:support@gaslite.co.za").trim();
 if (vapidPublicKey && vapidPrivateKey) {
-  webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+  try {
+    webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+  } catch (err) {
+    console.error("[push] Invalid VAPID keys \u2014 push notifications disabled:", err);
+  }
 }
 async function saveSubscription(userId, subscription) {
   const existing = await db.select().from(pushSubscriptions).where(eq3(pushSubscriptions.endpoint, subscription.endpoint));

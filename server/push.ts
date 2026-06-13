@@ -4,12 +4,16 @@ import { pushSubscriptions } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { storage } from "./storage";
 
-const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
-const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-const vapidSubject = process.env.VAPID_SUBJECT || "mailto:support@gaslite.co.za";
+const vapidPublicKey = process.env.VAPID_PUBLIC_KEY?.trim();
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY?.trim();
+const vapidSubject = (process.env.VAPID_SUBJECT || "mailto:support@gaslite.co.za").trim();
 
 if (vapidPublicKey && vapidPrivateKey) {
-  webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+  try {
+    webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+  } catch (err) {
+    console.error("[push] Invalid VAPID keys — push notifications disabled:", err);
+  }
 }
 
 export async function saveSubscription(userId: string, subscription: { endpoint: string; keys: { p256dh: string; auth: string } }) {
