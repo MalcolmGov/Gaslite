@@ -1,5 +1,4 @@
 import express, { type Request, Response, NextFunction } from "express";
-import serverless from "serverless-http";
 import { registerRoutes } from "../server/routes";
 import { setupSession, registerAuthRoutes } from "../server/auth";
 import { seedAdmin } from "../server/seed-admin";
@@ -51,9 +50,7 @@ async function ensureInitialized() {
   });
 }
 
-const handler = serverless(app);
-
 export default async function (req: any, res: any) {
   await ensureInitialized();
-  return handler(req, res);
+  app(req, res);
 }

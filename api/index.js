@@ -6,7 +6,6 @@ var __export = (target, all) => {
 
 // server/vercel-handler.ts
 import express from "express";
-import serverless from "serverless-http";
 
 // server/db.ts
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -2716,10 +2715,9 @@ async function ensureInitialized() {
     if (!res.headersSent) res.status(status).json({ message });
   });
 }
-var handler = serverless(app);
 async function vercel_handler_default(req, res) {
   await ensureInitialized();
-  return handler(req, res);
+  app(req, res);
 }
 export {
   vercel_handler_default as default
