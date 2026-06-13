@@ -38,10 +38,10 @@ async function ensureInitialized() {
   initialized = true;
   setupSession(app);
   registerAuthRoutes(app);
-  await seedAdmin();
   const { createServer } = await import("http");
   const httpServer = createServer(app);
   await registerRoutes(httpServer, app);
+  seedAdmin().catch(e => console.error("seedAdmin failed:", e));
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

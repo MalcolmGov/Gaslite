@@ -25,9 +25,6 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  setupSession(app);
-  registerAuthRoutes(app);
-
   await seedProducts();
 
   const objectStorageService = new ObjectStorageService();

@@ -642,7 +642,7 @@ setInterval(() => {
   store.forEach((entry, key) => {
     if (entry.resetAt <= now) store.delete(key);
   });
-}, 6e4);
+}, 6e4).unref();
 function rateLimit(options) {
   const { windowMs, max, message = "Too many requests, please try again later" } = options;
   return (req, res, next) => {
@@ -1140,8 +1140,6 @@ async function getYocoCheckoutStatus(checkoutId) {
 // server/routes.ts
 var upload = multer({ storage: multer.memoryStorage() });
 async function registerRoutes(httpServer, app2) {
-  setupSession(app2);
-  registerAuthRoutes(app2);
   await seedProducts();
   const objectStorageService = new ObjectStorageService();
   app2.get("/api/config/maps-key", (req, res) => {
@@ -2707,10 +2705,10 @@ async function ensureInitialized() {
   initialized = true;
   setupSession(app);
   registerAuthRoutes(app);
-  await seedAdmin();
   const { createServer } = await import("http");
   const httpServer = createServer(app);
   await registerRoutes(httpServer, app);
+  seedAdmin().catch((e) => console.error("seedAdmin failed:", e));
   app.use((err, _req, res, _next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";

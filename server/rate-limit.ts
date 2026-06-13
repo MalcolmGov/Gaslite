@@ -12,7 +12,7 @@ setInterval(() => {
   store.forEach((entry, key) => {
     if (entry.resetAt <= now) store.delete(key);
   });
-}, 60_000);
+}, 60_000).unref();
 
 export function rateLimit(options: {
   windowMs: number;
