@@ -59,6 +59,23 @@ async function buildAll() {
     external: externals,
     logLevel: "info",
   });
+
+  // Bundle the Vercel serverless handler into a self-contained file.
+  // Vercel's @vercel/node runtime doesn't follow relative TS imports when a
+  // custom buildCommand is in use, so we pre-bundle everything here.
+  console.log("building Vercel function bundle...");
+  await esbuild({
+    entryPoints: ["api/index.ts"],
+    platform: "node",
+    bundle: true,
+    format: "esm",
+    outfile: "api/index.js",
+    define: {
+      "process.env.NODE_ENV": '"production"',
+    },
+    external: allDeps,
+    logLevel: "info",
+  });
 }
 
 buildAll().catch((err) => {
