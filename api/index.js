@@ -698,7 +698,7 @@ function setupSession(app2) {
   const sessionTtl = 7 * 24 * 60 * 60 * 1e3;
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
+    pool,
     createTableIfMissing: true,
     ttl: sessionTtl,
     tableName: "sessions"

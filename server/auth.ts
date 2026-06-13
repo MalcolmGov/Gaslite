@@ -3,7 +3,7 @@ import crypto from "crypto";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import type { Express, Request, Response, NextFunction } from "express";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { users, passwordResetTokens } from "@shared/models/auth";
 import { eq, or, and, gt } from "drizzle-orm";
 import { authRateLimit } from "./rate-limit";
@@ -42,7 +42,7 @@ export function setupSession(app: Express) {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000;
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
+    pool,
     createTableIfMissing: true,
     ttl: sessionTtl,
     tableName: "sessions",
