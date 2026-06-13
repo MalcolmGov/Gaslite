@@ -3,17 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    
+    <!-- Apply theme before render to prevent flash of light mode -->
+    <script>
+      (function() {
+        if (localStorage.getItem('theme') !== 'light') {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+
     <!-- Primary SEO Meta Tags -->
-    <title>Move Digital - AI & Automation Solutions | Custom Software Development | Johannesburg</title>
-    <meta name="title" content="Move Digital - AI & Automation Solutions | Custom Software Development | Johannesburg">
-    <meta name="description" content="Transform your business with AI-powered automation, custom software development, and intelligent process optimization. Leading tech solutions company in Johannesburg. Get your free technical consultation today.">
-    <meta name="keywords" content="AI automation johannesburg, custom software development, process automation, AI integration, web applications, business intelligence, tech consulting, machine learning, move digital">
+    <title>Gaslite — Fast, Safe, Reliable Gas Delivery</title>
+    <meta name="title" content="Gaslite — Fast, Safe, Reliable Gas Delivery">
+    <meta name="description" content="Order gas cylinders delivered to your door. Fast, safe and reliable gas delivery across South Africa.">
+    <meta name="keywords" content="gas delivery, gas cylinders, LPG delivery, gas refill, South Africa">
     <meta name="robots" content="index, follow">
     <meta name="language" content="English">
-    <meta name="author" content="Move Digital">
-    <meta name="publisher" content="Move Digital">
-    <meta name="copyright" content="© 2025 Move Digital. All rights reserved.">
+    <meta name="author" content="Gaslite">
+    <meta name="publisher" content="Gaslite">
+    <meta name="copyright" content="© 2026 Gaslite. All rights reserved.">
     <meta name="distribution" content="global">
     <meta name="rating" content="general">
     
