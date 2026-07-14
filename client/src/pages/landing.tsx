@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { QRCodeSVG } from "qrcode.react";
 import { DemoWalkthrough } from "@/components/demo-walkthrough";
 import { img9kg, img19kg, img48kg, getProductImage } from "@/lib/product-images";
@@ -104,11 +105,22 @@ export default function LandingPage() {
   const heroInView = useInView(heroRef, { once: true });
   const [demoOpen, setDemoOpen] = useState(false);
 
-  const products = [
-    { size: "9kg", name: "Compact Cylinder", price: 280.71, popular: false, description: "Perfect for small households" },
-    { size: "19kg", name: "Standard Cylinder", price: 552, popular: true, description: "Most popular for families" },
-    { size: "48kg", name: "Commercial Cylinder", price: 1345, popular: false, description: "Ideal for businesses" },
+  // Live prices come from the database (single source of truth) so the
+  // marketing page always matches admin pricing and never drifts.
+  const { data: dbProducts } = useQuery<{ size: string; price: string }[]>({
+    queryKey: ["/api/products"],
+  });
+
+  const productMeta = [
+    { size: "9kg", name: "Compact Cylinder", popular: false, description: "Perfect for small households" },
+    { size: "19kg", name: "Standard Cylinder", popular: true, description: "Most popular for families" },
+    { size: "48kg", name: "Commercial Cylinder", popular: false, description: "Ideal for businesses" },
   ];
+
+  const products = productMeta.map((meta) => {
+    const dbProduct = dbProducts?.find((p) => p.size === meta.size);
+    return { ...meta, price: dbProduct ? Number(dbProduct.price) : null };
+  });
 
   const testimonials = [
     { name: "Sarah M.", location: "Johannesburg", rating: 5, text: "Incredibly fast delivery! The driver was at my door before I knew it." },
@@ -270,7 +282,7 @@ export default function LandingPage() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">19kg Gas Cylinder</span>
-                        <span className="font-medium">R552</span>
+                        <span className="font-medium">R680</span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground italic">Incl. R29 service fee</span>
@@ -278,7 +290,7 @@ export default function LandingPage() {
                       <div className="h-px bg-border" />
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-sm">Total</span>
-                        <span className="font-bold text-primary">R552</span>
+                        <span className="font-bold text-primary">R680</span>
                       </div>
                     </div>
                     <div className="mt-3 p-2 bg-blue-500/10 rounded-xl">
@@ -545,13 +557,15 @@ export default function LandingPage() {
                     <h3 className="text-lg font-bold mb-0.5">{product.name}</h3>
                     <p className="text-sm text-muted-foreground mb-2">{product.description}</p>
                     <div className="mb-3">
-                      <div className="text-3xl font-bold text-primary">R{product.price}</div>
+                      <div className="text-3xl font-bold text-primary">{product.price != null ? `R${product.price}` : "—"}</div>
                       <span className="text-xs text-muted-foreground italic">Incl. R29 service fee</span>
                     </div>
-                    <Button className={`w-full ${product.popular ? 'bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500' : ''}`} variant={product.popular ? "default" : "outline"}>
-                      Order Now
-                      <ChevronRight className="ml-1 h-4 w-4" />
-                    </Button>
+                    <a href="/auth/signup" onClick={() => localStorage.setItem("gaslite_intent", "customer")} className="block">
+                      <Button className={`w-full ${product.popular ? 'bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500' : ''}`} variant={product.popular ? "default" : "outline"}>
+                        Order Now
+                        <ChevronRight className="ml-1 h-4 w-4" />
+                      </Button>
+                    </a>
                   </CardContent>
                 </Card>
               </motion.div>

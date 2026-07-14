@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { seedAdmin } from "./seed-admin";
+import { setupSession, registerAuthRoutes } from "./auth";
 
 const app = express();
 const httpServer = createServer(app);
@@ -90,6 +91,8 @@ httpServer.listen(
 
 (async () => {
   await seedAdmin();
+  setupSession(app);
+  registerAuthRoutes(app);
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {

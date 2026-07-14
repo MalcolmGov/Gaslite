@@ -511,10 +511,9 @@ export async function seedProducts() {
     if (!existing) {
       await db.insert(products).values(canonical);
       console.log(`Seeded product: ${canonical.name}`);
-    } else if (Number(existing.price) !== Number(canonical.price)) {
-      await db.update(products).set({ price: canonical.price }).where(eq(products.id, existing.id));
-      console.log(`Updated price for ${canonical.name}: ${existing.price} -> ${canonical.price}`);
     }
+    // Do NOT overwrite the price of an existing product — pricing is
+    // controlled via the admin panel and must persist across restarts.
   }
 
   // Remove test cylinder if present
