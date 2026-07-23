@@ -22,4 +22,5 @@ ENV NODE_ENV=production
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
   CMD curl -fsS "http://localhost:${PORT:-5000}/api/health" || exit 1
 
+USER node
 CMD ["node", "dist/index.cjs"]
