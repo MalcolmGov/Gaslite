@@ -95,6 +95,11 @@ httpServer.listen(
   registerAuthRoutes(app);
   await registerRoutes(httpServer, app);
 
+  // Unmatched /api routes must return JSON 404, not fall through to the SPA shell
+  app.use("/api", (_req: Request, res: Response) => {
+    res.status(404).json({ message: "Not Found" });
+  });
+
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
