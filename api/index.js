@@ -14,17 +14,23 @@ import pg from "pg";
 // shared/schema.ts
 var schema_exports = {};
 __export(schema_exports, {
+  agents: () => agents,
   appSettings: () => appSettings,
   chatMessageTypeEnum: () => chatMessageTypeEnum,
   chatMessages: () => chatMessages,
+  commissionStatusEnum: () => commissionStatusEnum,
+  commissionTypeEnum: () => commissionTypeEnum,
+  commissions: () => commissions,
   driverApplicationStatusEnum: () => driverApplicationStatusEnum,
   driverApplications: () => driverApplications,
   driverReferrals: () => driverReferrals,
   driverStatusEnum: () => driverStatusEnum,
   drivers: () => drivers,
   driversRelations: () => driversRelations,
+  insertAgentSchema: () => insertAgentSchema,
   insertAppSettingSchema: () => insertAppSettingSchema,
   insertChatMessageSchema: () => insertChatMessageSchema,
+  insertCommissionSchema: () => insertCommissionSchema,
   insertDriverApplicationSchema: () => insertDriverApplicationSchema,
   insertDriverReferralSchema: () => insertDriverReferralSchema,
   insertDriverSchema: () => insertDriverSchema,
@@ -87,7 +93,7 @@ var passwordResetTokens = pgTable("password_reset_tokens", {
 });
 
 // shared/schema.ts
-var userRoleEnum = pgEnum("user_role", ["customer", "driver", "admin"]);
+var userRoleEnum = pgEnum("user_role", ["customer", "driver", "admin", "agent"]);
 var orderStatusEnum = pgEnum("order_status", ["pending", "confirmed", "assigned", "picked_up", "in_transit", "delivered", "cancelled"]);
 var paymentMethodEnum = pgEnum("payment_method", ["cash", "card"]);
 var driverApplicationStatusEnum = pgEnum("driver_application_status", ["pending", "approved", "rejected"]);
@@ -114,6 +120,7 @@ var userProfiles = pgTable2("user_profiles", {
   latitude: decimal("latitude", { precision: 10, scale: 8 }),
   longitude: decimal("longitude", { precision: 11, scale: 8 }),
   onboardingCompleted: boolean2("onboarding_completed").default(false).notNull(),
+  referredByAgentId: varchar2("referred_by_agent_id"),
   createdAt: timestamp2("created_at").defaultNow(),
   updatedAt: timestamp2("updated_at").defaultNow()
 });
@@ -135,6 +142,7 @@ var driverApplications = pgTable2("driver_applications", {
   accountNumber: text("account_number"),
   accountType: text("account_type"),
   referralCode: text("referral_code"),
+  submittedByAgentId: varchar2("submitted_by_agent_id"),
   status: driverApplicationStatusEnum("status").default("pending").notNull(),
   reviewNotes: text("review_notes"),
   reviewedAt: timestamp2("reviewed_at"),
@@ -227,6 +235,34 @@ var driverReferrals = pgTable2("driver_referrals", {
   referredDriverId: varchar2("referred_driver_id").notNull().unique(),
   createdAt: timestamp2("created_at").defaultNow()
 });
+var agents = pgTable2("agents", {
+  id: varchar2("id").primaryKey().default(sql2`gen_random_uuid()`),
+  userId: varchar2("user_id").notNull().unique(),
+  referralCode: varchar2("referral_code").notNull().unique(),
+  active: boolean2("active").default(true).notNull(),
+  bankName: text("bank_name"),
+  branchCode: text("branch_code"),
+  accountNumber: text("account_number"),
+  accountType: text("account_type"),
+  createdAt: timestamp2("created_at").defaultNow(),
+  updatedAt: timestamp2("updated_at").defaultNow()
+});
+var commissionTypeEnum = pgEnum("commission_type", ["driver_onboard", "customer_first_order"]);
+var commissionStatusEnum = pgEnum("commission_status", ["pending", "paid"]);
+var commissions = pgTable2("commissions", {
+  id: varchar2("id").primaryKey().default(sql2`gen_random_uuid()`),
+  agentId: varchar2("agent_id").notNull(),
+  type: commissionTypeEnum("type").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: commissionStatusEnum("status").default("pending").notNull(),
+  driverApplicationId: varchar2("driver_application_id"),
+  orderId: varchar2("order_id"),
+  referredUserId: varchar2("referred_user_id"),
+  description: text("description"),
+  paidAt: timestamp2("paid_at"),
+  paidBy: varchar2("paid_by"),
+  createdAt: timestamp2("created_at").defaultNow()
+});
 var pushSubscriptions = pgTable2("push_subscriptions", {
   id: varchar2("id").primaryKey().default(sql2`gen_random_uuid()`),
   userId: varchar2("user_id").notNull(),
@@ -315,6 +351,18 @@ var insertDriverReferralSchema = createInsertSchema(driverReferrals).omit({
 var insertAppSettingSchema = createInsertSchema(appSettings).omit({
   updatedAt: true
 });
+var insertAgentSchema = createInsertSchema(agents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+var insertCommissionSchema = createInsertSchema(commissions).omit({
+  id: true,
+  status: true,
+  paidAt: true,
+  paidBy: true,
+  createdAt: true
+});
 
 // server/db.ts
 var { Pool } = pg;
@@ -327,7 +375,7 @@ var pool = new Pool({ connectionString: process.env.DATABASE_URL });
 var db = drizzle(pool, { schema: schema_exports });
 
 // server/storage.ts
-import { eq, desc, and, sql as sql3, count } from "drizzle-orm";
+import { eq, desc, and, sql as sql3, count, inArray } from "drizzle-orm";
 var DatabaseStorage = class {
   // Products
   async getProducts() {
@@ -601,6 +649,64 @@ var DatabaseStorage = class {
     }).from(driverReferrals).groupBy(driverReferrals.referrerDriverId);
     return results.map((r) => ({ driverId: r.driverId, referralCount: r.referralCount }));
   }
+  // Agents
+  async createAgent(agent) {
+    const [created] = await db.insert(agents).values(agent).returning();
+    return created;
+  }
+  async getAgent(id) {
+    const [agent] = await db.select().from(agents).where(eq(agents.id, id));
+    return agent;
+  }
+  async getAgentByUserId(userId) {
+    const [agent] = await db.select().from(agents).where(eq(agents.userId, userId));
+    return agent;
+  }
+  async getAgentByReferralCode(code) {
+    const [agent] = await db.select().from(agents).where(eq(agents.referralCode, code.toUpperCase()));
+    return agent;
+  }
+  async updateAgent(id, agent) {
+    const [updated] = await db.update(agents).set({ ...agent, updatedAt: /* @__PURE__ */ new Date() }).where(eq(agents.id, id)).returning();
+    return updated;
+  }
+  async getAgents() {
+    return db.select().from(agents).orderBy(desc(agents.createdAt));
+  }
+  async getDriverApplicationsByAgent(agentId) {
+    return db.select().from(driverApplications).where(eq(driverApplications.submittedByAgentId, agentId)).orderBy(desc(driverApplications.createdAt));
+  }
+  async getReferredCustomerCount(agentId) {
+    const [result] = await db.select({ count: count() }).from(userProfiles).where(eq(userProfiles.referredByAgentId, agentId));
+    return result?.count || 0;
+  }
+  // Commissions
+  async createCommission(commission) {
+    const [created] = await db.insert(commissions).values(commission).returning();
+    return created;
+  }
+  async getCommissionsByAgent(agentId) {
+    return db.select().from(commissions).where(eq(commissions.agentId, agentId)).orderBy(desc(commissions.createdAt));
+  }
+  async getAllCommissions() {
+    return db.select().from(commissions).orderBy(desc(commissions.createdAt));
+  }
+  async getCommissionByApplication(driverApplicationId) {
+    const [commission] = await db.select().from(commissions).where(eq(commissions.driverApplicationId, driverApplicationId));
+    return commission;
+  }
+  async getFirstOrderCommissionForCustomer(referredUserId) {
+    const [commission] = await db.select().from(commissions).where(and(
+      eq(commissions.referredUserId, referredUserId),
+      eq(commissions.type, "customer_first_order")
+    ));
+    return commission;
+  }
+  async markCommissionsPaid(ids, paidBy) {
+    if (ids.length === 0) return 0;
+    const updated = await db.update(commissions).set({ status: "paid", paidAt: /* @__PURE__ */ new Date(), paidBy }).where(and(inArray(commissions.id, ids), eq(commissions.status, "pending"))).returning();
+    return updated.length;
+  }
 };
 var storage = new DatabaseStorage();
 async function seedProducts() {
@@ -615,9 +721,6 @@ async function seedProducts() {
     if (!existing) {
       await db.insert(products).values(canonical);
       console.log(`Seeded product: ${canonical.name}`);
-    } else if (Number(existing.price) !== Number(canonical.price)) {
-      await db.update(products).set({ price: canonical.price }).where(eq(products.id, existing.id));
-      console.log(`Updated price for ${canonical.name}: ${existing.price} -> ${canonical.price}`);
     }
   }
   const testProduct = existingProducts.find((p) => p.size === "Test");
@@ -966,7 +1069,7 @@ var ObjectStorageService = class {
 };
 
 // server/routes.ts
-import { eq as eq4 } from "drizzle-orm";
+import { eq as eq5 } from "drizzle-orm";
 
 // server/push.ts
 import webpush from "web-push";
@@ -1136,10 +1239,312 @@ async function getYocoCheckoutStatus(checkoutId) {
   return response.json();
 }
 
+// server/agent-routes.ts
+import bcrypt2 from "bcryptjs";
+import { eq as eq4 } from "drizzle-orm";
+var DEFAULT_DRIVER_ONBOARD_COMMISSION = "250";
+var DEFAULT_CUSTOMER_FIRST_ORDER_COMMISSION = "50";
+async function generateAgentCode() {
+  for (let i = 0; i < 10; i++) {
+    const code = "AG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
+    const existing = await storage.getAgentByReferralCode(code);
+    if (!existing) return code;
+  }
+  throw new Error("Could not generate a unique agent code");
+}
+async function createDriverOnboardCommission(application) {
+  if (!application.submittedByAgentId) return;
+  const existing = await storage.getCommissionByApplication(application.id);
+  if (existing) return;
+  const amount = await storage.getAppSetting("commission_driver_onboard") || DEFAULT_DRIVER_ONBOARD_COMMISSION;
+  await storage.createCommission({
+    agentId: application.submittedByAgentId,
+    type: "driver_onboard",
+    amount,
+    driverApplicationId: application.id,
+    description: `Driver onboarded: ${application.firstName} ${application.lastName}`
+  });
+}
+async function maybeCreateReferralCommission(customerId) {
+  const profile = await storage.getUserProfile(customerId);
+  if (!profile?.referredByAgentId) return;
+  const existing = await storage.getFirstOrderCommissionForCustomer(customerId);
+  if (existing) return;
+  const amount = await storage.getAppSetting("commission_customer_first_order") || DEFAULT_CUSTOMER_FIRST_ORDER_COMMISSION;
+  const name = [profile.firstName, profile.lastName].filter(Boolean).join(" ") || "customer";
+  await storage.createCommission({
+    agentId: profile.referredByAgentId,
+    type: "customer_first_order",
+    amount,
+    referredUserId: customerId,
+    description: `First order delivered for referred customer: ${name}`
+  });
+}
+async function getAgentStats(agentId) {
+  const [onboards, referredCustomers, commissions2] = await Promise.all([
+    storage.getDriverApplicationsByAgent(agentId),
+    storage.getReferredCustomerCount(agentId),
+    storage.getCommissionsByAgent(agentId)
+  ]);
+  const sum = (status) => commissions2.filter((c) => c.status === status).reduce((total, c) => total + parseFloat(c.amount), 0);
+  return {
+    onboards: {
+      total: onboards.length,
+      pending: onboards.filter((a) => a.status === "pending").length,
+      approved: onboards.filter((a) => a.status === "approved").length,
+      rejected: onboards.filter((a) => a.status === "rejected").length
+    },
+    referredCustomers,
+    earnings: {
+      pending: sum("pending"),
+      paid: sum("paid")
+    }
+  };
+}
+function registerAgentRoutes(app2) {
+  const isAgent = async (req, res, next) => {
+    try {
+      const profile = await storage.getUserProfile(req.userId);
+      if (!profile || profile.role !== "agent") {
+        return res.status(403).json({ error: "Agent access required" });
+      }
+      next();
+    } catch (error) {
+      res.status(500).json({ error: "Authorization failed" });
+    }
+  };
+  const isAdmin = async (req, res, next) => {
+    try {
+      const profile = await storage.getUserProfile(req.userId);
+      if (!profile || profile.role !== "admin") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      next();
+    } catch (error) {
+      res.status(500).json({ error: "Authorization failed" });
+    }
+  };
+  app2.post("/api/onboarding/agent", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.userId;
+      const { firstName, lastName, phone } = req.body;
+      if (!firstName || !lastName || !phone) {
+        return res.status(400).json({ error: "Name, surname and mobile number are required" });
+      }
+      const existingAgent = await storage.getAgentByUserId(userId);
+      if (existingAgent) {
+        return res.json({ agent: existingAgent });
+      }
+      let profile = await storage.getUserProfile(userId);
+      if (!profile) {
+        profile = await storage.createUserProfile({ userId, role: "agent" });
+      }
+      await storage.updateUserProfile(userId, {
+        firstName,
+        lastName,
+        phone: normalizePhone(phone),
+        role: "agent",
+        onboardingCompleted: true
+      });
+      const agent = await storage.createAgent({
+        userId,
+        referralCode: await generateAgentCode(),
+        active: true
+      });
+      res.json({ agent });
+    } catch (error) {
+      console.error("Agent onboarding error:", error);
+      res.status(500).json({ error: "Failed to set up your agent account" });
+    }
+  });
+  app2.get("/api/agent/me", isAuthenticated, isAgent, async (req, res) => {
+    try {
+      const agent = await storage.getAgentByUserId(req.userId);
+      if (!agent) {
+        return res.status(404).json({ error: "Agent record not found" });
+      }
+      const stats = await getAgentStats(agent.id);
+      res.json({ agent, stats });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to load agent profile" });
+    }
+  });
+  app2.post("/api/agent/onboard-driver", isAuthenticated, isAgent, async (req, res) => {
+    try {
+      const agent = await storage.getAgentByUserId(req.userId);
+      if (!agent) {
+        return res.status(404).json({ error: "Agent record not found" });
+      }
+      if (!agent.active) {
+        return res.status(403).json({ error: "Your agent account is not active. Please contact Gaslite." });
+      }
+      const { firstName, lastName, phone, password, email, address, licenseNumber, vehicleRegistration, licenseDocumentUrl, vehicleDocumentUrl } = req.body;
+      if (!firstName || !lastName || !phone || !password || !address || !licenseNumber || !vehicleRegistration) {
+        return res.status(400).json({ error: "Please fill in all the required fields" });
+      }
+      if (password.length < 6) {
+        return res.status(400).json({ error: "The driver's password must be at least 6 characters" });
+      }
+      const normalizedPhone = normalizePhone(String(phone).trim());
+      if (!isPhone(normalizedPhone)) {
+        return res.status(400).json({ error: "Please enter a valid South African mobile number (e.g. 071 234 5678)" });
+      }
+      const normalizedEmail = email ? String(email).toLowerCase().trim() : null;
+      if (normalizedEmail && !isEmail(normalizedEmail)) {
+        return res.status(400).json({ error: "Please enter a valid email address, or leave it blank" });
+      }
+      const [existingUser] = await db.select().from(users).where(eq4(users.phone, normalizedPhone));
+      if (existingUser) {
+        return res.status(409).json({ error: "This mobile number already has a Gaslite account. The driver can sign in and apply themselves, or contact Gaslite support." });
+      }
+      const passwordHash = await bcrypt2.hash(password, 12);
+      const [driverUser] = await db.insert(users).values({
+        phone: normalizedPhone,
+        email: normalizedEmail,
+        passwordHash,
+        firstName,
+        lastName
+      }).returning();
+      const application = await storage.createDriverApplication({
+        userId: driverUser.id,
+        firstName,
+        lastName,
+        email: normalizedEmail || "",
+        phone: normalizedPhone,
+        address,
+        licenseNumber,
+        vehicleRegistration,
+        licenseDocumentUrl: licenseDocumentUrl || null,
+        vehicleDocumentUrl: vehicleDocumentUrl || null,
+        submittedByAgentId: agent.id
+      });
+      await storage.createUserProfile({
+        userId: driverUser.id,
+        role: "customer",
+        firstName,
+        lastName,
+        phone: normalizedPhone,
+        address,
+        onboardingCompleted: true
+      });
+      res.json({ application, message: "Driver submitted! Gaslite will review the application." });
+    } catch (error) {
+      console.error("Agent driver onboarding error:", error);
+      res.status(500).json({ error: "Failed to submit the driver. Please try again." });
+    }
+  });
+  app2.get("/api/agent/onboards", isAuthenticated, isAgent, async (req, res) => {
+    try {
+      const agent = await storage.getAgentByUserId(req.userId);
+      if (!agent) return res.status(404).json({ error: "Agent record not found" });
+      const applications = await storage.getDriverApplicationsByAgent(agent.id);
+      res.json(applications.map((a) => ({
+        id: a.id,
+        firstName: a.firstName,
+        lastName: a.lastName,
+        phone: a.phone,
+        status: a.status,
+        createdAt: a.createdAt
+      })));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to load your onboarded drivers" });
+    }
+  });
+  app2.get("/api/agent/commissions", isAuthenticated, isAgent, async (req, res) => {
+    try {
+      const agent = await storage.getAgentByUserId(req.userId);
+      if (!agent) return res.status(404).json({ error: "Agent record not found" });
+      const commissions2 = await storage.getCommissionsByAgent(agent.id);
+      const stats = await getAgentStats(agent.id);
+      res.json({ commissions: commissions2, earnings: stats.earnings });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to load your earnings" });
+    }
+  });
+  app2.patch("/api/agent/bank", isAuthenticated, isAgent, async (req, res) => {
+    try {
+      const agent = await storage.getAgentByUserId(req.userId);
+      if (!agent) return res.status(404).json({ error: "Agent record not found" });
+      const { bankName, branchCode, accountNumber, accountType } = req.body;
+      const updated = await storage.updateAgent(agent.id, {
+        bankName: bankName || null,
+        branchCode: branchCode || null,
+        accountNumber: accountNumber || null,
+        accountType: accountType || null
+      });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save your bank details" });
+    }
+  });
+  app2.get("/api/admin/agents", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const allAgents = await storage.getAgents();
+      const result = await Promise.all(allAgents.map(async (agent) => {
+        const [user] = await db.select().from(users).where(eq4(users.id, agent.userId));
+        const profile = await storage.getUserProfile(agent.userId);
+        const stats = await getAgentStats(agent.id);
+        return {
+          ...agent,
+          firstName: profile?.firstName || user?.firstName || null,
+          lastName: profile?.lastName || user?.lastName || null,
+          phone: profile?.phone || user?.phone || null,
+          email: user?.email || null,
+          stats
+        };
+      }));
+      res.json(result);
+    } catch (error) {
+      console.error("Admin agents error:", error);
+      res.status(500).json({ error: "Failed to fetch agents" });
+    }
+  });
+  app2.get("/api/admin/agents/:agentId", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const agent = await storage.getAgent(String(req.params.agentId));
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+      const [onboards, commissions2, stats] = await Promise.all([
+        storage.getDriverApplicationsByAgent(agent.id),
+        storage.getCommissionsByAgent(agent.id),
+        getAgentStats(agent.id)
+      ]);
+      res.json({ agent, onboards, commissions: commissions2, stats });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch agent detail" });
+    }
+  });
+  app2.patch("/api/admin/agents/:agentId", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { active } = req.body;
+      if (typeof active !== "boolean") {
+        return res.status(400).json({ error: "active must be true or false" });
+      }
+      const updated = await storage.updateAgent(String(req.params.agentId), { active });
+      if (!updated) return res.status(404).json({ error: "Agent not found" });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update agent" });
+    }
+  });
+  app2.post("/api/admin/commissions/mark-paid", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { commissionIds } = req.body;
+      if (!Array.isArray(commissionIds) || commissionIds.length === 0) {
+        return res.status(400).json({ error: "commissionIds is required" });
+      }
+      const updatedCount = await storage.markCommissionsPaid(commissionIds, req.userId);
+      res.json({ updatedCount });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark commissions as paid" });
+    }
+  });
+}
+
 // server/routes.ts
 var upload = multer({ storage: multer.memoryStorage() });
 async function registerRoutes(httpServer, app2) {
   await seedProducts();
+  registerAgentRoutes(app2);
   const objectStorageService = new ObjectStorageService();
   app2.get("/api/config/maps-key", (req, res) => {
     const key = process.env.GOOGLE_MAPS_API_KEY;
@@ -1242,7 +1647,7 @@ async function registerRoutes(httpServer, app2) {
   app2.post("/api/onboarding/customer", isAuthenticated, async (req, res) => {
     try {
       const userId = req.userId;
-      const { firstName, lastName, phone, address, latitude, longitude } = req.body;
+      const { firstName, lastName, phone, address, latitude, longitude, agentReferralCode } = req.body;
       if (!firstName || !lastName || !phone || !address) {
         return res.status(400).json({ error: "All fields are required" });
       }
@@ -1258,6 +1663,12 @@ async function registerRoutes(httpServer, app2) {
         role: "customer",
         onboardingCompleted: true
       };
+      if (agentReferralCode && !profile.referredByAgentId) {
+        const agent = await storage.getAgentByReferralCode(String(agentReferralCode));
+        if (agent?.active) {
+          updateData.referredByAgentId = agent.id;
+        }
+      }
       if (latitude != null && longitude != null) {
         updateData.latitude = String(latitude);
         updateData.longitude = String(longitude);
@@ -1577,7 +1988,7 @@ async function registerRoutes(httpServer, app2) {
         const updatedOrder = await storage.getOrderWithItems(order.id);
         (async () => {
           try {
-            const [user] = await db.select().from(users).where(eq4(users.id, userId));
+            const [user] = await db.select().from(users).where(eq5(users.id, userId));
             const profile = await storage.getUserProfile(userId);
             const customerEmail = user?.email;
             const customerName = profile?.firstName ? `${profile.firstName} ${profile.lastName || ""}`.trim() : user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Valued Customer";
@@ -1652,7 +2063,7 @@ async function registerRoutes(httpServer, app2) {
               const updatedOrder = await storage.getOrderWithItems(order.id);
               (async () => {
                 try {
-                  const [user] = await db.select().from(users).where(eq4(users.id, order.customerId));
+                  const [user] = await db.select().from(users).where(eq5(users.id, order.customerId));
                   const profile = await storage.getUserProfile(order.customerId);
                   const customerEmail = user?.email;
                   const customerName = profile?.firstName ? `${profile.firstName} ${profile.lastName || ""}`.trim() : user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Valued Customer";
@@ -1962,6 +2373,11 @@ async function registerRoutes(httpServer, app2) {
       }
       const updated = await storage.updateOrder(order.id, updateData);
       res.json(updated);
+      if (status === "delivered") {
+        maybeCreateReferralCommission(order.customerId).catch(
+          (err) => console.error("Agent referral commission creation failed:", err)
+        );
+      }
       notifyCustomerOrderUpdate(order.customerId, order.orderNumber, status).catch(
         (err) => console.error("Push notification to customer failed:", err)
       );
@@ -2060,6 +2476,11 @@ async function registerRoutes(httpServer, app2) {
       }
       const updated = await storage.updateOrder(req.params.orderId, updateData);
       res.json(updated);
+      if (status === "delivered" && updated?.customerId) {
+        maybeCreateReferralCommission(updated.customerId).catch(
+          (err) => console.error("Agent referral commission creation failed:", err)
+        );
+      }
     } catch (error) {
       res.status(500).json({ error: "Failed to update order" });
     }
@@ -2127,6 +2548,9 @@ async function registerRoutes(httpServer, app2) {
           }
         }
         await storage.updateUserProfile(application.userId, { role: "driver" });
+        createDriverOnboardCommission(application).catch(
+          (err) => console.error("Agent onboard commission creation failed:", err)
+        );
       }
       if (application.userId && (status === "approved" || status === "rejected")) {
         notifyDriverApplicationUpdate(application.userId, status, reviewNotes).catch(
@@ -2628,21 +3052,21 @@ async function registerRoutes(httpServer, app2) {
 }
 
 // server/seed-admin.ts
-import bcrypt2 from "bcryptjs";
-import { eq as eq5, or as or2 } from "drizzle-orm";
+import bcrypt3 from "bcryptjs";
+import { eq as eq6, or as or2 } from "drizzle-orm";
 async function ensureAdmin(email, phone, password, firstName, lastName) {
-  const conditions = [eq5(users.email, email)];
-  if (phone) conditions.push(eq5(users.phone, phone));
+  const conditions = [eq6(users.email, email)];
+  if (phone) conditions.push(eq6(users.phone, phone));
   const existing = await db.select().from(users).where(
     conditions.length === 1 ? conditions[0] : or2(...conditions)
   );
   if (existing.length > 0) {
-    const profile = await db.select().from(userProfiles).where(eq5(userProfiles.userId, existing[0].id));
+    const profile = await db.select().from(userProfiles).where(eq6(userProfiles.userId, existing[0].id));
     if (profile.length > 0 && profile[0].role === "admin" && profile[0].onboardingCompleted) {
       return;
     }
     if (profile.length > 0) {
-      await db.update(userProfiles).set({ role: "admin", onboardingCompleted: true, firstName, lastName }).where(eq5(userProfiles.userId, existing[0].id));
+      await db.update(userProfiles).set({ role: "admin", onboardingCompleted: true, firstName, lastName }).where(eq6(userProfiles.userId, existing[0].id));
     } else {
       await db.insert(userProfiles).values({
         userId: existing[0].id,
@@ -2652,11 +3076,11 @@ async function ensureAdmin(email, phone, password, firstName, lastName) {
         onboardingCompleted: true
       });
     }
-    await db.update(users).set({ email, phone: phone || void 0, firstName, lastName }).where(eq5(users.id, existing[0].id));
+    await db.update(users).set({ email, phone: phone || void 0, firstName, lastName }).where(eq6(users.id, existing[0].id));
     console.log(`Admin updated: ${email}`);
     return;
   }
-  const passwordHash = await bcrypt2.hash(password, 12);
+  const passwordHash = await bcrypt3.hash(password, 12);
   const [user] = await db.insert(users).values({ email, phone, passwordHash, firstName, lastName }).returning();
   await db.insert(userProfiles).values({
     userId: user.id,

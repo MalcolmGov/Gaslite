@@ -16,10 +16,12 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { 
-  MapPin, 
-  Package, 
-  Truck, 
+import { AdminAgentsTab } from "@/pages/admin/agents-tab";
+import {
+  HandCoins,
+  MapPin,
+  Package,
+  Truck,
   LogOut,
   CheckCircle,
   XCircle,
@@ -463,7 +465,7 @@ export default function AdminDashboard() {
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
             <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-2">
-              <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-7 gap-1">
+              <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-8 gap-1">
                 <TabsTrigger value="orders" data-testid="tab-orders" className="shrink-0">
                   <Package className="h-4 w-4 mr-1.5" />
                   <span>Orders</span>
@@ -499,8 +501,16 @@ export default function AdminDashboard() {
                   <Rocket className="h-4 w-4 mr-1.5" />
                   <span>Launch</span>
                 </TabsTrigger>
+                <TabsTrigger value="agents" data-testid="tab-agents" className="shrink-0">
+                  <HandCoins className="h-4 w-4 mr-1.5" />
+                  <span>Agents</span>
+                </TabsTrigger>
               </TabsList>
             </div>
+
+            <TabsContent value="agents" className="space-y-4">
+              <AdminAgentsTab />
+            </TabsContent>
 
             <TabsContent value="orders" className="space-y-4">
               <Card>

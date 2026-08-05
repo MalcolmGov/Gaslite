@@ -7,7 +7,7 @@ import { z } from "zod";
 export * from "./models/auth";
 
 // Enums
-export const userRoleEnum = pgEnum("user_role", ["customer", "driver", "admin"]);
+export const userRoleEnum = pgEnum("user_role", ["customer", "driver", "admin", "agent"]);
 export const orderStatusEnum = pgEnum("order_status", ["pending", "confirmed", "assigned", "picked_up", "in_transit", "delivered", "cancelled"]);
 export const paymentMethodEnum = pgEnum("payment_method", ["cash", "card"]);
 export const driverApplicationStatusEnum = pgEnum("driver_application_status", ["pending", "approved", "rejected"]);
@@ -37,6 +37,7 @@ export const userProfiles = pgTable("user_profiles", {
   latitude: decimal("latitude", { precision: 10, scale: 8 }),
   longitude: decimal("longitude", { precision: 11, scale: 8 }),
   onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
+  referredByAgentId: varchar("referred_by_agent_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -60,6 +61,7 @@ export const driverApplications = pgTable("driver_applications", {
   accountNumber: text("account_number"),
   accountType: text("account_type"),
   referralCode: text("referral_code"),
+  submittedByAgentId: varchar("submitted_by_agent_id"),
   status: driverApplicationStatusEnum("status").default("pending").notNull(),
   reviewNotes: text("review_notes"),
   reviewedAt: timestamp("reviewed_at"),
@@ -170,6 +172,39 @@ export const driverReferrals = pgTable("driver_referrals", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Community agents ("foot soldiers") — sell Gaslite + onboard drivers for commission
+export const agents = pgTable("agents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().unique(),
+  referralCode: varchar("referral_code").notNull().unique(),
+  active: boolean("active").default(true).notNull(),
+  bankName: text("bank_name"),
+  branchCode: text("branch_code"),
+  accountNumber: text("account_number"),
+  accountType: text("account_type"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const commissionTypeEnum = pgEnum("commission_type", ["driver_onboard", "customer_first_order"]);
+export const commissionStatusEnum = pgEnum("commission_status", ["pending", "paid"]);
+
+// Commission ledger for agents; admin marks paid after EFT payout
+export const commissions = pgTable("commissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  type: commissionTypeEnum("type").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: commissionStatusEnum("status").default("pending").notNull(),
+  driverApplicationId: varchar("driver_application_id"),
+  orderId: varchar("order_id"),
+  referredUserId: varchar("referred_user_id"),
+  description: text("description"),
+  paidAt: timestamp("paid_at"),
+  paidBy: varchar("paid_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Push subscriptions table
 export const pushSubscriptions = pgTable("push_subscriptions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -276,6 +311,20 @@ export const insertAppSettingSchema = createInsertSchema(appSettings).omit({
   updatedAt: true,
 });
 
+export const insertAgentSchema = createInsertSchema(agents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCommissionSchema = createInsertSchema(commissions).omit({
+  id: true,
+  status: true,
+  paidAt: true,
+  paidBy: true,
+  createdAt: true,
+});
+
 // Types
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
@@ -309,6 +358,12 @@ export type InsertDriverReferral = z.infer<typeof insertDriverReferralSchema>;
 
 export type AppSetting = typeof appSettings.$inferSelect;
 export type InsertAppSetting = z.infer<typeof insertAppSettingSchema>;
+
+export type Agent = typeof agents.$inferSelect;
+export type InsertAgent = z.infer<typeof insertAgentSchema>;
+
+export type Commission = typeof commissions.$inferSelect;
+export type InsertCommission = z.infer<typeof insertCommissionSchema>;
 
 // Extended types for API responses
 export type OrderWithItems = Order & {

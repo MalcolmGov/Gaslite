@@ -18,6 +18,7 @@ import { users } from "@shared/models/auth";
 import { orders } from "@shared/schema";
 import { saveSubscription, removeSubscription, notifyDriversNewOrder, notifyCustomerOrderUpdate, notifyDriverOrderCancelled, notifyDriverApplicationUpdate } from "./push";
 import { createYocoCheckout, getYocoCheckoutStatus } from "./yoco";
+import { registerAgentRoutes, createDriverOnboardCommission, maybeCreateReferralCommission } from "./agent-routes";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -26,6 +27,8 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   await seedProducts();
+
+  registerAgentRoutes(app);
 
   const objectStorageService = new ObjectStorageService();
 
@@ -145,7 +148,7 @@ export async function registerRoutes(
   app.post("/api/onboarding/customer", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.userId!;
-      const { firstName, lastName, phone, address, latitude, longitude } = req.body;
+      const { firstName, lastName, phone, address, latitude, longitude, agentReferralCode } = req.body;
 
       if (!firstName || !lastName || !phone || !address) {
         return res.status(400).json({ error: "All fields are required" });
@@ -164,6 +167,12 @@ export async function registerRoutes(
         role: "customer",
         onboardingCompleted: true,
       };
+      if (agentReferralCode && !profile.referredByAgentId) {
+        const agent = await storage.getAgentByReferralCode(String(agentReferralCode));
+        if (agent?.active) {
+          updateData.referredByAgentId = agent.id;
+        }
+      }
       if (latitude != null && longitude != null) {
         updateData.latitude = String(latitude);
         updateData.longitude = String(longitude);
@@ -997,6 +1006,12 @@ export async function registerRoutes(
       const updated = await storage.updateOrder(order.id, updateData);
       res.json(updated);
 
+      if (status === "delivered") {
+        maybeCreateReferralCommission(order.customerId).catch(err =>
+          console.error('Agent referral commission creation failed:', err)
+        );
+      }
+
       notifyCustomerOrderUpdate(order.customerId, order.orderNumber, status).catch(err =>
         console.error('Push notification to customer failed:', err)
       );
@@ -1112,6 +1127,12 @@ export async function registerRoutes(
 
       const updated = await storage.updateOrder(req.params.orderId, updateData);
       res.json(updated);
+
+      if (status === "delivered" && updated?.customerId) {
+        maybeCreateReferralCommission(updated.customerId).catch(err =>
+          console.error('Agent referral commission creation failed:', err)
+        );
+      }
     } catch (error) {
       res.status(500).json({ error: "Failed to update order" });
     }
@@ -1188,6 +1209,10 @@ export async function registerRoutes(
           }
         }
         await storage.updateUserProfile(application.userId, { role: "driver" });
+
+        createDriverOnboardCommission(application).catch(err =>
+          console.error('Agent onboard commission creation failed:', err)
+        );
       }
 
       if (application.userId && (status === "approved" || status === "rejected")) {

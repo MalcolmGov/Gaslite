@@ -17,6 +17,10 @@ import DriverDashboard from "@/pages/driver/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
 import CustomerOnboarding from "@/pages/onboarding/customer";
 import DriverOnboarding from "@/pages/onboarding/driver";
+import AgentSignupPage from "@/pages/agent/signup";
+import AgentHome from "@/pages/agent/home";
+import AgentOnboardDriver from "@/pages/agent/onboard-driver";
+import AgentEarnings from "@/pages/agent/earnings";
 import DriverTerms from "@/pages/driver/terms";
 import TermsOfService from "@/pages/legal/terms";
 import PrivacyPolicy from "@/pages/legal/privacy";
@@ -41,13 +45,15 @@ function LoadingScreen() {
   );
 }
 
-function getIntent(): "customer" | "driver" | null {
+function getIntent(): "customer" | "driver" | "agent" | null {
   const params = new URLSearchParams(window.location.search);
   const intent = params.get("intent");
   if (intent === "driver") return "driver";
+  if (intent === "agent") return "agent";
   const stored = localStorage.getItem("gaslite_intent");
   if (stored === "driver") return "driver";
   if (stored === "customer") return "customer";
+  if (stored === "agent") return "agent";
   return null;
 }
 
@@ -84,6 +90,7 @@ function AuthenticatedRouter() {
       <Switch>
         <Route path="/" component={LandingPage} />
         <Route path="/apply" component={ApplyPage} />
+        <Route path="/agent" component={AgentSignupPage} />
         <Route path="/auth/signin" component={SignInPage} />
         <Route path="/auth/signup" component={SignUpPage} />
         <Route path="/auth/forgot-password" component={ForgotPasswordPage} />
@@ -100,6 +107,9 @@ function AuthenticatedRouter() {
   const intent = getIntent();
 
   if (!profile?.onboardingCompleted) {
+    if (intent === "agent" || profile?.role === "agent") {
+      return <AgentSignupPage />;
+    }
     if (intent === "driver" || profile?.role === "driver") {
       return <DriverOnboarding />;
     }
@@ -124,6 +134,21 @@ function AuthenticatedRouter() {
         <Route path="/legal/privacy" component={PrivacyPolicy} />
         <Route path="/legal/refund" component={RefundPolicy} />
         <Route component={AdminDashboard} />
+      </Switch>
+    );
+  }
+
+  if (role === "agent") {
+    return (
+      <Switch>
+        <Route path="/" component={AgentHome} />
+        <Route path="/agent" component={AgentHome} />
+        <Route path="/agent/onboard" component={AgentOnboardDriver} />
+        <Route path="/agent/earnings" component={AgentEarnings} />
+        <Route path="/legal/terms" component={TermsOfService} />
+        <Route path="/legal/privacy" component={PrivacyPolicy} />
+        <Route path="/legal/refund" component={RefundPolicy} />
+        <Route component={AgentHome} />
       </Switch>
     );
   }

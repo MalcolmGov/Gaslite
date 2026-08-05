@@ -19,11 +19,11 @@ export interface AuthenticatedRequest extends Request {
   userId?: string;
 }
 
-function isEmail(value: string): boolean {
+export function isEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function normalizePhone(value: string): string {
+export function normalizePhone(value: string): string {
   let digits = value.replace(/[\s\-().]/g, "");
   if (digits.startsWith("+27")) {
     digits = "0" + digits.slice(3);
@@ -33,7 +33,7 @@ function normalizePhone(value: string): string {
   return digits;
 }
 
-function isPhone(value: string): boolean {
+export function isPhone(value: string): boolean {
   const normalized = normalizePhone(value);
   return /^0\d{9}$/.test(normalized);
 }

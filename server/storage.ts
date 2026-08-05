@@ -1,6 +1,12 @@
 import { db } from "./db";
-import { eq, desc, and, sql, gte, lte, count } from "drizzle-orm";
+import { eq, desc, and, sql, gte, lte, count, inArray } from "drizzle-orm";
 import {
+  agents,
+  commissions,
+  type Agent,
+  type InsertAgent,
+  type Commission,
+  type InsertCommission,
   products,
   userProfiles,
   driverApplications,
@@ -127,6 +133,24 @@ export interface IStorage {
     orderCount: number;
     totalSpent: number;
   }>>;
+
+  // Agents
+  createAgent(agent: InsertAgent): Promise<Agent>;
+  getAgent(id: string): Promise<Agent | undefined>;
+  getAgentByUserId(userId: string): Promise<Agent | undefined>;
+  getAgentByReferralCode(code: string): Promise<Agent | undefined>;
+  updateAgent(id: string, agent: Partial<Agent>): Promise<Agent | undefined>;
+  getAgents(): Promise<Agent[]>;
+  getDriverApplicationsByAgent(agentId: string): Promise<DriverApplication[]>;
+  getReferredCustomerCount(agentId: string): Promise<number>;
+
+  // Commissions
+  createCommission(commission: InsertCommission): Promise<Commission>;
+  getCommissionsByAgent(agentId: string): Promise<Commission[]>;
+  getAllCommissions(): Promise<Commission[]>;
+  getCommissionByApplication(driverApplicationId: string): Promise<Commission | undefined>;
+  getFirstOrderCommissionForCustomer(referredUserId: string): Promise<Commission | undefined>;
+  markCommissionsPaid(ids: string[], paidBy: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -491,6 +515,86 @@ export class DatabaseStorage implements IStorage {
       referralCount: count(),
     }).from(driverReferrals).groupBy(driverReferrals.referrerDriverId);
     return results.map(r => ({ driverId: r.driverId, referralCount: r.referralCount }));
+  }
+
+  // Agents
+  async createAgent(agent: InsertAgent): Promise<Agent> {
+    const [created] = await db.insert(agents).values(agent).returning();
+    return created;
+  }
+
+  async getAgent(id: string): Promise<Agent | undefined> {
+    const [agent] = await db.select().from(agents).where(eq(agents.id, id));
+    return agent;
+  }
+
+  async getAgentByUserId(userId: string): Promise<Agent | undefined> {
+    const [agent] = await db.select().from(agents).where(eq(agents.userId, userId));
+    return agent;
+  }
+
+  async getAgentByReferralCode(code: string): Promise<Agent | undefined> {
+    const [agent] = await db.select().from(agents).where(eq(agents.referralCode, code.toUpperCase()));
+    return agent;
+  }
+
+  async updateAgent(id: string, agent: Partial<Agent>): Promise<Agent | undefined> {
+    const [updated] = await db.update(agents).set({ ...agent, updatedAt: new Date() }).where(eq(agents.id, id)).returning();
+    return updated;
+  }
+
+  async getAgents(): Promise<Agent[]> {
+    return db.select().from(agents).orderBy(desc(agents.createdAt));
+  }
+
+  async getDriverApplicationsByAgent(agentId: string): Promise<DriverApplication[]> {
+    return db.select().from(driverApplications)
+      .where(eq(driverApplications.submittedByAgentId, agentId))
+      .orderBy(desc(driverApplications.createdAt));
+  }
+
+  async getReferredCustomerCount(agentId: string): Promise<number> {
+    const [result] = await db.select({ count: count() }).from(userProfiles)
+      .where(eq(userProfiles.referredByAgentId, agentId));
+    return result?.count || 0;
+  }
+
+  // Commissions
+  async createCommission(commission: InsertCommission): Promise<Commission> {
+    const [created] = await db.insert(commissions).values(commission).returning();
+    return created;
+  }
+
+  async getCommissionsByAgent(agentId: string): Promise<Commission[]> {
+    return db.select().from(commissions).where(eq(commissions.agentId, agentId)).orderBy(desc(commissions.createdAt));
+  }
+
+  async getAllCommissions(): Promise<Commission[]> {
+    return db.select().from(commissions).orderBy(desc(commissions.createdAt));
+  }
+
+  async getCommissionByApplication(driverApplicationId: string): Promise<Commission | undefined> {
+    const [commission] = await db.select().from(commissions)
+      .where(eq(commissions.driverApplicationId, driverApplicationId));
+    return commission;
+  }
+
+  async getFirstOrderCommissionForCustomer(referredUserId: string): Promise<Commission | undefined> {
+    const [commission] = await db.select().from(commissions)
+      .where(and(
+        eq(commissions.referredUserId, referredUserId),
+        eq(commissions.type, "customer_first_order"),
+      ));
+    return commission;
+  }
+
+  async markCommissionsPaid(ids: string[], paidBy: string): Promise<number> {
+    if (ids.length === 0) return 0;
+    const updated = await db.update(commissions)
+      .set({ status: "paid", paidAt: new Date(), paidBy })
+      .where(and(inArray(commissions.id, ids), eq(commissions.status, "pending")))
+      .returning();
+    return updated.length;
   }
 }
 

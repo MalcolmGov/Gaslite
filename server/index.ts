@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { seedAdmin } from "./seed-admin";
+import { runMigrations } from "./migrate";
 import { setupSession, registerAuthRoutes } from "./auth";
 
 const app = express();
@@ -90,6 +91,7 @@ httpServer.listen(
 );
 
 (async () => {
+  await runMigrations();
   await seedAdmin();
   setupSession(app);
   registerAuthRoutes(app);

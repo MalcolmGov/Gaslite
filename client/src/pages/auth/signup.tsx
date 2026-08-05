@@ -109,6 +109,13 @@ function RoleCard({
 export default function SignUpPage() {
   const [, navigate] = useLocation();
   const { register, isRegistering } = useAuth();
+
+  // Agent referral: keep the ?ref= code until onboarding completes
+  const refCode = new URLSearchParams(window.location.search).get("ref");
+  if (refCode) {
+    localStorage.setItem("gaslite_agent_ref", refCode);
+  }
+
   const { toast } = useToast();
   const [selectedRole, setSelectedRole] = useState<RoleOption | null>(null);
   const [identifierType, setIdentifierType] = useState<IdentifierType>("phone");

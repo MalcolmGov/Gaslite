@@ -62,12 +62,14 @@ export default function CustomerOnboarding() {
         ...data,
         latitude: coordinates?.latitude,
         longitude: coordinates?.longitude,
+        agentReferralCode: localStorage.getItem("gaslite_agent_ref") || undefined,
       };
       const res = await apiRequest("POST", "/api/onboarding/customer", payload);
       return res.json();
     },
     onSuccess: () => {
       localStorage.removeItem("gaslite_intent");
+      localStorage.removeItem("gaslite_agent_ref");
       toast({ title: "Welcome to Gaslite!", description: "Your account is all set up." });
       queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
     },
