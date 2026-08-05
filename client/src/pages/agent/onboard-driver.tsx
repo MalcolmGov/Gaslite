@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Check, Truck, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Check, Truck, CheckCircle2, Share2, Copy } from "lucide-react";
 
 // A deliberately simple 3-step wizard: the agent fills everything in
 // on the driver's behalf, standing next to them.
@@ -58,6 +58,27 @@ export default function AgentOnboardDriver() {
   };
 
   if (done) {
+    const loginMessage =
+      `Welcome to Gaslite, ${form.firstName}! 🚚\n\n` +
+      `Your driver account is ready. Sign in here:\n` +
+      `${window.location.origin}/auth/signin\n\n` +
+      `Mobile number: ${form.phone}\n` +
+      `Password: ${form.password}\n\n` +
+      `Gaslite is reviewing your application — you'll be notified once you're approved. ` +
+      `Please keep your password safe.`;
+
+    // wa.me needs the number in international format (27...) with no leading 0
+    const waNumber = "27" + form.phone.replace(/[\s\-().]/g, "").replace(/^(\+27|27)/, "0").replace(/^0/, "");
+
+    const shareLogin = () => {
+      window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(loginMessage)}`, "_blank");
+    };
+
+    const copyLogin = async () => {
+      await navigator.clipboard.writeText(loginMessage);
+      toast({ title: "Details copied", description: "Paste them anywhere to share with the driver." });
+    };
+
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -65,11 +86,22 @@ export default function AgentOnboardDriver() {
             <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto" />
             <h1 className="text-xl font-bold">Driver submitted!</h1>
             <div className="text-sm text-muted-foreground space-y-2 text-left bg-muted/50 rounded-md p-4">
-              <p>1. Gaslite will check the details and approve the driver.</p>
-              <p>2. The driver signs in with their <span className="font-semibold text-foreground">mobile number and the password you created</span>.</p>
+              <p>1. Send the driver their login details (button below).</p>
+              <p>2. Gaslite will check the details and approve the driver.</p>
               <p>3. Once approved, your commission appears under <span className="font-semibold text-foreground">My Earnings</span>.</p>
             </div>
-            <Button className="w-full" size="lg" onClick={() => navigate("/")} data-testid="button-back-home">
+            <Button
+              className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white"
+              size="lg"
+              onClick={shareLogin}
+              data-testid="button-share-login"
+            >
+              <Share2 className="h-4 w-4 mr-2" /> Send login details on WhatsApp
+            </Button>
+            <Button variant="outline" className="w-full" onClick={copyLogin} data-testid="button-copy-login">
+              <Copy className="h-4 w-4 mr-2" /> Copy login details
+            </Button>
+            <Button variant="ghost" className="w-full" onClick={() => navigate("/")} data-testid="button-back-home">
               Back to Home
             </Button>
           </CardContent>
