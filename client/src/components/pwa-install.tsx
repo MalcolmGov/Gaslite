@@ -1,62 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, X, Smartphone } from "lucide-react";
+import { usePwaInstall } from "@/hooks/use-pwa-install";
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+function dismissedRecently(): boolean {
+  const storedDismissal = localStorage.getItem("gaslite_pwa_dismissed");
+  if (!storedDismissal) return false;
+  const dismissedAt = parseInt(storedDismissal, 10);
+  return Date.now() - dismissedAt < 7 * 24 * 60 * 60 * 1000;
 }
 
+// Site-wide install banner, rendered once for every signed-in role
+// (customer, driver, agent, admin). Always offers a way to install:
+// the native one-tap prompt where the browser supports it, otherwise
+// step-by-step manual instructions — never silently does nothing.
 export function PWAInstallBanner() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [dismissed, setDismissed] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
-
-  useEffect(() => {
-    if (window.matchMedia("(display-mode: standalone)").matches ||
-        (window.navigator as any).standalone === true) {
-      setIsInstalled(true);
-      return;
-    }
-
-    const storedDismissal = localStorage.getItem("gaslite_pwa_dismissed");
-    if (storedDismissal) {
-      const dismissedAt = parseInt(storedDismissal, 10);
-      if (Date.now() - dismissedAt < 7 * 24 * 60 * 60 * 1000) {
-        setDismissed(true);
-        return;
-      }
-    }
-
-    if (window.__pwaInstallPrompt) {
-      setDeferredPrompt(window.__pwaInstallPrompt as BeforeInstallPromptEvent);
-      window.__pwaInstallPrompt = undefined;
-    }
-
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      window.__pwaInstallPrompt = undefined;
-    };
-
-    window.addEventListener("beforeinstallprompt", handler);
-
-    window.addEventListener("appinstalled", () => {
-      setIsInstalled(true);
-      setDeferredPrompt(null);
-    });
-
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
+  const { isInstalled, canPromptNatively, isIOS, promptInstall } = usePwaInstall();
+  const [dismissed, setDismissed] = useState(dismissedRecently);
+  const [showHelp, setShowHelp] = useState(false);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") {
-      setIsInstalled(true);
+    if (canPromptNatively) {
+      await promptInstall();
+    } else {
+      setShowHelp(true);
     }
-    setDeferredPrompt(null);
   };
 
   const handleDismiss = () => {
@@ -64,7 +32,7 @@ export function PWAInstallBanner() {
     localStorage.setItem("gaslite_pwa_dismissed", Date.now().toString());
   };
 
-  if (isInstalled || dismissed || !deferredPrompt) return null;
+  if (isInstalled || dismissed) return null;
 
   return (
     <div
@@ -81,6 +49,23 @@ export function PWAInstallBanner() {
             <p className="text-xs text-muted-foreground mt-0.5">
               Add to your home screen for quick access and a better experience
             </p>
+            {showHelp && (
+              <div className="text-xs text-muted-foreground mt-2 bg-muted/50 rounded-md p-2.5 space-y-1">
+                {isIOS ? (
+                  <>
+                    <p className="font-medium text-foreground">On iPhone (Safari):</p>
+                    <p>1. Tap the Share button (square with arrow)</p>
+                    <p>2. Tap "Add to Home Screen", then "Add"</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium text-foreground">On Android (Chrome):</p>
+                    <p>1. Tap the menu (⋮) at the top right</p>
+                    <p>2. Tap "Add to Home screen" or "Install app"</p>
+                  </>
+                )}
+              </div>
+            )}
             <div className="flex items-center gap-2 mt-3">
               <Button
                 size="sm"
@@ -115,44 +100,13 @@ export function PWAInstallBanner() {
 }
 
 export function PWAInstallButton({ className = "" }: { className?: string }) {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const { isInstalled, canPromptNatively, promptInstall } = usePwaInstall();
 
-  useEffect(() => {
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setIsInstalled(true);
-      return;
-    }
-
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener("beforeinstallprompt", handler);
-    window.addEventListener("appinstalled", () => {
-      setIsInstalled(true);
-      setDeferredPrompt(null);
-    });
-
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
-
-  const handleInstall = async () => {
-    if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") {
-      setIsInstalled(true);
-    }
-    setDeferredPrompt(null);
-  };
-
-  if (isInstalled || !deferredPrompt) return null;
+  if (isInstalled || !canPromptNatively) return null;
 
   return (
     <Button
-      onClick={handleInstall}
+      onClick={() => promptInstall()}
       variant="outline"
       size="sm"
       className={className}

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
+import { usePwaInstall } from "@/hooks/use-pwa-install";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,48 +11,16 @@ import { Truck, Share2, HandCoins, LogOut, ChevronRight, Copy, Smartphone, Downl
 import { GasliteLogo } from "@/components/gaslite-logo";
 import type { Agent } from "@shared/schema";
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
 // Prominent install card so agents run Gaslite as an app, not a browser tab
 function InstallAppCard() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(true);
+  const { isInstalled, canPromptNatively, isIOS, promptInstall } = usePwaInstall();
   const [showHelp, setShowHelp] = useState(false);
-
-  useEffect(() => {
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone === true;
-    setIsInstalled(standalone);
-    if (standalone) return;
-
-    if (window.__pwaInstallPrompt) {
-      setDeferredPrompt(window.__pwaInstallPrompt as BeforeInstallPromptEvent);
-    }
-
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    window.addEventListener("appinstalled", () => setIsInstalled(true));
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
 
   if (isInstalled) return null;
 
-  const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
-
   const handleInstall = async () => {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") setIsInstalled(true);
-      setDeferredPrompt(null);
-      window.__pwaInstallPrompt = undefined;
+    if (canPromptNatively) {
+      await promptInstall();
     } else {
       setShowHelp(!showHelp);
     }
