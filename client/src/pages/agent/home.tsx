@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -5,9 +6,93 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Truck, Share2, HandCoins, LogOut, ChevronRight, Copy } from "lucide-react";
+import { Truck, Share2, HandCoins, LogOut, ChevronRight, Copy, Smartphone, Download } from "lucide-react";
 import { GasliteLogo } from "@/components/gaslite-logo";
 import type { Agent } from "@shared/schema";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
+// Prominent install card so agents run Gaslite as an app, not a browser tab
+function InstallAppCard() {
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(true);
+  const [showHelp, setShowHelp] = useState(false);
+
+  useEffect(() => {
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone === true;
+    setIsInstalled(standalone);
+    if (standalone) return;
+
+    if (window.__pwaInstallPrompt) {
+      setDeferredPrompt(window.__pwaInstallPrompt as BeforeInstallPromptEvent);
+    }
+
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", () => setIsInstalled(true));
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  if (isInstalled) return null;
+
+  const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") setIsInstalled(true);
+      setDeferredPrompt(null);
+      window.__pwaInstallPrompt = undefined;
+    } else {
+      setShowHelp(!showHelp);
+    }
+  };
+
+  return (
+    <Card className="border-primary/40 bg-primary/5">
+      <CardContent className="pt-4 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 text-white flex items-center justify-center flex-shrink-0">
+            <Smartphone className="h-5 w-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm">Put Gaslite on your home screen</p>
+            <p className="text-xs text-muted-foreground">Open the app with one tap — no web address needed</p>
+          </div>
+          <Button size="sm" onClick={handleInstall} data-testid="button-install-app">
+            <Download className="h-4 w-4 mr-1" /> Install
+          </Button>
+        </div>
+        {showHelp && (
+          <div className="text-xs text-muted-foreground mt-3 bg-background/60 rounded-md p-3 space-y-1">
+            {isIOS ? (
+              <>
+                <p className="font-medium text-foreground">On iPhone (Safari):</p>
+                <p>1. Tap the Share button (square with arrow)</p>
+                <p>2. Tap "Add to Home Screen", then "Add"</p>
+              </>
+            ) : (
+              <>
+                <p className="font-medium text-foreground">On Android (Chrome):</p>
+                <p>1. Tap the menu (⋮) at the top right</p>
+                <p>2. Tap "Add to Home screen" or "Install app"</p>
+              </>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 type AgentMe = {
   agent: Agent;
@@ -82,6 +167,8 @@ export default function AgentHome() {
           </h1>
           <p className="text-sm text-muted-foreground">Gaslite Community Agent</p>
         </div>
+
+        <InstallAppCard />
 
         <Card className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white border-0">
           <CardContent className="pt-5 pb-5">

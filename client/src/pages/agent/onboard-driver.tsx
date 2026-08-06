@@ -65,7 +65,9 @@ export default function AgentOnboardDriver() {
       `Mobile number: ${form.phone}\n` +
       `Password: ${form.password}\n\n` +
       `Gaslite is reviewing your application — you'll be notified once you're approved. ` +
-      `Please keep your password safe.`;
+      `Please keep your password safe.\n\n` +
+      `Tip: after signing in, tap "Install" (or your browser menu → Add to Home Screen) ` +
+      `so Gaslite opens like an app — no need to type the address again.`;
 
     // wa.me needs the number in international format (27...) with no leading 0
     const waNumber = "27" + form.phone.replace(/[\s\-().]/g, "").replace(/^(\+27|27)/, "0").replace(/^0/, "");
