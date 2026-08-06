@@ -84,13 +84,16 @@ export function ChatPanel({ threadType, threadId, currentUserId, title, collapse
   }
 
   return (
-    <Card className="w-80 max-h-[28rem] flex flex-col shadow-lg" style={{ position: "fixed", bottom: "16px", right: "16px", zIndex: 9999 }} data-testid="chat-panel">
+    <Card
+      className="fixed inset-x-4 bottom-4 sm:inset-x-auto sm:right-4 sm:w-80 max-h-[70vh] sm:max-h-[28rem] flex flex-col shadow-lg z-[9999]"
+      data-testid="chat-panel"
+    >
       <CardHeader className="flex flex-row items-center justify-between gap-2 p-3 border-b">
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <MessageCircle className="h-4 w-4" />
-          {chatTitle}
+        <CardTitle className="text-sm font-medium flex items-center gap-2 min-w-0">
+          <MessageCircle className="h-4 w-4 shrink-0" />
+          <span className="truncate">{chatTitle}</span>
         </CardTitle>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           {onClose && (
             <Button size="icon" variant="ghost" onClick={onClose} data-testid="button-close-chat">
               <X className="h-4 w-4" />
@@ -101,7 +104,7 @@ export function ChatPanel({ threadType, threadId, currentUserId, title, collapse
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[12rem] max-h-[18rem]">
+      <CardContent className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[12rem] max-h-[calc(70vh-8rem)] sm:max-h-[18rem]">
         {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-8 w-3/4" />

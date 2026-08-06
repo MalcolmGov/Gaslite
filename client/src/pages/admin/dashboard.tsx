@@ -567,12 +567,12 @@ export default function AdminDashboard() {
                                     )}
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-2 flex-wrap">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                                   <Select
                                     value={order.status}
                                     onValueChange={(value) => updateOrderMutation.mutate({ orderId: order.id, status: value })}
                                   >
-                                    <SelectTrigger className="w-[140px]" data-testid={`select-status-${order.id}`}>
+                                    <SelectTrigger className="w-full sm:w-[140px]" data-testid={`select-status-${order.id}`}>
                                       <SelectValue placeholder="Status" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -589,7 +589,7 @@ export default function AdminDashboard() {
                                     <Select
                                       onValueChange={(value) => updateOrderMutation.mutate({ orderId: order.id, driverId: value, status: "assigned" })}
                                     >
-                                      <SelectTrigger className="w-[160px]" data-testid={`select-driver-${order.id}`}>
+                                      <SelectTrigger className="w-full sm:w-[160px]" data-testid={`select-driver-${order.id}`}>
                                         <SelectValue placeholder="Assign Driver" />
                                       </SelectTrigger>
                                       <SelectContent>
@@ -606,6 +606,7 @@ export default function AdminDashboard() {
                                   <Button
                                     size="icon"
                                     variant="ghost"
+                                    className="self-end sm:self-auto"
                                     onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
                                     data-testid={`button-expand-${order.id}`}
                                   >
@@ -1643,9 +1644,9 @@ export default function AdminDashboard() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="flex items-center justify-between p-4 rounded-lg border border-border">
-                        <div className="flex items-center gap-3">
-                          <Rocket className="h-5 w-5 text-primary" />
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border border-border">
+                        <div className="flex items-start gap-3">
+                          <Rocket className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                           <div>
                             <p className="font-medium">Launch Special</p>
                             <p className="text-sm text-muted-foreground">
@@ -1656,6 +1657,7 @@ export default function AdminDashboard() {
                         <Button
                           variant={launchSpecialData.launchSpecialActive ? "default" : "outline"}
                           size="sm"
+                          className="self-start sm:self-auto shrink-0"
                           data-testid="button-toggle-launch-special"
                           disabled={toggleLaunchSpecialMutation.isPending}
                           onClick={() => {
@@ -1678,9 +1680,9 @@ export default function AdminDashboard() {
                         </Button>
                       </div>
 
-                      <div className="flex items-center justify-between p-4 rounded-lg border border-border">
-                        <div className="flex items-center gap-3">
-                          <Banknote className="h-5 w-5 text-amber-500" />
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border border-border">
+                        <div className="flex items-start gap-3">
+                          <Banknote className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                           <div>
                             <p className="font-medium">Subscription Fee (R39/month)</p>
                             <p className="text-sm text-muted-foreground">
@@ -1691,6 +1693,7 @@ export default function AdminDashboard() {
                         <Button
                           variant={launchSpecialData.subscriptionFeeActive ? "default" : "outline"}
                           size="sm"
+                          className="self-start sm:self-auto shrink-0"
                           data-testid="button-toggle-subscription-fee"
                           disabled={toggleLaunchSpecialMutation.isPending}
                           onClick={() => {
