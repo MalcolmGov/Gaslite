@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GasliteLogo } from "@/components/gaslite-logo";
+import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useUpload } from "@/hooks/use-upload";
@@ -230,10 +230,11 @@ export default function ApplyPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="address">Home Address *</Label>
-                <Textarea
-                  id="address"
+                <GooglePlacesAutocomplete
+                  value={form.watch("address") || ""}
+                  onChange={(val) => form.setValue("address", val, { shouldValidate: true })}
+                  onSelect={(address) => form.setValue("address", address, { shouldValidate: true })}
                   placeholder="123 Main Street, City, Province"
-                  {...form.register("address")}
                   data-testid="input-address"
                 />
                 {form.formState.errors.address && (

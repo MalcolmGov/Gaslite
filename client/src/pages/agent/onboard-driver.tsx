@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useUpload } from "@/hooks/use-upload";
+import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -192,7 +193,13 @@ export default function AgentOnboardDriver() {
             <CardContent className="pt-6 space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="address">Home address</Label>
-                <Input id="address" placeholder="Street, area, city" value={form.address} onChange={set("address")} required data-testid="input-driver-address" />
+                <GooglePlacesAutocomplete
+                  value={form.address}
+                  onChange={(val) => setForm((f) => ({ ...f, address: val }))}
+                  onSelect={(address) => setForm((f) => ({ ...f, address }))}
+                  placeholder="Street, area, city"
+                  data-testid="input-driver-address"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="licenseNumber">Driver's licence number</Label>

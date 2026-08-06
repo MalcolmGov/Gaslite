@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useUpload } from "@/hooks/use-upload";
 import { GasliteLogo } from "@/components/gaslite-logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GooglePlacesAutocomplete } from "@/components/google-places-autocomplete";
 import {
   Form,
   FormControl,
@@ -25,7 +26,6 @@ import {
   User,
   Phone,
   Mail,
-  MapPin,
   FileText,
   Car,
   CheckCircle,
@@ -502,10 +502,13 @@ export default function DriverOnboarding() {
                         <FormItem>
                           <FormLabel>Home Address</FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input placeholder="123 Main Road, Cape Town, 8001" className="pl-9" {...field} data-testid="input-driver-address" />
-                            </div>
+                            <GooglePlacesAutocomplete
+                              value={field.value}
+                              onChange={field.onChange}
+                              onSelect={(address) => field.onChange(address)}
+                              placeholder="123 Main Road, Cape Town, 8001"
+                              data-testid="input-driver-address"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
