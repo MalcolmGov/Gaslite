@@ -165,10 +165,13 @@ export function registerAgentRoutes(app: Express) {
         return res.status(403).json({ error: "Your agent account is not active. Please contact Gaslite." });
       }
 
-      const { firstName, lastName, phone, password, email, address, licenseNumber, vehicleRegistration, licenseDocumentUrl, vehicleDocumentUrl } = req.body;
+      const { firstName, lastName, phone, password, email, address, licenseNumber, vehicleRegistration, licenseDocumentUrl } = req.body;
 
       if (!firstName || !lastName || !phone || !password || !address || !licenseNumber || !vehicleRegistration) {
         return res.status(400).json({ error: "Please fill in all the required fields" });
+      }
+      if (!licenseDocumentUrl) {
+        return res.status(400).json({ error: "The driver's license document is required" });
       }
       if (password.length < 6) {
         return res.status(400).json({ error: "The driver's password must be at least 6 characters" });
@@ -210,8 +213,7 @@ export function registerAgentRoutes(app: Express) {
         address,
         licenseNumber,
         vehicleRegistration,
-        licenseDocumentUrl: licenseDocumentUrl || null,
-        vehicleDocumentUrl: vehicleDocumentUrl || null,
+        licenseDocumentUrl,
         submittedByAgentId: agent.id,
       });
 

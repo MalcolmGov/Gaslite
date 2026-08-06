@@ -80,7 +80,7 @@ export default function TermsOfService() {
 
             <section>
               <h2 className="text-xl font-semibold mb-3">11. Contact</h2>
-              <p className="text-muted-foreground">For questions about these Terms, contact us at <a href="mailto:support@gaslite.co.za" className="text-primary underline" data-testid="link-email-support">support@gaslite.co.za</a>.</p>
+              <p className="text-muted-foreground">For questions about these Terms, contact us at <a href="mailto:support@gaslite.co.za" className="text-primary underline" data-testid="link-email-support">support@gaslite.co.za</a>, <a href="tel:0664858059" className="text-primary underline">066 485 8059</a> or <a href="tel:0765770921" className="text-primary underline">076 577 0921</a>.</p>
             </section>
           </CardContent>
         </Card>

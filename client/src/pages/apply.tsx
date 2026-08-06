@@ -39,7 +39,6 @@ export default function ApplyPage() {
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
   const [licenseDocUrl, setLicenseDocUrl] = useState<string | null>(null);
-  const [vehicleDocUrl, setVehicleDocUrl] = useState<string | null>(null);
 
   const { uploadFile, isUploading: licenseUploading } = useUpload({
     onSuccess: (response) => {
@@ -48,16 +47,6 @@ export default function ApplyPage() {
     },
     onError: () => {
       toast({ title: "Failed to upload license", variant: "destructive" });
-    },
-  });
-
-  const { uploadFile: uploadVehicleDoc, isUploading: vehicleUploading } = useUpload({
-    onSuccess: (response) => {
-      setVehicleDocUrl(response.objectPath);
-      toast({ title: "Vehicle document uploaded successfully" });
-    },
-    onError: () => {
-      toast({ title: "Failed to upload document", variant: "destructive" });
     },
   });
 
@@ -79,7 +68,6 @@ export default function ApplyPage() {
       return apiRequest("POST", "/api/driver-applications", {
         ...data,
         licenseDocumentUrl: licenseDocUrl,
-        vehicleDocumentUrl: vehicleDocUrl,
       });
     },
     onSuccess: () => {
@@ -91,6 +79,10 @@ export default function ApplyPage() {
   });
 
   const onSubmit = (data: ApplicationFormData) => {
+    if (!licenseDocUrl) {
+      toast({ title: "License document required", description: "Please upload your driver's license before submitting.", variant: "destructive" });
+      return;
+    }
     submitMutation.mutate(data);
   };
 
@@ -276,70 +268,45 @@ export default function ApplyPage() {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Driver's License Document</Label>
-                  <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
-                    {licenseDocUrl ? (
-                      <div className="flex items-center justify-center gap-2 text-green-600">
-                        <CheckCircle className="h-5 w-5" />
-                        <span className="text-sm">License uploaded</span>
-                      </div>
-                    ) : (
-                      <>
-                        <FileText className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                        <label className="cursor-pointer">
-                          <span className="text-sm text-primary hover:underline">
-                            {licenseUploading ? "Uploading..." : "Upload license document"}
-                          </span>
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept="image/*,.pdf"
-                            onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0])}
-                            disabled={licenseUploading}
-                            data-testid="input-license-upload"
-                          />
-                        </label>
-                      </>
-                    )}
-                  </div>
+              <div className="space-y-2">
+                <Label>Driver's License Document *</Label>
+                <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                  {licenseDocUrl ? (
+                    <div className="flex items-center justify-center gap-2 text-green-600">
+                      <CheckCircle className="h-5 w-5" />
+                      <span className="text-sm">License uploaded</span>
+                    </div>
+                  ) : (
+                    <>
+                      <FileText className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                      <label className="cursor-pointer">
+                        <span className="text-sm text-primary hover:underline">
+                          {licenseUploading ? "Uploading..." : "Upload license document"}
+                        </span>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*,.pdf"
+                          onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0])}
+                          disabled={licenseUploading}
+                          data-testid="input-license-upload"
+                        />
+                      </label>
+                    </>
+                  )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Vehicle Registration Document</Label>
-                  <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
-                    {vehicleDocUrl ? (
-                      <div className="flex items-center justify-center gap-2 text-green-600">
-                        <CheckCircle className="h-5 w-5" />
-                        <span className="text-sm">Document uploaded</span>
-                      </div>
-                    ) : (
-                      <>
-                        <FileText className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                        <label className="cursor-pointer">
-                          <span className="text-sm text-primary hover:underline">
-                            {vehicleUploading ? "Uploading..." : "Upload vehicle document"}
-                          </span>
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept="image/*,.pdf"
-                            onChange={(e) => e.target.files?.[0] && uploadVehicleDoc(e.target.files[0])}
-                            disabled={vehicleUploading}
-                            data-testid="input-vehicle-upload"
-                          />
-                        </label>
-                      </>
-                    )}
-                  </div>
-                </div>
+                {!licenseDocUrl && (
+                  <p className="text-sm text-destructive" data-testid="text-license-required">
+                    Your driver's license document is required to submit your application.
+                  </p>
+                )}
               </div>
 
               <Button
                 type="submit"
                 size="lg"
                 className="w-full"
-                disabled={submitMutation.isPending}
+                disabled={submitMutation.isPending || !licenseDocUrl}
                 data-testid="button-submit-application"
               >
                 {submitMutation.isPending ? "Submitting..." : "Submit Application"}

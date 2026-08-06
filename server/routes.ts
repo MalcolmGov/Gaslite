@@ -52,6 +52,9 @@ export async function registerRoutes(
   app.post("/api/driver-applications", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
       const data = insertDriverApplicationSchema.parse(req.body);
+      if (!data.licenseDocumentUrl) {
+        return res.status(400).json({ error: "Your driver's license document is required" });
+      }
       data.userId = req.userId!;
       const application = await storage.createDriverApplication(data);
       res.json(application);
@@ -194,6 +197,10 @@ export async function registerRoutes(
 
       if (!firstName || !lastName || !email || !phone || !address || !licenseNumber || !vehicleRegistration) {
         return res.status(400).json({ error: "All required fields must be filled" });
+      }
+
+      if (!licenseDocumentUrl) {
+        return res.status(400).json({ error: "Your driver's license document is required" });
       }
 
       if (referralCode) {

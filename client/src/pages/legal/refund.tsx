@@ -74,7 +74,7 @@ export default function RefundPolicy() {
               <p className="text-muted-foreground mb-2">To request a refund:</p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-1">
                 <li>Cancel your order through the app before the driver picks it up (automatic refund)</li>
-                <li>For other refund requests, email <a href="mailto:support@gaslite.co.za" className="text-primary underline" data-testid="link-email-support">support@gaslite.co.za</a> with your order number and reason</li>
+                <li>For other refund requests, email <a href="mailto:support@gaslite.co.za" className="text-primary underline" data-testid="link-email-support">support@gaslite.co.za</a> or call <a href="tel:0664858059" className="text-primary underline">066 485 8059</a> / <a href="tel:0765770921" className="text-primary underline">076 577 0921</a> with your order number and reason</li>
                 <li>Include any relevant photos or documentation</li>
               </ul>
             </section>

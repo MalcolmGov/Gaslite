@@ -225,8 +225,6 @@ export default function DriverOnboarding() {
   const { user, logout } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [licenseDocUrl, setLicenseDocUrl] = useState<string | null>(null);
-  const [vehicleDocUrl, setVehicleDocUrl] = useState<string | null>(null);
-  const [prdpCertUrl, setPrdpCertUrl] = useState<string | null>(null);
   const [referralStatus, setReferralStatus] = useState<{ checking: boolean; valid?: boolean; referrerName?: string; error?: string }>({ checking: false });
 
   const validateReferralCode = useCallback(async (code: string) => {
@@ -259,27 +257,7 @@ export default function DriverOnboarding() {
       toast({ title: "License document uploaded" });
     },
     onError: () => {
-      toast({ title: "Upload failed", description: "Please try again or skip this step.", variant: "destructive" });
-    },
-  });
-
-  const { uploadFile: uploadVehicle, isUploading: vehicleUploading } = useUpload({
-    onSuccess: (response) => {
-      setVehicleDocUrl(response.objectPath);
-      toast({ title: "Vehicle document uploaded" });
-    },
-    onError: () => {
-      toast({ title: "Upload failed", description: "Please try again or skip this step.", variant: "destructive" });
-    },
-  });
-
-  const { uploadFile: uploadPrdp, isUploading: prdpUploading } = useUpload({
-    onSuccess: (response) => {
-      setPrdpCertUrl(response.objectPath);
-      toast({ title: "PrDP certificate uploaded" });
-    },
-    onError: () => {
-      toast({ title: "Upload failed", description: "Please try again or skip this step.", variant: "destructive" });
+      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" });
     },
   });
 
@@ -306,8 +284,6 @@ export default function DriverOnboarding() {
       const res = await apiRequest("POST", "/api/onboarding/driver", {
         ...data,
         licenseDocumentUrl: licenseDocUrl,
-        vehicleDocumentUrl: vehicleDocUrl,
-        prdpCertificateUrl: prdpCertUrl,
         bankName: data.bankName,
         branchCode: data.branchCode,
         accountNumber: data.accountNumber,
@@ -436,7 +412,7 @@ export default function DriverOnboarding() {
               {currentStep === 1 && "Tell us about yourself so we can verify your identity."}
               {currentStep === 2 && "Enter your vehicle registration details."}
               {currentStep === 3 && "Add your banking details for payment processing."}
-              {currentStep === 4 && "Upload your documents including your PrDP 'D' certificate (optional but recommended)."}
+              {currentStep === 4 && "Upload your driver's license so we can verify your identity."}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -739,7 +715,7 @@ export default function DriverOnboarding() {
                 {currentStep === 4 && (
                   <div className="space-y-5">
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Driver's License Photo/Scan</p>
+                      <p className="text-sm font-medium">Driver's License Photo/Scan <span className="text-destructive">*</span></p>
                       <div className="border-2 border-dashed border-border rounded-md p-6 text-center">
                         {licenseDocUrl ? (
                           <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
@@ -766,72 +742,11 @@ export default function DriverOnboarding() {
                           </>
                         )}
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Vehicle Registration Document</p>
-                      <div className="border-2 border-dashed border-border rounded-md p-6 text-center">
-                        {vehicleDocUrl ? (
-                          <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
-                            <CheckCircle className="h-5 w-5" />
-                            <span className="text-sm font-medium" data-testid="text-vehicle-uploaded">Document uploaded</span>
-                          </div>
-                        ) : (
-                          <>
-                            <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                            <label className="cursor-pointer">
-                              <span className="text-sm text-foreground hover:underline font-medium">
-                                {vehicleUploading ? "Uploading..." : "Upload vehicle document"}
-                              </span>
-                              <input
-                                type="file"
-                                className="hidden"
-                                accept="image/*,.pdf"
-                                onChange={(e) => e.target.files?.[0] && uploadVehicle(e.target.files[0])}
-                                disabled={vehicleUploading}
-                                data-testid="input-driver-vehicle-upload"
-                              />
-                            </label>
-                            <p className="text-xs text-muted-foreground mt-1">JPG, PNG or PDF (max 10MB)</p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">PrDP 'D' Certificate (Dangerous Goods)</p>
-                      <p className="text-xs text-muted-foreground">
-                        Professional Driving Permit with 'D' (Dangerous Goods) endorsement is required to transport LPG in South Africa. Must be valid and renewed annually.
-                      </p>
-                      <div className="border-2 border-dashed border-border rounded-md p-6 text-center">
-                        {prdpCertUrl ? (
-                          <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
-                            <CheckCircle className="h-5 w-5" />
-                            <span className="text-sm font-medium" data-testid="text-prdp-uploaded">PrDP certificate uploaded</span>
-                          </div>
-                        ) : (
-                          <>
-                            <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                            <label className="cursor-pointer">
-                              <span className="text-sm text-foreground hover:underline font-medium">
-                                {prdpUploading ? "Uploading..." : "Upload PrDP certificate"}
-                              </span>
-                              <input
-                                type="file"
-                                className="hidden"
-                                accept="image/*,.pdf"
-                                onChange={(e) => e.target.files?.[0] && uploadPrdp(e.target.files[0])}
-                                disabled={prdpUploading}
-                                data-testid="input-prdp-upload"
-                              />
-                            </label>
-                            <p className="text-xs text-muted-foreground mt-1">JPG, PNG or PDF (max 10MB)</p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div className="bg-muted/50 rounded-md p-4">
-                      <p className="text-sm text-muted-foreground">
-                        Document uploads are optional but help speed up the review. You can submit without them and upload later.
-                      </p>
+                      {!licenseDocUrl && (
+                        <p className="text-xs text-destructive" data-testid="text-license-required">
+                          Your driver's license document is required to submit your application.
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -854,9 +769,15 @@ export default function DriverOnboarding() {
                   ) : (
                     <Button
                       type="button"
-                      disabled={submitMutation.isPending}
+                      disabled={submitMutation.isPending || !licenseDocUrl}
                       data-testid="button-submit-driver-application"
-                      onClick={() => form.handleSubmit((data) => submitMutation.mutate(data))()}
+                      onClick={() => {
+                        if (!licenseDocUrl) {
+                          toast({ title: "License document required", description: "Please upload your driver's license before submitting.", variant: "destructive" });
+                          return;
+                        }
+                        form.handleSubmit((data) => submitMutation.mutate(data))();
+                      }}
                     >
                       {submitMutation.isPending ? "Submitting..." : "Submit Application"}
                       {!submitMutation.isPending && <ArrowRight className="h-4 w-4 ml-2" />}

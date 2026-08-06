@@ -321,7 +321,7 @@ export default function DriverTerms() {
 
               <section className="border-t border-border pt-6 mt-8">
                 <p className="text-sm text-muted-foreground">
-                  For support: <span className="text-primary">support@gaslite.co.za</span>
+                  For support: <span className="text-primary">support@gaslite.co.za</span> · <a href="tel:0664858059" className="text-primary hover:underline">066 485 8059</a> · <a href="tel:0765770921" className="text-primary hover:underline">076 577 0921</a>
                 </p>
               </section>
             </div>

@@ -1011,7 +1011,7 @@ export default function AdminDashboard() {
                                 ) : (
                                   <Badge variant="outline" className="text-muted-foreground">No license document</Badge>
                                 )}
-                                {app.vehicleDocumentUrl ? (
+                                {app.vehicleDocumentUrl && (
                                   <Button
                                     size="sm"
                                     variant="outline"
@@ -1021,8 +1021,6 @@ export default function AdminDashboard() {
                                     <Eye className="h-4 w-4 mr-1" />
                                     Vehicle Document
                                   </Button>
-                                ) : (
-                                  <Badge variant="outline" className="text-muted-foreground">No vehicle document</Badge>
                                 )}
                               </div>
 

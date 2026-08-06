@@ -2,14 +2,17 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useUpload } from "@/hooks/use-upload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Check, Truck, CheckCircle2, Share2, Copy } from "lucide-react";
+import { ArrowLeft, Check, Truck, CheckCircle2, Share2, Copy, Upload } from "lucide-react";
 
-// A deliberately simple 3-step wizard: the agent fills everything in
+const TOTAL_STEPS = 4;
+
+// A deliberately simple 4-step wizard: the agent fills everything in
 // on the driver's behalf, standing next to them.
 export default function AgentOnboardDriver() {
   const [, navigate] = useLocation();
@@ -19,6 +22,17 @@ export default function AgentOnboardDriver() {
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [licenseDocUrl, setLicenseDocUrl] = useState<string | null>(null);
+
+  const { uploadFile: uploadLicense, isUploading: licenseUploading } = useUpload({
+    onSuccess: (response) => {
+      setLicenseDocUrl(response.objectPath);
+      toast({ title: "License document uploaded" });
+    },
+    onError: () => {
+      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" });
+    },
+  });
 
   const [form, setForm] = useState({
     firstName: "",
@@ -36,12 +50,13 @@ export default function AgentOnboardDriver() {
 
   const step1Valid = form.firstName && form.lastName && form.phone && form.password.length >= 6;
   const step2Valid = form.address && form.licenseNumber && form.vehicleRegistration;
+  const step3Valid = !!licenseDocUrl;
 
   const handleSubmit = async () => {
     if (submitting) return;
     setSubmitting(true);
     try {
-      await apiRequest("POST", "/api/agent/onboard-driver", form);
+      await apiRequest("POST", "/api/agent/onboard-driver", { ...form, licenseDocumentUrl: licenseDocUrl });
       await queryClient.invalidateQueries({ queryKey: ["/api/agent/onboards"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/agent/me"] });
       setDone(true);
@@ -126,11 +141,11 @@ export default function AgentOnboardDriver() {
           </Button>
           <div>
             <h1 className="font-semibold leading-tight">Sign up a Driver</h1>
-            <p className="text-xs text-muted-foreground">Step {step} of 3</p>
+            <p className="text-xs text-muted-foreground">Step {step} of {TOTAL_STEPS}</p>
           </div>
         </div>
         <div className="h-1 bg-muted">
-          <div className="h-1 bg-primary transition-all" style={{ width: `${(step / 3) * 100}%` }} />
+          <div className="h-1 bg-primary transition-all" style={{ width: `${(step / TOTAL_STEPS) * 100}%` }} />
         </div>
       </header>
 
@@ -201,6 +216,47 @@ export default function AgentOnboardDriver() {
         {step === 3 && (
           <Card>
             <CardContent className="pt-6 space-y-4">
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Driver's License Photo/Scan <span className="text-destructive">*</span></p>
+                <p className="text-xs text-muted-foreground">Take a photo of the driver's license now, or upload a scan.</p>
+                <div className="border-2 border-dashed border-border rounded-md p-6 text-center">
+                  {licenseDocUrl ? (
+                    <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
+                      <CheckCircle2 className="h-5 w-5" />
+                      <span className="text-sm font-medium" data-testid="text-license-uploaded">License uploaded</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                      <label className="cursor-pointer">
+                        <span className="text-sm text-foreground hover:underline font-medium">
+                          {licenseUploading ? "Uploading..." : "Upload license document"}
+                        </span>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*,.pdf"
+                          capture="environment"
+                          onChange={(e) => e.target.files?.[0] && uploadLicense(e.target.files[0])}
+                          disabled={licenseUploading}
+                          data-testid="input-driver-license-upload"
+                        />
+                      </label>
+                      <p className="text-xs text-muted-foreground mt-1">JPG, PNG or PDF (max 10MB)</p>
+                    </>
+                  )}
+                </div>
+              </div>
+              <Button className="w-full" size="lg" disabled={!step3Valid} onClick={() => setStep(4)} data-testid="button-step3-next">
+                Next
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 4 && (
+          <Card>
+            <CardContent className="pt-6 space-y-4">
               <h2 className="font-semibold">Check everything is correct</h2>
               <div className="text-sm space-y-2 bg-muted/50 rounded-md p-4">
                 {[
@@ -211,6 +267,7 @@ export default function AgentOnboardDriver() {
                   ["Licence", form.licenseNumber],
                   ["Vehicle", form.vehicleRegistration],
                   ["Email", form.email || "—"],
+                  ["License document", licenseDocUrl ? "Uploaded ✓" : "Missing"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between gap-3">
                     <span className="text-muted-foreground">{label}</span>
@@ -221,7 +278,7 @@ export default function AgentOnboardDriver() {
               <Button
                 className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white"
                 size="lg"
-                disabled={submitting}
+                disabled={submitting || !step3Valid}
                 onClick={handleSubmit}
                 data-testid="button-submit-driver"
               >

@@ -841,7 +841,11 @@ export default function LandingPage() {
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  <span>0800 GASLITE</span>
+                  <a href="tel:0664858059" className="hover:text-foreground transition-colors" data-testid="link-phone-1">066 485 8059</a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  <a href="tel:0765770921" className="hover:text-foreground transition-colors" data-testid="link-phone-2">076 577 0921</a>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />

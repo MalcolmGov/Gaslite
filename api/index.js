@@ -1378,9 +1378,12 @@ function registerAgentRoutes(app2) {
       if (!agent.active) {
         return res.status(403).json({ error: "Your agent account is not active. Please contact Gaslite." });
       }
-      const { firstName, lastName, phone, password, email, address, licenseNumber, vehicleRegistration, licenseDocumentUrl, vehicleDocumentUrl } = req.body;
+      const { firstName, lastName, phone, password, email, address, licenseNumber, vehicleRegistration, licenseDocumentUrl } = req.body;
       if (!firstName || !lastName || !phone || !password || !address || !licenseNumber || !vehicleRegistration) {
         return res.status(400).json({ error: "Please fill in all the required fields" });
+      }
+      if (!licenseDocumentUrl) {
+        return res.status(400).json({ error: "The driver's license document is required" });
       }
       if (password.length < 6) {
         return res.status(400).json({ error: "The driver's password must be at least 6 characters" });
@@ -1414,8 +1417,7 @@ function registerAgentRoutes(app2) {
         address,
         licenseNumber,
         vehicleRegistration,
-        licenseDocumentUrl: licenseDocumentUrl || null,
-        vehicleDocumentUrl: vehicleDocumentUrl || null,
+        licenseDocumentUrl,
         submittedByAgentId: agent.id
       });
       await storage.createUserProfile({
@@ -1564,6 +1566,9 @@ async function registerRoutes(httpServer, app2) {
   app2.post("/api/driver-applications", isAuthenticated, async (req, res) => {
     try {
       const data = insertDriverApplicationSchema.parse(req.body);
+      if (!data.licenseDocumentUrl) {
+        return res.status(400).json({ error: "Your driver's license document is required" });
+      }
       data.userId = req.userId;
       const application = await storage.createDriverApplication(data);
       res.json(application);
@@ -1686,6 +1691,9 @@ async function registerRoutes(httpServer, app2) {
       const { firstName, lastName, email, phone, address, licenseNumber, vehicleRegistration, licenseDocumentUrl, vehicleDocumentUrl, bankName, branchCode, accountNumber, accountType, referralCode } = req.body;
       if (!firstName || !lastName || !email || !phone || !address || !licenseNumber || !vehicleRegistration) {
         return res.status(400).json({ error: "All required fields must be filled" });
+      }
+      if (!licenseDocumentUrl) {
+        return res.status(400).json({ error: "Your driver's license document is required" });
       }
       if (referralCode) {
         const referrer = await storage.getDriverByReferralCode(referralCode);
