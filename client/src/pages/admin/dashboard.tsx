@@ -367,55 +367,55 @@ export default function AdminDashboard() {
             <p className="text-muted-foreground">Manage orders, drivers, applications, and customers</p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                    <Package className="h-6 w-6 text-primary" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <Package className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Orders</p>
-                    <p className="text-2xl font-bold" data-testid="text-total-orders">{stats?.totalOrders || 0}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Total Orders</p>
+                    <p className="text-lg sm:text-2xl font-bold" data-testid="text-total-orders">{stats?.totalOrders || 0}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
-                    <DollarSign className="h-6 w-6 text-green-600" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-green-500/10 rounded-xl flex items-center justify-center">
+                    <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Revenue</p>
-                    <p className="text-2xl font-bold" data-testid="text-total-revenue">R{(stats?.totalRevenue || 0).toFixed(2)}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
-                    <Truck className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Active Drivers</p>
-                    <p className="text-2xl font-bold" data-testid="text-active-drivers">{stats?.activeDrivers || 0}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Revenue</p>
+                    <p className="text-base sm:text-2xl font-bold break-all" data-testid="text-total-revenue">R{(stats?.totalRevenue || 0).toFixed(2)}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center">
-                    <FileText className="h-6 w-6 text-yellow-600" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                    <Truck className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Pending Applications</p>
-                    <p className="text-2xl font-bold" data-testid="text-pending-apps">{stats?.pendingApplications || 0}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Active Drivers</p>
+                    <p className="text-lg sm:text-2xl font-bold" data-testid="text-active-drivers">{stats?.activeDrivers || 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-yellow-500/10 rounded-xl flex items-center justify-center">
+                    <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Pending Apps</p>
+                    <p className="text-lg sm:text-2xl font-bold" data-testid="text-pending-apps">{stats?.pendingApplications || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -464,49 +464,50 @@ export default function AdminDashboard() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-2">
-              <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-8 gap-1">
-                <TabsTrigger value="orders" data-testid="tab-orders" className="shrink-0">
-                  <Package className="h-4 w-4 mr-1.5" />
-                  <span>Orders</span>
-                  {pendingOrders.length > 0 && (
-                    <Badge variant="secondary" className="ml-1 text-[10px] px-1.5">{pendingOrders.length}</Badge>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="customers" data-testid="tab-customers" className="shrink-0">
-                  <Users className="h-4 w-4 mr-1.5" />
-                  <span className="hidden sm:inline">Customers</span>
-                  <span className="sm:hidden">Cust.</span>
-                </TabsTrigger>
-                <TabsTrigger value="applications" data-testid="tab-applications" className="shrink-0">
-                  <FileText className="h-4 w-4 mr-1.5" />
-                  <span>Apps</span>
-                  {pendingApplications.length > 0 && (
-                    <Badge variant="secondary" className="ml-1 text-[10px] px-1.5">{pendingApplications.length}</Badge>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="drivers" data-testid="tab-drivers" className="shrink-0">
-                  <Truck className="h-4 w-4 mr-1.5" />
-                  <span>Drivers</span>
-                </TabsTrigger>
-                <TabsTrigger value="earnings" data-testid="tab-earnings" className="shrink-0">
-                  <Wallet className="h-4 w-4 mr-1.5" />
-                  <span>Earnings</span>
-                </TabsTrigger>
-                <TabsTrigger value="driver-map" data-testid="tab-driver-map" className="shrink-0">
-                  <Map className="h-4 w-4 mr-1.5" />
-                  <span>Map</span>
-                </TabsTrigger>
-                <TabsTrigger value="launch-special" data-testid="tab-launch-special" className="shrink-0">
-                  <Rocket className="h-4 w-4 mr-1.5" />
-                  <span>Launch</span>
-                </TabsTrigger>
-                <TabsTrigger value="agents" data-testid="tab-agents" className="shrink-0">
-                  <HandCoins className="h-4 w-4 mr-1.5" />
-                  <span>Agents</span>
-                </TabsTrigger>
-              </TabsList>
-            </div>
+            <TabsList className="grid grid-cols-4 sm:grid-cols-8 h-auto sm:h-10 gap-1 w-full">
+              <TabsTrigger value="orders" data-testid="tab-orders" aria-label="Orders" className="flex-col sm:flex-row gap-0.5 sm:gap-0 py-2 sm:py-1.5">
+                <span className="flex items-center gap-1.5">
+                  <Package className="h-4 w-4" />
+                  <span className="hidden sm:inline">Orders</span>
+                </span>
+                {pendingOrders.length > 0 && (
+                  <Badge variant="secondary" className="sm:ml-1 text-[10px] px-1.5 leading-tight">{pendingOrders.length}</Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="customers" data-testid="tab-customers" aria-label="Customers" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 sm:py-1.5">
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Customers</span>
+              </TabsTrigger>
+              <TabsTrigger value="applications" data-testid="tab-applications" aria-label="Applications" className="flex-col sm:flex-row gap-0.5 sm:gap-0 py-2 sm:py-1.5">
+                <span className="flex items-center gap-1.5">
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">Apps</span>
+                </span>
+                {pendingApplications.length > 0 && (
+                  <Badge variant="secondary" className="sm:ml-1 text-[10px] px-1.5 leading-tight">{pendingApplications.length}</Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="drivers" data-testid="tab-drivers" aria-label="Drivers" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 sm:py-1.5">
+                <Truck className="h-4 w-4" />
+                <span className="hidden sm:inline">Drivers</span>
+              </TabsTrigger>
+              <TabsTrigger value="earnings" data-testid="tab-earnings" aria-label="Earnings" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 sm:py-1.5">
+                <Wallet className="h-4 w-4" />
+                <span className="hidden sm:inline">Earnings</span>
+              </TabsTrigger>
+              <TabsTrigger value="driver-map" data-testid="tab-driver-map" aria-label="Map" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 sm:py-1.5">
+                <Map className="h-4 w-4" />
+                <span className="hidden sm:inline">Map</span>
+              </TabsTrigger>
+              <TabsTrigger value="launch-special" data-testid="tab-launch-special" aria-label="Launch Special" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 sm:py-1.5">
+                <Rocket className="h-4 w-4" />
+                <span className="hidden sm:inline">Launch</span>
+              </TabsTrigger>
+              <TabsTrigger value="agents" data-testid="tab-agents" aria-label="Agents" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 sm:py-1.5">
+                <HandCoins className="h-4 w-4" />
+                <span className="hidden sm:inline">Agents</span>
+              </TabsTrigger>
+            </TabsList>
 
             <TabsContent value="agents" className="space-y-4">
               <AdminAgentsTab />
@@ -658,29 +659,29 @@ export default function AdminDashboard() {
 
                 return (
                   <>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                       <Card>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                        <CardContent className="p-4 sm:p-6">
+                          <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="w-10 h-10 shrink-0 bg-primary/10 rounded-xl flex items-center justify-center">
                               <Users className="h-5 w-5 text-primary" />
                             </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">Total Sign-ups</p>
-                              <p className="text-2xl font-bold" data-testid="text-total-signups">{allCustomers.length}</p>
+                            <div className="min-w-0">
+                              <p className="text-xs sm:text-sm text-muted-foreground truncate">Total Sign-ups</p>
+                              <p className="text-lg sm:text-2xl font-bold" data-testid="text-total-signups">{allCustomers.length}</p>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
                       <Card>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center">
+                        <CardContent className="p-4 sm:p-6">
+                          <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="w-10 h-10 shrink-0 bg-green-500/10 rounded-xl flex items-center justify-center">
                               <TrendingUp className="h-5 w-5 text-green-600" />
                             </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">Today / Week / Month</p>
-                              <p className="text-2xl font-bold" data-testid="text-signup-trend">
+                            <div className="min-w-0">
+                              <p className="text-xs sm:text-sm text-muted-foreground truncate">Today / Week / Month</p>
+                              <p className="text-base sm:text-2xl font-bold" data-testid="text-signup-trend">
                                 {signupsToday} / {signupsThisWeek} / {signupsThisMonth}
                               </p>
                             </div>
@@ -688,27 +689,27 @@ export default function AdminDashboard() {
                         </CardContent>
                       </Card>
                       <Card>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                        <CardContent className="p-4 sm:p-6">
+                          <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="w-10 h-10 shrink-0 bg-blue-500/10 rounded-xl flex items-center justify-center">
                               <UserCheck className="h-5 w-5 text-blue-600" />
                             </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">Onboarded</p>
-                              <p className="text-2xl font-bold" data-testid="text-onboarded">{completedOnboarding} / {allCustomers.length}</p>
+                            <div className="min-w-0">
+                              <p className="text-xs sm:text-sm text-muted-foreground truncate">Onboarded</p>
+                              <p className="text-lg sm:text-2xl font-bold" data-testid="text-onboarded">{completedOnboarding} / {allCustomers.length}</p>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
                       <Card>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                        <CardContent className="p-4 sm:p-6">
+                          <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="w-10 h-10 shrink-0 bg-purple-500/10 rounded-xl flex items-center justify-center">
                               <ShoppingBag className="h-5 w-5 text-purple-600" />
                             </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">Have Ordered</p>
-                              <p className="text-2xl font-bold" data-testid="text-with-orders">{withOrders}</p>
+                            <div className="min-w-0">
+                              <p className="text-xs sm:text-sm text-muted-foreground truncate">Have Ordered</p>
+                              <p className="text-lg sm:text-2xl font-bold" data-testid="text-with-orders">{withOrders}</p>
                             </div>
                           </div>
                         </CardContent>
