@@ -85,8 +85,8 @@ li.todo .box { position:absolute; left:4px; top:6px; width:15px; height:15px; bo
   <dl class="meta">
     <dt>Prepared for</dt><dd>Malcolm, Move Digital</dd>
     <dt>Date</dt><dd>2 September 2026</dd>
-    <dt>Scope</dt><dd><code>MalcolmGov/ekyc</code> at commit <code>6595ce1</code>, with <code>MalcolmGov/aria</code> (Zara agent marketplace) reviewed as the integration target</dd>
-    <dt>Status</dt><dd>Planning document. No code has been changed in either repository.</dd>
+    <dt>Scope</dt><dd><code>MalcolmGov/ekyc</code> at commit <code>6595ce1</code>, reviewed for production readiness; <code>MalcolmGov/aria</code> (the Zara agent marketplace) reviewed as the platform the product will be built on</dd>
+    <dt>Status</dt><dd>Planning document, revision 2. Direction agreed: build on the Zara platform as a reusable, multi-tenant KYC/KYB product sold to business customers. No code has been changed in either repository.</dd>
   </dl>
 </header>
 <nav class="toc" aria-label="Contents"><p>Contents</p><ol><li><a href="#1-verdict">1. Verdict</a></li>
@@ -94,26 +94,29 @@ li.todo .box { position:absolute; left:4px; top:6px; width:15px; height:15px; bo
 <li><a href="#3-what-the-repository-actually-is-today">3. What the repository actually is today</a></li>
 <li><a href="#4-findings">4. Findings</a></li>
 <li><a href="#5-what-you-are-actually-selling">5. What you are actually selling</a></li>
-<li><a href="#6-target-architecture">6. Target architecture</a></li>
-<li><a href="#7-extending-into-the-zara-agent-marketplace">7. Extending into the Zara agent marketplace</a></li>
+<li><a href="#6-target-architecture-on-zara">6. Target architecture on Zara</a></li>
+<li><a href="#7-the-three-agents-in-the-zara-marketplace">7. The three agents in the Zara marketplace</a></li>
+<li><a href="#packages-live-in-data-agents-as-africa-kyc-verifier-agent-json-africa-kyb-onboarding-agent-json-and-africa-digital-onboarding-agent-json-validated-by-scripts-marketplace-validate-package-py-with-a-build-note-in-docs-marketplace-matching-insurance-ops-suite-md-the-partner-console-gets-a-verification-tab-cases-review-queue-flow-builder-and-per-check-usage">Packages live in <code>data/agents/</code> as <code>africa-kyc-verifier.agent.json</code>, <code>africa-kyb-onboarding.agent.json</code> and <code>africa-digital-onboarding.agent.json</code>, validated by <code>scripts/marketplace/validate_package.py</code>, with a build note in <code>docs/marketplace/</code> matching <code>INSURANCE_OPS_SUITE.md</code>. The partner console gets a Verification tab: cases, review queue, flow builder, and per-check usage.</a></li>
 <li><a href="#8-compliance-and-regulatory-requirements">8. Compliance and regulatory requirements</a></li>
 <li><a href="#9-roadmap">9. Roadmap</a></li>
+<li><a href="#cumulative-a-sellable-kyc-agent-after-phase-2-six-to-seven-weeks-kyc-plus-onboarding-after-phase-3-about-eleven-weeks-and-the-full-kyc-kyb-and-onboarding-product-after-phase-4-four-to-five-months"><strong>Cumulative:</strong> a sellable KYC agent after Phase 2 (six to seven weeks), KYC plus onboarding after Phase 3 (about eleven weeks), and the full KYC, KYB and onboarding product after Phase 4 (four to five months).</a></li>
 <li><a href="#10-definition-of-production-ready">10. Definition of production ready</a></li>
-<li><a href="#11-decisions-needed-from-you">11. Decisions needed from you</a></li>
+<li><a href="#11-decisions">11. Decisions</a></li>
 <li><a href="#appendix-a-route-inventory-and-authentication-state">Appendix A: route inventory and authentication state</a></li>
 <li><a href="#appendix-b-build-and-audit-output">Appendix B: build and audit output</a></li></ol></nav>
 <h2 id="1-verdict">1. Verdict</h2>
 <div class="verdict"><p><strong>The ekyc repository is not production grade and should not be offered to clients in its current state.</strong> It is a well-presented prototype: the UI is broad and the stack is sensible, but the verification engine behind it is largely simulated, the API has almost no authentication, passwords are stored in plain text, and results can be forged by anyone who can reach the server.</p></div>
 <p>The <code>PRODUCTION-READINESS.md</code> file in the repo says "PRODUCTION READY, zero additional development required". That document is not accurate. Of the twenty-one "production ready" claims it makes, the code supports four (multi-country list, Didit session creation, PWA shell, multi-language UI). The rest are either simulated, marketing copy, or contradicted by the code.</p>
-<p>The good news is that the product idea is sound and the market position is real. The repo is best treated as a <strong>functional specification and UI prototype</strong> for a new build, not as a codebase to patch. Roughly 60% of the server needs to be rewritten; most of the client can be kept.</p>
-<p><strong>Recommended path:</strong> rebuild the server as a multi-tenant "Verification Core" API (Section 7), ship a hardened KYC-only pilot first, add real KYB in a second phase, then package both as Zara marketplace agents (Section 8). A pilot-safe KYC product is realistic in six to eight weeks of focused engineering. A sellable KYC + KYB + onboarding product is a five to six month programme.</p>
+<p>The good news is that the product idea is sound and the market position is real. The repo is best treated as a <strong>functional specification and UI prototype</strong> for the new build, not as a codebase to patch or port.</p>
+<p><strong>Agreed path:</strong> build the product on the Zara platform rather than as a standalone service. Zara already has tenancy, partner API keys, rentals, metering, an audit table, retention purge, WhatsApp and web channels, a partner console, guardrails, evals, CI and a deploy pipeline, and a small working Didit client. A platform-level verification service plus three rentable agents (KYC, KYB, Digital Onboarding) is the product; ekyc is archived as the prototype reference. A sellable KYC agent is realistic in six to seven weeks; KYC plus onboarding in about eleven weeks; the full KYC, KYB and onboarding product in four to five months (Section 9).</p>
+<p><strong>What this product is.</strong> A reusable KYC/KYB capability that you on-sell to business customers. Each customer is a Zara tenant. They rent the agents, call the verification API with their partner key, or both. Zara Pay, when it launches, is one tenant of this product like any other, not its owner.</p>
 
 <h2 id="2-what-was-reviewed-and-how">2. What was reviewed and how</h2>
 <ul>
 <li>Full read of <code>server/</code> (5,300 lines), <code>shared/schema.ts</code>, client hooks, API client, routing, and all deployment config.</li>
 <li>Install, typecheck (<code>npm run check</code>) and dependency audit run against a fresh clone.</li>
 <li>Every HTTP route catalogued with its authentication state (Appendix A).</li>
-<li><code>aria</code> reviewed for the agent package format, catalogue and suite model, the webhook and MCP integration rails, and the runtime sidecar, so the marketplace plan is grounded in what actually exists there.</li>
+<li><code>aria</code> reviewed for the agent package format, catalogue and suite model, tenancy and billing tables, the webhook and MCP integration rails, the runtime sidecar, and the existing Didit client in Zara Pay, so the platform plan is grounded in what actually exists there.</li>
 </ul>
 <p>I could not test against live Didit or Twilio credentials, so vendor behaviour is assessed from the code and the vendors' published contracts, not from live calls.</p>
 
@@ -205,7 +208,7 @@ When Didit session creation fails, the API returns a demo session rather than an
 <p class="finding"><span class="chip high">H5</span><strong>No tenancy, API keys or customer model.</strong> The schema has <code>users</code>, <code>verification_sessions</code>, <code>countries</code>, <code>business_verification_sessions</code> and <code>whatsapp_verification_sessions</code>. Nothing links a session to a paying customer. You cannot onboard a second client without them seeing the first client's data.</p>
 <p class="finding"><span class="chip high">H6</span><strong>Engineering baseline is missing.</strong> <code>npm run check</code> fails with 13 type errors. There are no tests, no CI, no linter and no migrations (schema is applied with <code>drizzle-kit push</code>). <code>npm audit</code> on production dependencies reports 36 vulnerabilities: 1 critical, 21 high, 12 moderate, 2 low.</p>
 <p class="finding"><span class="chip high">H7</span><strong>Deployment is tied to Replit.</strong> Callback URLs are built from <code>REPLIT_DOMAINS</code>, <code>ekyc-africa.com</code> is hardcoded in eleven places, <code>vercel.json</code> deploys the frontend only (the API is excluded), and there is no Dockerfile.</p>
-<p class="finding"><span class="chip high">H8</span><strong>Compliance claims are not backed by the code.</strong> No audit table, no consent capture, no retention or deletion, raw vendor payloads stored in <code>vendor_data</code> JSON, no per-tenant isolation, biometric processing and cross-border transfer not addressed (see Section 9).</p>
+<p class="finding"><span class="chip high">H8</span><strong>Compliance claims are not backed by the code.</strong> No audit table, no consent capture, no retention or deletion, raw vendor payloads stored in <code>vendor_data</code> JSON, no per-tenant isolation, biometric processing and cross-border transfer not addressed (see Section 8).</p>
 <h3>Medium: should be fixed in the rebuild</h3>
 <ul>
 <li>Two definitions of <code>GET /api/stats</code> (<code>routes.ts:1139</code> and <code>routes.ts:1736</code>); the second is unreachable.</li>
@@ -222,7 +225,7 @@ When Didit session creation fails, the API returns a demo session rather than an
 <li>The WhatsApp link pattern: a link sent to the applicant that opens a hosted verification flow. This is the right channel for the market and maps directly onto how Zara agents hand off.</li>
 <li>The KYB data model shape: business, directors, shareholders, UBOs, documents, risk score, compliance status. The fields are right even though nothing fills them honestly.</li>
 <li>The country registration-number patterns and the data masking utility are usable starting points.</li>
-<li>Most of the client: 26 pages, component library, i18n, PWA shell. It will need rewiring to a new API and a single brand.</li>
+<li>The client as a reference: 26 pages of flows, copy and i18n that show what the hosted pages and agent scripts need to cover. It is not ported; Didit hosts document capture and Zara hosts the rest.</li>
 </ul>
 
 <h2 id="5-what-you-are-actually-selling">5. What you are actually selling</h2>
@@ -262,45 +265,108 @@ When Didit session creation fails, the API returns a demo session rather than an
 <li><strong>The verification engine and the agent are separate products.</strong> The engine is an API with an audit trail. The agent is a Zara package that calls it. Clients who want no agent still buy the engine.</li>
 <li><strong>Agents orchestrate; they do not verify.</strong> This is also how the existing Zara packages are written: the onboarding-buddy workflow "never collects banking/card in chat", and the loan pre-qualifier returns indicative results, "never a credit decision". KYC and KYB agents must hold the same line or the compliance story collapses.</li>
 </ol>
-<p><strong>First customers are already in the group.</strong> Gaslite needs verified drivers. Zara needs verified retail partners. Both are honest pilots that exercise the KYC flow, the WhatsApp channel and the webhook-out integration before an external client depends on them.</p>
+<p><strong>Pilot tenants are already in the group.</strong> Gaslite needs verified drivers. Zara needs verified retail partners before it hands them a partner dashboard. Both are honest pilots that exercise the KYC flow, the WhatsApp channel and the webhook-out integration before an external client depends on them. They are pilots of a product built for external customers, not the reason the product exists.</p>
 
-<h2 id="6-target-architecture">6. Target architecture</h2>
-<pre><code>┌──────────────────────────────────────────────────────────────────────────┐
-│  Channels        WhatsApp (Twilio / Meta Cloud)   Web widget   Client app │
-└───────────────┬──────────────────────────────┬───────────────────────────┘
-                │                              │
-   ┌────────────▼────────────┐    ┌────────────▼────────────────────────┐
-   │  Zara Agent Runtime     │    │  Hosted Onboarding Flows            │
-   │  kyc-verifier package   │    │  flow definitions per tenant        │
-   │  kyb-onboarding package │    │  white-label, resumable, multilingual│
-   │  compliance-onboarding  │    │  step: form | kyc | kyb | agreement │
-   │  suite                  │    │                                     │
-   └────────────┬────────────┘    └────────────┬────────────────────────┘
-                │  MCP tools / signed webhooks  │  internal API
-   ┌────────────▼──────────────────────────────▼────────────────────────┐
-   │  Verification Core (new service, TypeScript)                       │
-   │  tenants · api keys · applicants · cases · checks · evidence       │
-   │  decisions · audit events · webhooks out · retention jobs          │
-   │  vendor adapters: Didit · Smile ID · registries · sanctions        │
-   └────────────┬──────────────────────────────┬────────────────────────┘
-                │                              │
-   ┌────────────▼────────────┐    ┌────────────▼────────────────────────┐
-   │  PostgreSQL (per-tenant │    │  Object storage (encrypted, region- │
-   │  row isolation, audit   │    │  pinned) for documents &amp; evidence   │
-   │  append-only)           │    │                                     │
-   └─────────────────────────┘    └─────────────────────────────────────┘
+<h2 id="6-target-architecture-on-zara">6. Target architecture on Zara</h2>
+<h3>6.0 What Zara already provides</h3>
+<p>Every row below is shipped code in <code>aria</code>, not a plan. This is why building on Zara is faster and safer than a standalone service.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Where it exists in Zara</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tenancy and customer identity</td>
+<td><code>partners</code>, <code>partner_keys</code>, <code>partner_members</code>, <code>reseller_subtenants</code> in <code>agent_platform/store.py</code></td>
+<td>Business customers are partners; API access is by hashed partner key</td>
+</tr>
+<tr>
+<td>Commercial model</td>
+<td><code>rentals</code>, <code>deployments</code>, <code>usage_events</code>, <code>invoices</code>, <code>saas_subscriptions</code>, <code>partner_agent_prices</code></td>
+<td>Agent rental by tier plus metered usage already exists; per-check vendor cost is one more usage event type</td>
+</tr>
+<tr>
+<td>Audit and retention</td>
+<td><code>audit_events</code> table; nightly <code>retention.py</code> purge job</td>
+<td>Extend rather than invent</td>
+</tr>
+<tr>
+<td>Channels</td>
+<td>WhatsApp via Meta Cloud API, web embed widget, in-app</td>
+<td>One deployment serves all three</td>
+</tr>
+<tr>
+<td>Agent packaging</td>
+<td><code>zara.agent-package/v1</code> with typed tools, guardrails, evals; 500-SKU catalogue; suites</td>
+<td>Three new families and one suite entry, no schema change</td>
+</tr>
+<tr>
+<td>Per-tenant integrations</td>
+<td>Actions of kind webhook and MCP with HMAC signing, SSRF guard</td>
+<td>Outbound "verification complete" webhook to the customer's system uses the existing rail</td>
+</tr>
+<tr>
+<td>White label</td>
+<td><code>white_label_configs</code>, brandless widget for white-labelled tenants</td>
+<td>Hosted status pages and messages take the tenant's brand</td>
+</tr>
+<tr>
+<td>Didit client</td>
+<td><code>vas-wallet/app/kyc/didit.py</code> and <code>webhook.py</code></td>
+<td>Correct signature check on raw bytes, correct status persistence; small, promoted to platform level in Phase 1</td>
+</tr>
+<tr>
+<td>Engineering baseline</td>
+<td>CI with 288 test files, deploy workflow, Neon Postgres, security pack, SA compliance calendar</td>
+<td>ekyc has none of these</td>
+</tr>
+</tbody>
+</table></div>
+<p>Two production-safety gaps in the current Zara Pay code must be closed when the client is promoted: the webhook skips signature verification when no secret is configured (<code>vas-wallet/app/kyc/didit.py:79</code>), and the signup flow activates a wallet without any KYC when Didit is not configured (<code>vas-wallet/app/flows/router.py:379</code>). Both are acceptable in development and must be impossible in production.</p>
+<h3>6.1 Shape</h3>
+<pre><code>┌───────────────────────────────────────────────────────────────────────────────┐
+│  Business customer (Zara tenant)                                              │
+│  rents agents in the marketplace · and/or calls the verification API with     │
+│  a partner key · receives signed webhooks into their own systems              │
+└──────────────┬───────────────────────────────────┬────────────────────────────┘
+               │ WhatsApp · web widget · in-app    │ REST, partner key
+┌──────────────▼───────────────────────┐   ┌───────▼───────────────────────────┐
+│  Agent packages (Zara runtime)       │   │  Verification API                 │
+│  kyc-verifier · kyb-onboarding ·     │   │  /agentplatform/v1/verification/* │
+│  digital-onboarding                  │   │  tenant-scoped, metered           │
+│  suite: compliance-onboarding        │   │                                   │
+└──────────────┬───────────────────────┘   └───────┬───────────────────────────┘
+               │ first-party platform tools        │
+┌──────────────▼───────────────────────────────────▼───────────────────────────┐
+│  verification/ package in aria (new)                                         │
+│  cases · checks · evidence refs · decisions · related persons · flow runs    │
+│  vendor adapters: Didit (platform account) · Smile ID · registries · screening│
+│  inbound vendor webhooks (signed, idempotent) · outbound tenant webhooks     │
+│  writes usage_events and audit_events; honours retention purge               │
+└──────────────┬───────────────────────────────────────────────────────────────┘
+               │
+┌──────────────▼───────────────────────┐   ┌───────────────────────────────────┐
+│  Neon Postgres (tenant_id on every   │   │  Didit holds documents and        │
+│  row; existing store.py conventions) │   │  biometrics; Zara stores decisions │
+│                                      │   │  and references, not images       │
+└──────────────────────────────────────┘   └───────────────────────────────────┘
 </code></pre>
-<h3>6.1 Verification Core</h3>
-<p>A new Express or Fastify service in TypeScript, replacing <code>server/</code>. Keep Drizzle and PostgreSQL. Key changes from today:</p>
+<h3>6.2 The verification package</h3>
+<p>A new <code>verification/</code> package in aria, mounted like the other routers in <code>server.py</code>, with its tables created through <code>store.py</code> conventions. It is platform code, not part of <code>vas-wallet</code>.</p>
 <ul>
-<li><strong>Tenancy.</strong> Every table carries <code>tenant_id</code>. API keys are hashed, scoped and rotatable. A tenant's staff log in with hashed passwords (argon2) and roles: owner, compliance officer, agent operator, read-only.</li>
-<li><strong>Case model instead of session model.</strong> An <code>applicant</code> (person or business) has <code>cases</code>; a case has ordered <code>checks</code> (document, liveness, face match, registry, sanctions, PEP, adverse media, UBO discovery); each check has <code>evidence</code> (vendor payload reference, document pointer, screenshot) and a <code>result</code>. A case ends in a <code>decision</code> with a named decider (system or user) and a reason.</li>
-<li><strong>Vendor adapters behind one interface.</strong> <code>IdentityVendor</code> (Didit first, Smile ID second), <code>RegistryVendor</code> (per country), <code>ScreeningVendor</code> (sanctions and PEP). Every adapter returns a typed result or throws. No adapter may return a simulated success. Sandbox mode is a tenant setting that is visible on every record it touches.</li>
-<li><strong>Webhooks in and out.</strong> Inbound vendor webhooks verified on raw bytes, idempotent on vendor event id, processed by a queue. Outbound webhooks to the client's system signed with HMAC and retried, matching the envelope format Zara already documents so one integration guide serves both.</li>
-<li><strong>Audit and retention.</strong> Append-only <code>audit_events</code> table (who, what, which record, when, from where). Retention policy per tenant with scheduled deletion and a deletion certificate. Vendor payloads stored as encrypted evidence objects, not inline JSON.</li>
-<li><strong>Operational baseline.</strong> Dockerfile, migrations, health and readiness endpoints, structured logs with request ids, rate limiting, helmet, CORS allowlist, secrets from environment only, CI running typecheck, lint, tests and audit on every push.</li>
+<li><strong>Tenant scope.</strong> Every table carries <code>partner_id</code>. Cases are created by an agent acting for a tenant or by a partner-key API call. A tenant can only read its own cases; a test proves it.</li>
+<li><strong>Case model.</strong> An <code>applicant</code> (person or business) has <code>cases</code>; a case has ordered <code>checks</code> (document, liveness, face match, government database, registry, sanctions, PEP, adverse media, UBO discovery); each check stores a typed <code>result</code> and an <code>evidence</code> reference (vendor session id, report reference, document pointer held by the vendor). A case ends in a <code>decision</code> with a named decider (system or a tenant user) and a reason. Related persons (directors, UBOs) link a business case to person cases.</li>
+<li><strong>Vendor adapters.</strong> <code>IdentityVendor</code> (Didit first, Smile ID second), <code>RegistryVendor</code> (per country), <code>ScreeningVendor</code> (sanctions and PEP). Each returns a typed result or raises. No adapter may return a simulated success. Sandbox is a per-tenant flag visible on every record and every API response, and sandbox can never activate anything in a live tenant.</li>
+<li><strong>Didit account model.</strong> One platform Didit account owned by Move Digital, with <code>vendor_data</code> carrying the tenant and case ids so webhooks route correctly, and per-check cost metered to the tenant as a <code>usage_events</code> row. Bring-your-own-account is a later enterprise option, not the default.</li>
+<li><strong>Webhooks.</strong> Inbound vendor webhooks verified on raw bytes and idempotent on the vendor event id. Outbound "case decided" events to the tenant's system use the existing signed action rail, so the customer's integration guide is the one Zara already publishes.</li>
+<li><strong>Hosted pages.</strong> A tenant-branded start page, status page and retry page. Document capture and liveness stay in Didit's hosted flow. The ekyc client is not ported.</li>
+<li><strong>Data minimisation.</strong> Zara stores decisions, check results and references. Documents and selfies stay with the vendor. This keeps the POPIA surface small and the retention purge simple.</li>
 </ul>
-<h3>6.2 Vendor strategy</h3>
+<h3>6.3 Vendor strategy</h3>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -313,46 +379,51 @@ When Didit session creation fails, the API returns a demo session rather than an
 <tbody>
 <tr>
 <td>Document, liveness, face match</td>
-<td>Didit (keep)</td>
-<td>Hosted flow, webhooks, broad document coverage, free tier for early volume</td>
-<td>Use the current v2 session API with <code>x-api-key</code>; drop the three-way auth guessing</td>
+<td>Didit, platform account</td>
+<td>Hosted flow, webhooks, broad document coverage, free tier for early volume; client already exists in Zara</td>
+<td>Move to the current session API and confirm the endpoint and header scheme against Didit's docs at build time</td>
 </tr>
 <tr>
 <td>African government database checks (SA DHA, Nigeria NIN/BVN, Kenya IPRS, Ghana NIA)</td>
 <td>Smile ID as second adapter</td>
-<td>Direct government checks are where African KYC differentiates; Didit's coverage here is weaker</td>
-<td>Contractual and per-check cost; enable per tenant</td>
+<td>Direct government checks are where African KYC differentiates</td>
+<td>Contractual and per-check cost; enabled per tenant</td>
 </tr>
 <tr>
 <td>Sanctions, PEP, adverse media</td>
-<td>Didit AML screening for pilot; evaluate OpenSanctions (commercial licence) or ComplyAdvantage for KYB</td>
-<td>Keeps one vendor for the pilot; KYB needs entity-level screening later</td>
+<td>Didit AML screening for the pilot; evaluate OpenSanctions (commercial licence) or ComplyAdvantage for KYB</td>
+<td>One vendor for the pilot; KYB needs entity-level screening later</td>
 <td></td>
 </tr>
 <tr>
 <td>Company registries</td>
-<td>Adapter per country. Start with South Africa (CIPC data via an accredited data partner), then Kenya BRS, Nigeria CAC, Ghana ORC, Uganda URSB</td>
-<td>Direct API access differs by country and often requires an agreement</td>
-<td>Every registry adapter needs a <strong>manual review fallback</strong>: an operator uploads the registry extract and attests. Honest assisted KYB beats fake automated KYB</td>
+<td>Adapter per country. South Africa first (CIPC data via an accredited data partner), then Kenya BRS, Nigeria CAC, Ghana ORC, Uganda URSB</td>
+<td>API access differs by country and usually needs an agreement</td>
+<td>Every registry adapter has a <strong>manual review fallback</strong>: an operator uploads the registry extract and attests. Honest assisted KYB beats fake automated KYB</td>
 </tr>
 <tr>
 <td>Workflow engine (Ballerine)</td>
-<td>Drop the fictitious API call. Either self-host Ballerine properly or, more simply, implement the case state machine in the core</td>
-<td>The current integration is against an endpoint that does not exist</td>
-<td>Own state machine recommended; Ballerine can be revisited at scale</td>
+<td>Not used. The case state machine lives in the verification package</td>
+<td>The ekyc integration called an endpoint that does not exist</td>
+<td>Revisit only at scale</td>
 </tr>
 <tr>
 <td>WhatsApp</td>
-<td>Keep Twilio for the pilot; plan the move to Meta WhatsApp Cloud API that Zara already runs</td>
-<td>Zara has the templates, the handover doc and the number</td>
-<td></td>
+<td>Zara's Meta Cloud API number and templates</td>
+<td>Already live with template approval and signature enforcement in CI</td>
+<td>Twilio is not needed</td>
 </tr>
 </tbody>
 </table></div>
-<h3>6.3 Hosted Onboarding Flows</h3>
-<p>A <code>flow_definitions</code> table per tenant: an ordered list of steps with types <code>form</code>, <code>kyc</code>, <code>kyb</code>, <code>document</code>, <code>agreement</code>, <code>review</code>, <code>webhook</code>. A <code>flow_runs</code> table tracks an applicant through a definition and is resumable from a link. The existing client pages (<code>verify</code>, <code>kyb</code>, <code>whatsapp-verify</code>, <code>verification-success</code>) become the renderers for these steps under the tenant's branding. This is what "Digital Onboarding flows for business customers" means concretely: a client configures a definition, gets a link or a widget, and receives a signed webhook when a run completes.</p>
+<h3>6.4 Commercial model</h3>
+<ul>
+<li><strong>Agent rental</strong> at the existing tier prices in <code>agent_platform/config.py</code> (<code>kyc-verifier</code> pro, <code>kyb-onboarding</code> enterprise, <code>digital-onboarding</code> pro).</li>
+<li><strong>Per-check metering</strong> as <code>usage_events</code>, invoiced through the existing invoice path, with a margin over vendor cost. Volume tiers are a pricing setting, not code.</li>
+<li><strong>API-only</strong> customers use a partner key with no agent rental, billed on checks alone.</li>
+<li><strong>White label</strong> and reseller sub-tenants use the existing <code>white_label_configs</code> and <code>reseller_subtenants</code> paths, so a bank or a fintech can resell onboarding under its own brand.</li>
+</ul>
 
-<h2 id="7-extending-into-the-zara-agent-marketplace">7. Extending into the Zara agent marketplace</h2>
+<h2 id="7-the-three-agents-in-the-zara-marketplace">7. The three agents in the Zara marketplace</h2>
 <p>Zara already has the machinery this needs: a <code>zara.agent-package/v1</code> format with manifest, system prompt, knowledge, typed tools with <code>side_effects</code> and <code>auth_scope</code>, guardrails and evals; a catalogue of 500 SKUs across five markets; suites that bundle families; a runtime sidecar; and two integration rails (signed webhooks and MCP) documented at <code>docs/marketplace/CONNECT_YOUR_BACKEND.md</code>. There is no KYC or KYB family in the catalogue today, and the adjacent families (<code>onboarding-buddy</code>, <code>loan-prequalifier</code>, <code>sim-registration</code>, <code>policy-compliance</code>, <code>fraud-investigations</code>) all follow the "collect, explain, hand off, never decide" pattern.</p>
 <h3>7.1 New families</h3>
 <div class="tablewrap"><table>
@@ -375,18 +446,25 @@ When Didit session creation fails, the API returns a demo session rather than an
 </tr>
 <tr>
 <td><code>kyb-onboarding</code></td>
-<td>Business Onboarding Agent</td>
+<td>Business Verification Agent</td>
 <td>enterprise</td>
 <td>whatsapp, web</td>
-<td>Collects business identity conversationally, triggers registry and screening checks, sends KYC links to each director and UBO, chases documents, hands a prepared case to a human</td>
+<td>Collects business identity conversationally, opens a business case, triggers registry and screening checks, sends KYC links to each director and UBO, chases documents, hands a prepared case to a human</td>
+</tr>
+<tr>
+<td><code>digital-onboarding</code></td>
+<td>Digital Onboarding Agent</td>
+<td>pro</td>
+<td>whatsapp, web, app</td>
+<td>Runs the tenant's configured onboarding flow end to end: form steps, KYC or KYB as steps, agreements, and a signed webhook into the tenant's systems on completion</td>
 </tr>
 </tbody>
 </table></div>
-<p>Both are built for the <code>africa</code> market first with <code>en</code>, <code>zu</code>, <code>af</code>, <code>fr</code>, <code>sw</code> in the manifest, and <code>compliance: ["popia", "fica"]</code>.</p>
+<p>All three are built for the <code>africa</code> market first with <code>en</code>, <code>zu</code>, <code>af</code>, <code>fr</code>, <code>sw</code> in the manifest, and <code>compliance: ["popia", "fica"]</code>. Market variants follow the existing <code>{market}-{family}</code> convention.</p>
 <h3>7.2 A <code>compliance-onboarding</code> suite</h3>
-<p>One entry in <code>agent_platform/suites.py</code>, no schema change: <code>kyc-verifier</code>, <code>kyb-onboarding</code>, <code>onboarding-buddy</code>, <code>policy-compliance</code>, <code>fraud-investigations</code>. Sector: "Banks, lenders, insurers, fintech and any regulated onboarding". This gives the marketplace a compliance vertical that mirrors the insurance-ops suite shipped in August.</p>
+<p>One entry in <code>agent_platform/suites.py</code>, no schema change: <code>kyc-verifier</code>, <code>kyb-onboarding</code>, <code>digital-onboarding</code>, <code>policy-compliance</code>, <code>fraud-investigations</code>. Sector: "Banks, lenders, insurers, fintech and any regulated onboarding". This gives the marketplace a compliance vertical alongside the insurance-ops suite shipped in August.</p>
 <h3>7.3 Tools</h3>
-<p>The Verification Core exposes an MCP server (Zara already ships <code>agent_platform/mcp_server.py</code> and <code>movedigital_mcp.py</code>, so the pattern exists). Tool definitions follow the loan pre-qualifier package's discipline:</p>
+<p>The verification package exposes first-party platform tools to the runtime (the same mechanism the existing families use), scoped to the renting tenant. They follow the loan pre-qualifier package's discipline:</p>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -404,7 +482,7 @@ When Didit session creation fails, the API returns a demo session rather than an
 <tr>
 <td><code>start_kyc(applicant_ref, channel, language)</code></td>
 <td>write</td>
-<td>Creates a case in the core and returns the hosted link. Never accepts identity data as arguments.</td>
+<td>Creates a case and returns the hosted link. Never accepts identity data as arguments.</td>
 </tr>
 <tr>
 <td><code>get_case_status(case_ref)</code></td>
@@ -427,6 +505,11 @@ When Didit session creation fails, the API returns a demo session rather than an
 <td>Adds an outstanding document request and returns an upload link</td>
 </tr>
 <tr>
+<td><code>run_flow_step(flow_run_ref, step_id, answers)</code></td>
+<td>write</td>
+<td>Advances a tenant's onboarding flow; used by <code>digital-onboarding</code> only</td>
+</tr>
+<tr>
 <td><code>escalate(case_ref, reason)</code></td>
 <td>write</td>
 <td>Hands off to the tenant's compliance desk</td>
@@ -439,16 +522,17 @@ When Didit session creation fails, the API returns a demo session rather than an
 <li>The agent never states that someone "is verified" or "is approved" unless <code>get_case_status</code> returned that state, and never for KYB.</li>
 <li>Evals: at least one case per rule above, in <code>whatsapp</code> and <code>web</code>, in English and one other market language, using the existing <code>says_any</code> / <code>says_none</code> eval format.</li>
 </ul>
-<h3>7.5 Delivery</h3>
-<p>Packages live in <code>data/agents/</code> as <code>africa-kyc-verifier.agent.json</code> and <code>africa-kyb-onboarding.agent.json</code>, validated by <code>scripts/marketplace/validate_package.py</code>, with a build note in <code>docs/marketplace/</code> matching <code>INSURANCE_OPS_SUITE.md</code>. Rental follows the existing tier pricing in <code>agent_platform/config.py</code>; per-check vendor costs are metered separately by the core and invoiced through the tenant, not the agent rental.</p>
-
+<h3>7.5 Onboarding flows</h3>
+<p>A <code>flow_definitions</code> table per tenant: an ordered list of steps with types <code>form</code>, <code>kyc</code>, <code>kyb</code>, <code>document</code>, <code>agreement</code>, <code>review</code>, <code>webhook</code>. A <code>flow_runs</code> table tracks an applicant through a definition and is resumable from a link. The <code>digital-onboarding</code> agent drives a run conversationally; the same run can also be completed on the hosted pages without an agent. A tenant configures a definition in the partner console, gets a link or the widget, and receives a signed webhook when a run completes. This is what "Digital Onboarding flows for business customers" means concretely.</p>
+<h3>7.6 Delivery</h3>
+<h2 id="packages-live-in-data-agents-as-africa-kyc-verifier-agent-json-africa-kyb-onboarding-agent-json-and-africa-digital-onboarding-agent-json-validated-by-scripts-marketplace-validate-package-py-with-a-build-note-in-docs-marketplace-matching-insurance-ops-suite-md-the-partner-console-gets-a-verification-tab-cases-review-queue-flow-builder-and-per-check-usage">Packages live in <code>data/agents/</code> as <code>africa-kyc-verifier.agent.json</code>, <code>africa-kyb-onboarding.agent.json</code> and <code>africa-digital-onboarding.agent.json</code>, validated by <code>scripts/marketplace/validate_package.py</code>, with a build note in <code>docs/marketplace/</code> matching <code>INSURANCE_OPS_SUITE.md</code>. The partner console gets a Verification tab: cases, review queue, flow builder, and per-check usage.</h2>
 <h2 id="8-compliance-and-regulatory-requirements">8. Compliance and regulatory requirements</h2>
 <p>This is not legal advice. It is the list of obligations the product must be built to satisfy, to be confirmed with counsel before the first regulated client.</p>
 <p><strong>South Africa (first market)</strong></p>
 <ul>
 <li><strong>FICA.</strong> Accountable institutions must perform customer due diligence, identify beneficial owners, screen against sanctions lists and keep records for five years. Your clients are the accountable institutions; your product must give them an evidence pack that survives an FIC inspection.</li>
 <li><strong>Beneficial ownership.</strong> The CIPC register uses a 5% threshold. The threshold must be a per-jurisdiction setting.</li>
-<li><strong>POPIA.</strong> Biometric data is special personal information (section 26) and requires consent or another authorisation; you need an Information Officer, a lawful-basis record per processing purpose, and a basis for cross-border transfer (section 72) because Didit and most screening vendors process outside South Africa. Data subjects can request access and deletion.</li>
+<li><strong>POPIA.</strong> Biometric data is special personal information (section 26) and requires consent or another authorisation; you need an Information Officer, a lawful-basis record per processing purpose, and a basis for cross-border transfer (section 72) because Didit and most screening vendors process outside South Africa, and Zara's own database is Neon in the EU. Data subjects can request access and deletion.</li>
 <li><strong>Retention and deletion.</strong> Per-tenant policy, enforced by a job, with a deletion record.</li>
 </ul>
 <p><strong>Other markets in the current country list</strong></p>
@@ -468,7 +552,7 @@ When Didit session creation fails, the API returns a demo session rather than an
 </ul>
 
 <h2 id="9-roadmap">9. Roadmap</h2>
-<p>Effort is indicative, for one to two engineers, and assumes the rebuild rather than patching. Each phase has exit criteria; a phase is not done until they pass.</p>
+<p>Effort is indicative, for one to two engineers working in <code>aria</code>. Each phase has exit criteria; a phase is not done until they pass. Phases 2 and 3 can overlap once the Phase 1 API is stable.</p>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -481,58 +565,57 @@ When Didit session creation fails, the API returns a demo session rather than an
 </thead>
 <tbody>
 <tr>
-<td><span class="chip medium">0. Stop the bleeding</span></td>
-<td>Make the current deployment safe to leave running or take it down</td>
-<td>Rotate Didit, Twilio and session secrets. Remove committed tokens and cookies from the repo and its history. Put every write and PII endpoint behind authentication or remove it. Delete the <code>x-demo-mode</code> bypass and the unsigned webhook. Disable the WhatsApp send endpoint. Take <code>ekyc-africa.com</code> off public DNS if no one is using it.</td>
-<td>No unauthenticated write or PII route (Appendix A all green). No secrets in the tree.</td>
-<td>1 week</td>
+<td><span class="chip medium">0. Close ekyc</span></td>
+<td>Stop the exposed prototype being a liability</td>
+<td>Rotate the Didit, Twilio and session secrets it holds. Take the deployment offline or put every write and PII endpoint behind authentication. Remove committed tokens and cookies from the repo and its history. Archive the repo as the prototype reference.</td>
+<td>Nothing reachable on the internet serves ekyc's open endpoints. No live secrets in the tree.</td>
+<td>2 to 3 days</td>
 </tr>
 <tr>
-<td><span class="chip medium">1. Verification Core, KYC pilot</span></td>
-<td>A hardened, multi-tenant KYC API with real Didit results</td>
-<td>New service per Section 6.1. Tenants, API keys, hashed passwords, RBAC. Case model. Didit adapter on the current API with signed, idempotent webhooks. Outbound webhooks. Hosted KYC flow reusing the existing client pages under one brand. WhatsApp link via Twilio. Audit table. Dockerfile, migrations, CI with typecheck, lint, tests and audit.</td>
-<td>Two tenants (Gaslite drivers, Zara partners) complete real verifications end to end. Webhook status persists. Zero critical or high audit findings. Test coverage on auth, tenancy isolation and webhook verification.</td>
-<td>6 to 8 weeks</td>
-</tr>
-<tr>
-<td><span class="chip medium">2. Real KYB</span></td>
-<td>Honest business verification with human decision</td>
-<td>Registry adapter interface with South Africa first and manual-review fallback. Sanctions and PEP screening adapter. UBO discovery with per-jurisdiction threshold. Related-person KYC links. Case review UI for the compliance officer. Evidence pack export (PDF).</td>
-<td>A South African company can be onboarded with a registry extract, screened directors and UBOs, and a signed decision. No code path produces a result without a vendor response or a human attestation.</td>
-<td>6 to 8 weeks</td>
-</tr>
-<tr>
-<td><span class="chip medium">3. Onboarding Flows</span></td>
-<td>Configurable white-label journeys</td>
-<td>Flow definitions and runs. Step renderers. Tenant branding. Resumable links. Agreements step with e-signature record. Client dashboard per tenant. Retention jobs and deletion. Consent capture.</td>
-<td>A client configures a flow without engineering help and receives a webhook on completion. Retention policy demonstrably deletes.</td>
-<td>4 to 6 weeks</td>
-</tr>
-<tr>
-<td><span class="chip medium">4. Zara marketplace agents</span></td>
-<td>KYC and KYB agents rentable in the marketplace</td>
-<td>MCP server on the core. Two packages, suite entry, guardrails, evals. Partner console wiring. Metering of per-check vendor costs.</td>
-<td>Packages pass <code>validate_package.py</code> and evals. A rented <code>kyc-verifier</code> completes a real verification from WhatsApp in sandbox and live.</td>
+<td><span class="chip medium">1. Verification service</span></td>
+<td>A tenant-scoped, metered verification API on Zara with real Didit results</td>
+<td><code>verification/</code> package. Case model with tenant scope. Didit adapter promoted from Zara Pay to platform level, production-safe config (no signature skip, no sandbox activation). Inbound webhook, idempotent. Partner-key API. Usage and audit events. Hosted start, status and retry pages. Outbound "case decided" event on the existing action rail. Tests for tenancy isolation, signature verification and idempotency.</td>
+<td>Gaslite and Zara partner onboarding tenants complete real verifications end to end from a partner-key call. Usage rows and audit rows written. CI green.</td>
 <td>3 to 4 weeks</td>
+</tr>
+<tr>
+<td><span class="chip medium">2. KYC agent</span></td>
+<td><code>kyc-verifier</code> rentable in the marketplace</td>
+<td>Package, tools, guardrails, evals. Suite entry. Console Verification tab with cases list. WhatsApp and widget flows.</td>
+<td>Package passes <code>validate_package.py</code> and evals. A rented agent completes a real verification from WhatsApp and from the widget for a pilot tenant. Post-reply guardrail blocks ID data in chat.</td>
+<td>2 to 3 weeks</td>
+</tr>
+<tr>
+<td><span class="chip medium">3. Digital Onboarding agent</span></td>
+<td>Configurable, white-labelled onboarding journeys</td>
+<td><code>flow_definitions</code> and <code>flow_runs</code>. Flow builder in the console. Step renderers on hosted pages. Agreements step with an e-signature record. Consent capture as evidence. <code>digital-onboarding</code> package. Retention honoured for flow data.</td>
+<td>A tenant configures a flow without engineering help, an applicant completes it on WhatsApp with KYC as a step, and the tenant receives the signed webhook.</td>
+<td>4 weeks</td>
+</tr>
+<tr>
+<td><span class="chip medium">4. KYB agent</span></td>
+<td>Honest business verification with human decision</td>
+<td>Registry adapter interface, South Africa first with manual-review fallback. Screening adapter. UBO discovery with per-jurisdiction threshold. Related-person KYC links. Review queue in the console with decision and reason. Evidence pack export. <code>kyb-onboarding</code> package.</td>
+<td>A South African company is onboarded with a registry extract, screened directors and UBOs, and a signed decision. No code path produces a result without a vendor response or a human attestation.</td>
+<td>6 to 8 weeks</td>
 </tr>
 <tr>
 <td><span class="chip medium">5. Trust and scale</span></td>
 <td>Sell to regulated clients</td>
-<td>Penetration test and remediation. DPA and security pack. Smile ID adapter for government checks. Second registry country. SOC 2 readiness backlog. Load test.</td>
-<td>Pen test report with no open high findings. First external regulated client signed.</td>
+<td>Penetration test and remediation of the verification surface. DPA and security pack additions. Smile ID adapter. Second registry country. Load test.</td>
+<td>Pen test with no open high findings. First external regulated client signed.</td>
 <td>ongoing</td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>Cumulative:</strong> a pilot-safe KYC product after Phase 1 (about two months), and a sellable KYC + KYB + onboarding product after Phase 3 (about five months). Phase 4 can run in parallel with Phase 3 once the core API is stable.</p>
-
+<h2 id="cumulative-a-sellable-kyc-agent-after-phase-2-six-to-seven-weeks-kyc-plus-onboarding-after-phase-3-about-eleven-weeks-and-the-full-kyc-kyb-and-onboarding-product-after-phase-4-four-to-five-months"><strong>Cumulative:</strong> a sellable KYC agent after Phase 2 (six to seven weeks), KYC plus onboarding after Phase 3 (about eleven weeks), and the full KYC, KYB and onboarding product after Phase 4 (four to five months).</h2>
 <h2 id="10-definition-of-production-ready">10. Definition of production ready</h2>
-<p>The product is ready to offer to a client when all of the following hold. Use this as the release gate, replacing the current <code>PRODUCTION-READINESS.md</code>.</p>
+<p>The product is ready to offer to a client when all of the following hold. Use this as the release gate for the Zara verification service and the three agents; it replaces ekyc's <code>PRODUCTION-READINESS.md</code>.</p>
 <ul>
 <li class="todo"><span class="box" aria-hidden="true"></span>Every route is authenticated and scoped to a tenant; an automated test proves tenant A cannot read tenant B.</li>
 <li class="todo"><span class="box" aria-hidden="true"></span>Passwords hashed with argon2; API keys hashed; secrets only from environment; no secrets in git history.</li>
 <li class="todo"><span class="box" aria-hidden="true"></span>Every inbound webhook verified on raw bytes and idempotent; no bypass paths.</li>
-<li class="todo"><span class="box" aria-hidden="true"></span>No code path returns a verification, screening or registry result that did not come from a vendor response or a recorded human attestation. Sandbox results are labelled on every record and every API response.</li>
+<li class="todo"><span class="box" aria-hidden="true"></span>No code path returns a verification, screening or registry result that did not come from a vendor response or a recorded human attestation. Sandbox results are labelled on every record and every API response, and sandbox can never activate anything in a live tenant.</li>
 <li class="todo"><span class="box" aria-hidden="true"></span>Append-only audit events for every read of PII and every state change, with actor, time and origin.</li>
 <li class="todo"><span class="box" aria-hidden="true"></span>Consent captured and stored per applicant; retention policy enforced by a scheduled job; deletion produces a record.</li>
 <li class="todo"><span class="box" aria-hidden="true"></span>Documents and vendor payloads stored encrypted in region-pinned object storage, never in the database or process memory.</li>
@@ -543,15 +626,21 @@ When Didit session creation fails, the API returns a demo session rather than an
 <li class="todo"><span class="box" aria-hidden="true"></span>Marketing pages describe only what exists.</li>
 </ul>
 
-<h2 id="11-decisions-needed-from-you">11. Decisions needed from you</h2>
+<h2 id="11-decisions">11. Decisions</h2>
+<p><strong>Taken</strong></p>
 <ol>
-<li><strong>Rebuild or patch.</strong> This document recommends a rebuild of the server with the client largely kept. Patching is possible but would cost about the same and leave the case model and tenancy bolted on.</li>
-<li><strong>Brand.</strong> eKYC Africa, SwifterID or a Zara sub-brand. One name across code, domain and marketplace.</li>
-<li><strong>First external market and vertical.</strong> South Africa lenders and fintech is the natural fit with FICA and the Zara banking suite. Confirm.</li>
-<li><strong>KYB honesty line.</strong> Approve the "assisted KYB with human decision" positioning for Phase 2 rather than promising automated registry checks in countries where API access is not yet contracted.</li>
-<li><strong>Vendor contracts.</strong> Approve opening commercial conversations with Didit (production tier), Smile ID and a South African company data partner.</li>
-<li><strong>Pilots.</strong> Approve Gaslite driver onboarding and Zara partner onboarding as the two internal pilots.</li>
-<li><strong>Where the code lives.</strong> Recommend a fresh <code>verification-core</code> repository, with the current <code>ekyc</code> repo archived as the prototype reference.</li>
+<li><strong>Build on Zara, not standalone.</strong> The verification service is a platform package in <code>aria</code>; the product is sold as rentable agents plus a partner-key API. ekyc is archived as the prototype reference.</li>
+<li><strong>Reusable, multi-tenant, on-sold.</strong> Every business customer is a Zara tenant. Zara Pay, when it launches, is one tenant.</li>
+</ol>
+<p><strong>Still needed from you</strong></p>
+<ol>
+<li><strong>Brand.</strong> The product name customers see in the marketplace and on hosted pages. eKYC Africa, SwifterID, or a Zara-branded name such as "Zara Verify".</li>
+<li><strong>Didit account model.</strong> Recommended: one platform account owned by Move Digital with per-tenant metering. Confirm, or specify bring-your-own-account for enterprise tenants from day one.</li>
+<li><strong>Pricing.</strong> Confirm agent tiers (<code>kyc-verifier</code> pro, <code>kyb-onboarding</code> enterprise, <code>digital-onboarding</code> pro) and the per-check margin over vendor cost.</li>
+<li><strong>First external market and vertical.</strong> South Africa lenders and fintech is the natural fit with FICA and the banking suite. Confirm.</li>
+<li><strong>KYB honesty line.</strong> Approve "assisted KYB with human decision" for Phase 4 rather than promising automated registry checks where API access is not yet contracted.</li>
+<li><strong>Vendor conversations.</strong> Approve opening commercial discussions with Didit (production tier), Smile ID and a South African company data partner.</li>
+<li><strong>Pilots.</strong> Approve Gaslite driver onboarding and Zara partner onboarding as the two pilot tenants.</li>
 </ol>
 
 <h2 id="appendix-a-route-inventory-and-authentication-state">Appendix A: route inventory and authentication state</h2>
