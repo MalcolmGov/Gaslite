@@ -63,9 +63,23 @@ docker compose up -d --build
 
 See [DOCKER.md](DOCKER.md) for the full container guide.
 
-### Deploying to Vercel
+### Deploying to Vercel (current setup)
 
-This app lives in the `moove-prompts/` folder of the Gaslite repository. Create a **separate** Vercel project for it and set **Root Directory** to `moove-prompts`. Add the environment variables from `.env.example`, then run `npm run db:deploy` (Prisma migrations) against the production database.
+This app lives in the `moove-prompts/` folder of the Gaslite repository, so it has its own Vercel project (`moove-prompts`, Root Directory `moove-prompts`) separate from the Gaslite one. `vercel.json` pins the Next.js preset and runs `scripts/vercel-build.sh`, which applies pending Prisma migrations automatically whenever a real `DATABASE_URL` is configured and then runs the normal build.
+
+The database is a PostgreSQL 17 service in the `moove-prompts` Railway project, exposed through a public TCP proxy so Vercel can reach it. Its connection string is the `DATABASE_PUBLIC_URL` variable on that Railway service.
+
+Environment variables to set on the Vercel project (Production and Preview):
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | Railway `DATABASE_PUBLIC_URL`, with `?sslmode=require` appended |
+| `NEXTAUTH_URL` | The site URL, e.g. `https://moove-prompts.vercel.app` |
+| `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
+| `AUTH_TRUST_HOST` | `true` |
+| `CRON_SECRET` | any random string (protects `/api/cron/reset-credits`) |
+
+After the first deploy with these set, seed the library once from your machine: put the same `DATABASE_URL` in `moove-prompts/.env` and run `npm run db:seed`.
 
 ## Branding and configuration
 
