@@ -43,11 +43,15 @@ export async function StructuredData({ type, data }: StructuredDataProps) {
         height: 512,
       },
       description: config.branding.description,
-      sameAs: [
-        "https://github.com/f/prompts.chat",
-        "https://x.com/promptschat",
-        "https://x.com/fkadev",
-      ],
+      ...(config.homepage?.useCloneBranding
+        ? {}
+        : {
+            sameAs: [
+              "https://github.com/f/prompts.chat",
+              "https://x.com/promptschat",
+              "https://x.com/fkadev",
+            ],
+          }),
     },
     website: {
       "@context": "https://schema.org",

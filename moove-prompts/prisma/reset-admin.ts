@@ -6,16 +6,18 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🔐 Resetting admin user...");
 
-  const password = await bcrypt.hash("password123", 12);
+  const adminEmail = (process.env.ADMIN_EMAIL || "admin@prompts.chat").trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD || "password123";
+  const password = await bcrypt.hash(adminPassword, 12);
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@prompts.chat" },
+    where: { email: adminEmail },
     update: {
       password: password,
       role: "ADMIN",
     },
     create: {
-      email: "admin@prompts.chat",
+      email: adminEmail,
       username: "admin",
       name: "Admin User",
       password: password,
@@ -26,8 +28,8 @@ async function main() {
 
   console.log("✅ Admin user reset successfully!");
   console.log("\n📋 Credentials:");
-  console.log("   Email:    admin@prompts.chat");
-  console.log("   Password: password123");
+  console.log(`   Email:    ${adminEmail}`);
+  console.log(process.env.ADMIN_PASSWORD ? "   Password: (from ADMIN_PASSWORD)" : "   Password: password123");
 }
 
 main()

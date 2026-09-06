@@ -82,14 +82,18 @@ async function fetchPrompts(): Promise<RemotePromptsResponse> {
 async function main() {
   console.log("🌱 Seeding database from prompts.chat...");
 
-  // Create admin user for assigning prompts
-  const password = await bcrypt.hash("password123", 12);
+  // Create admin user for assigning prompts.
+  // Credentials come from ADMIN_EMAIL / ADMIN_PASSWORD so a real account can be
+  // bootstrapped on first deploy; the defaults are for local development only.
+  const adminEmail = (process.env.ADMIN_EMAIL || "admin@prompts.chat").trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD || "password123";
+  const password = await bcrypt.hash(adminPassword, 12);
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@prompts.chat" },
-    update: {},
+    where: { email: adminEmail },
+    update: { password: password, role: "ADMIN" },
     create: {
-      email: "admin@prompts.chat",
+      email: adminEmail,
       username: "admin",
       name: "Admin User",
       password: password,
@@ -309,8 +313,9 @@ async function main() {
   }
 
   console.log("\n🎉 Seeding complete!");
-  console.log("\n📋 Test credentials (password: password123):");
-  console.log("   Admin: admin@prompts.chat");
+  console.log("\n📋 Admin account:");
+  console.log(`   Email: ${adminEmail}`);
+  console.log(process.env.ADMIN_PASSWORD ? "   Password: (from ADMIN_PASSWORD)" : "   Password: password123");
 }
 
 main()
