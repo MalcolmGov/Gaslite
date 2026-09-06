@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { generateAllEmbeddings, isAISearchEnabled } from "@/lib/ai/embeddings";
 
+// Embedding the whole library streams progress for a few minutes; give the
+// function room to finish on Vercel instead of the default timeout.
+export const maxDuration = 300;
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();

@@ -55,10 +55,12 @@ export default defineConfig({
     categories: true,
     // Enable tags
     tags: true,
-    // Enable AI-powered semantic search (requires OPENAI_API_KEY)
-    aiSearch: false,
-    // Enable AI-powered generation features (requires OPENAI_API_KEY)
-    aiGeneration: false,
+    // AI-powered semantic search. Active only when OPENAI_API_KEY is set in the
+    // environment; without a key the app falls back to keyword search.
+    aiSearch: true,
+    // AI-powered generation (prompt builder, improve prompt, example generation).
+    // Also requires OPENAI_API_KEY; hidden when the key is absent.
+    aiGeneration: true,
     // Enable MCP (Model Context Protocol) features including API key generation
     mcp: true,
     // Enable comments on prompts
