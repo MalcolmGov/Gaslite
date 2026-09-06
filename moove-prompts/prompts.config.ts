@@ -32,9 +32,10 @@ export default defineConfig({
   // Authentication plugins
   auth: {
     // Available: "credentials" | "google" | "azure" | "github" | "apple" | "oidc" | "oauth"
-    // Email/password out of the box. Add "google" / "github" here once the
-    // matching AUTH_* variables are set in .env (see .env.example).
-    providers: ["credentials"],
+    // Email/password plus Google. OAuth providers are only offered when their
+    // credentials exist in the environment (GOOGLE_CLIENT_ID/SECRET, see
+    // .env.example), so listing them here is safe before the keys are added.
+    providers: ["credentials", "google"],
     // Allow public registration (only applies to credentials provider)
     allowRegistration: true,
   },
