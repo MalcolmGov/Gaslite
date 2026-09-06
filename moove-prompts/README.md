@@ -74,6 +74,7 @@ Environment variables to set on the Vercel project (Production and Preview):
 | Variable | Value |
 |---|---|
 | `DATABASE_URL` | Railway `DATABASE_PUBLIC_URL`, with `?sslmode=require` appended |
+| `DIRECT_URL` | Optional. Only needed if the database sits behind a connection pooler; defaults to `DATABASE_URL` |
 | `NEXTAUTH_URL` | The site URL, e.g. `https://moove-prompts.vercel.app` |
 | `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
 | `AUTH_TRUST_HOST` | `true` |
