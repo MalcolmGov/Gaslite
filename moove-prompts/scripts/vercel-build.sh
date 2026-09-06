@@ -10,6 +10,10 @@
 set -euo pipefail
 
 if [[ -n "${DATABASE_URL:-}" && "${DATABASE_URL}" != *"placeholder"* && "${DATABASE_URL}" != *"localhost"* ]]; then
+  # prisma/schema.prisma declares directUrl = env("DIRECT_URL") for hosts with a
+  # connection pooler (Neon, Supabase). When no separate direct URL is
+  # configured, migrations can use the normal connection string.
+  export DIRECT_URL="${DIRECT_URL:-$DATABASE_URL}"
   echo "[vercel-build] DATABASE_URL is set; applying Prisma migrations..."
   npx prisma migrate deploy
 else
