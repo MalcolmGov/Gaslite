@@ -111,6 +111,14 @@ Any `PCHAT_*` environment variable (for example `PCHAT_NAME`, `PCHAT_COLOR`) ove
 2. Put the client ID and secret in `.env` (`AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`, or `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET`).
 3. Add `"google"` or `"github"` to `auth.providers` in `prompts.config.ts`.
 
+### AI search and generation
+
+Semantic search, the prompt builder and "improve prompt" are switched on in `prompts.config.ts` but stay dormant until an API key is present.
+
+1. Add `OPENAI_API_KEY` to the Vercel project (Production and Preview) and redeploy. `OPENAI_BASE_URL`, `OPENAI_EMBEDDING_MODEL` and `OPENAI_GENERATIVE_MODEL` let you point at any OpenAI-compatible provider or change models.
+2. Sign in as an admin, open **Admin → AI Search**, and click **Generate embeddings**. This embeds every prompt once (a few minutes for ~2,000 prompts) and shows progress as it runs. New prompts are embedded automatically when they are created.
+3. Search on the Prompts page now understands meaning, not just keywords, and the prompt builder appears in the header.
+
 ### Error monitoring
 
 Sentry is wired in but disabled until you set `NEXT_PUBLIC_SENTRY_DSN` (plus `SENTRY_ORG`, `SENTRY_PROJECT`, and `SENTRY_AUTH_TOKEN` for source-map uploads).
