@@ -93,11 +93,7 @@ export async function generatePromptEmbedding(promptId: string): Promise<void> {
   if (prompt.isPrivate) return;
 
   // Combine title, description, and content for embedding
-  const textToEmbed = [
-    prompt.title,
-    prompt.description || "",
-    prompt.content,
-  ].join("\n\n").trim();
+  const textToEmbed = buildEmbeddingText(prompt);
 
   const embedding = await generateEmbedding(textToEmbed);
   
@@ -110,6 +106,19 @@ export async function generatePromptEmbedding(promptId: string): Promise<void> {
 // Delay helper to avoid rate limits
 function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Batch settings for bulk embedding. The embeddings API accepts many inputs
+// per request, so embedding the whole library takes seconds instead of the
+// ~1s/prompt serial loop that used to hit serverless timeouts.
+const EMBED_BATCH_SIZE = Math.max(1, parseInt(process.env.EMBEDDING_BATCH_SIZE || "32", 10) || 32);
+const EMBED_BATCH_DELAY_MS = Math.max(0, parseInt(process.env.EMBEDDING_BATCH_DELAY_MS || "250", 10) || 0);
+// text-embedding-3-* accept 8,191 tokens per input; cap characters well below that.
+const EMBED_MAX_CHARS = 24000;
+
+function buildEmbeddingText(prompt: { title: string; description: string | null; content: string }): string {
+  const text = [prompt.title, prompt.description || "", prompt.content].join("\n\n").trim();
+  return text.length > EMBED_MAX_CHARS ? text.slice(0, EMBED_MAX_CHARS) : text;
 }
 
 export async function generateAllEmbeddings(
@@ -127,31 +136,61 @@ export async function generateAllEmbeddings(
       isPrivate: false,
       deletedAt: null,
     },
-    select: { id: true },
+    select: { id: true, title: true, description: true, content: true },
+    orderBy: { createdAt: "asc" },
   });
 
   const total = prompts.length;
   let success = 0;
   let failed = 0;
+  let current = 0;
+  const client = getOpenAIClient();
 
-  for (let i = 0; i < prompts.length; i++) {
-    const prompt = prompts[i];
+  for (let i = 0; i < prompts.length; i += EMBED_BATCH_SIZE) {
+    const batch = prompts.slice(i, i + EMBED_BATCH_SIZE);
+    const inputs = batch.map((p) => buildEmbeddingText(p) || p.title);
+
+    let vectors: (number[] | null)[];
     try {
-      await generatePromptEmbedding(prompt.id);
-      success++;
+      const response = await client.embeddings.create({ model: EMBEDDING_MODEL, input: inputs });
+      vectors = batch.map((_, idx) => response.data.find((d) => d.index === idx)?.embedding ?? null);
     } catch {
-      failed++;
+      // Batch failed (an oversized input, for instance): retry one by one so a
+      // single bad prompt cannot sink the whole batch.
+      vectors = await Promise.all(
+        inputs.map(async (text) => {
+          try {
+            return await generateEmbedding(text);
+          } catch {
+            return null;
+          }
+        })
+      );
     }
-    
-    // Report progress
+
+    await Promise.all(
+      batch.map(async (prompt, idx) => {
+        const embedding = vectors[idx];
+        if (!embedding) {
+          failed++;
+          return;
+        }
+        try {
+          await db.prompt.update({ where: { id: prompt.id }, data: { embedding } });
+          success++;
+        } catch {
+          failed++;
+        }
+      })
+    );
+
+    current += batch.length;
     if (onProgress) {
-      onProgress(i + 1, total, success, failed);
+      onProgress(current, total, success, failed);
     }
-    
-    // Rate limit: wait 1000ms between requests to avoid hitting API limits
-    // (GitHub Models API and other providers have stricter rate limits)
-    if (i < prompts.length - 1) {
-      await delay(1000);
+
+    if (i + EMBED_BATCH_SIZE < prompts.length && EMBED_BATCH_DELAY_MS > 0) {
+      await delay(EMBED_BATCH_DELAY_MS);
     }
   }
 
