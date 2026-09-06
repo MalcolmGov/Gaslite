@@ -82,6 +82,8 @@ Environment variables to set on the Vercel project (Production and Preview):
 
 After the first deploy with these set, seed the library once from your machine: put the same `DATABASE_URL` in `moove-prompts/.env` and run `npm run db:seed`.
 
+Listing pages are cached for five minutes. After seeding or importing prompts outside the app, sign in as an admin and open `/api/admin/revalidate` to refresh them immediately.
+
 ## Branding and configuration
 
 Everything brand-related lives in one file: [`prompts.config.ts`](prompts.config.ts).

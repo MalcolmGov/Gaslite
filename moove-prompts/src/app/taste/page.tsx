@@ -98,8 +98,8 @@ function getCachedTastes(
         total: totalCount,
       };
     },
-    ["taste", cacheKey],
-    { tags: ["prompts"] }
+    ["v2", "taste", cacheKey],
+    { tags: ["prompts"], revalidate: 300 }
   )();
 }
 

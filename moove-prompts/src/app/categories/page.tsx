@@ -51,8 +51,8 @@ const getCategories = unstable_cache(
       })),
     }));
   },
-  ["categories-page"],
-  { tags: ["categories"] }
+  ["v2", "categories-page"],
+  { tags: ["categories"], revalidate: 300 }
 );
 
 export default async function CategoriesPage() {

@@ -36,8 +36,8 @@ const getCategories = unstable_cache(
       },
     });
   },
-  ["categories"],
-  { tags: ["categories"] }
+  ["v2", "categories"],
+  { tags: ["categories"], revalidate: 300 }
 );
 
 // Query for pinned categories (cached)
@@ -54,8 +54,8 @@ const getPinnedCategories = unstable_cache(
       },
     });
   },
-  ["pinned-categories"],
-  { tags: ["categories"] }
+  ["v2", "pinned-categories"],
+  { tags: ["categories"], revalidate: 300 }
 );
 
 // Query for tags (cached)
@@ -65,8 +65,8 @@ const getTags = unstable_cache(
       orderBy: { name: "asc" },
     });
   },
-  ["tags"],
-  { tags: ["tags"] }
+  ["v2", "tags"],
+  { tags: ["tags"], revalidate: 300 }
 );
 
 // Query for prompts list (cached)
@@ -156,8 +156,8 @@ function getCachedPrompts(
         total: totalCount,
       };
     },
-    ["prompts", cacheKey],
-    { tags: ["prompts"] }
+    ["v2", "prompts", cacheKey],
+    { tags: ["prompts"], revalidate: 300 }
   )();
 }
 

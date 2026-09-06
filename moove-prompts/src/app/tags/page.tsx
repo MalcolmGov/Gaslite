@@ -30,8 +30,8 @@ const getTags = unstable_cache(
       },
     });
   },
-  ["tags-page"],
-  { tags: ["tags"] }
+  ["v2", "tags-page"],
+  { tags: ["tags"], revalidate: 300 }
 );
 
 export default async function TagsPage() {
