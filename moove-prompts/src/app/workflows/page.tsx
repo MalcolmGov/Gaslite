@@ -106,8 +106,8 @@ function getCachedWorkflows(
         total: totalCount,
       };
     },
-    ["workflows", cacheKey],
-    { tags: ["prompts", "connections"] }
+    ["v2", "workflows", cacheKey],
+    { tags: ["prompts", "connections"], revalidate: 300 }
   )();
 }
 

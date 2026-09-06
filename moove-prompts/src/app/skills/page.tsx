@@ -98,8 +98,8 @@ function getCachedSkills(
         total: totalCount,
       };
     },
-    ["skills", cacheKey],
-    { tags: ["prompts"] }
+    ["v2", "skills", cacheKey],
+    { tags: ["prompts"], revalidate: 300 }
   )();
 }
 
