@@ -2254,5 +2254,80 @@
       "postgresql": "PostgreSQL database",
       "npm": "npm"
     }
+  },
+  "moove": {
+    "hero": {
+      "eyebrow": "Moove Digital · Prompt Library",
+      "titleLead": "Prompts that",
+      "titleAccent": "moove work forward.",
+      "description": "A curated, searchable library of prompts, agent skills and workflows for ChatGPT, Claude, Gemini and the tools your team already uses. Find one, fill in the blanks, ship.",
+      "searchPlaceholder": "What do you need a prompt for?",
+      "searchButton": "Search",
+      "tryLabel": "Try:"
+    },
+    "stats": {
+      "prompts": "Prompts",
+      "skills": "Agent skills",
+      "categories": "Categories",
+      "tags": "Tags"
+    },
+    "categories": {
+      "eyebrow": "Browse",
+      "title": "Start with a category",
+      "all": "All categories",
+      "count": "{count, plural, one {# prompt} other {# prompts}}"
+    },
+    "latest": {
+      "eyebrow": "Fresh",
+      "title": "New in the library",
+      "all": "See everything new"
+    },
+    "loved": {
+      "eyebrow": "Proven",
+      "title": "Most loved",
+      "all": "Browse popular prompts"
+    },
+    "how": {
+      "eyebrow": "How it works",
+      "title": "From idea to output in three steps",
+      "description": "Every prompt is written to be reused. Variables are marked, examples are attached, and the copy button does the rest.",
+      "step1Title": "Find it",
+      "step1Body": "Search by task, browse a category, or follow a tag. Filters cover text, image, video, structured and skill prompts.",
+      "step2Title": "Make it yours",
+      "step2Body": "Fill in the highlighted variables inline, then copy the finished prompt or save it to your collection.",
+      "step3Title": "Run it anywhere",
+      "step3Body": "Paste into ChatGPT, Claude or Gemini, or connect the built-in MCP server so your coding assistant pulls prompts directly."
+    },
+    "skills": {
+      "eyebrow": "For agents",
+      "title": "Agent skills, ready to install",
+      "description": "Multi-file skills that give Claude Code, Cursor and other assistants specialised abilities.",
+      "all": "All skills"
+    },
+    "cta": {
+      "title": "Add your own prompts",
+      "description": "Keep the prompts your team relies on in one place. Publish them for everyone or keep them private to your account.",
+      "primary": "Create a prompt",
+      "secondary": "Browse the library",
+      "signIn": "Sign in"
+    },
+    "footer": {
+      "blurb": "The Moove Digital prompt library. Prompts, agent skills and workflows for the AI tools your team uses every day.",
+      "byline": "Built by Moove Digital",
+      "libraryHeading": "Library",
+      "prompts": "Prompts",
+      "skills": "Agent skills",
+      "categories": "Categories",
+      "tags": "Tags",
+      "promptmasters": "Promptmasters",
+      "contributeHeading": "Contribute",
+      "addPrompt": "Add a prompt",
+      "collection": "My collection",
+      "api": "API & MCP",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "rights": "All rights reserved.",
+      "licenceLead": "Community prompts are public domain under"
+    }
   }
 }

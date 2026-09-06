@@ -178,7 +178,7 @@ export function PromptCard({ prompt, showPinButton = false, isPinned = false }: 
 
   return (
     <div 
-      className={`group border rounded-[var(--radius)] overflow-hidden hover:border-foreground/20 transition-colors flex flex-col ${hasMediaBackground || isAudio ? "" : "p-4"}`}
+      className={`group border rounded-[var(--radius)] overflow-hidden bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 flex flex-col ${hasMediaBackground || isAudio ? "" : "p-4"}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
