@@ -52,7 +52,7 @@ function getConfig(client: Client, mode: Mode, mcpUrl: string, apiKey?: string |
       if (mode === "remote") {
         const config: Record<string, unknown> = {
           mcpServers: {
-            "prompts.chat": {
+            "moove-prompts": {
               url: mcpUrl,
               ...(apiKey && { headers: { "PROMPTS_API_KEY": apiKey } }),
             },
@@ -62,7 +62,7 @@ function getConfig(client: Client, mode: Mode, mcpUrl: string, apiKey?: string |
       } else {
         const config: Record<string, unknown> = {
           mcpServers: {
-            "prompts.chat": {
+            "moove-prompts": {
               command: "npx",
               args: ["-y", packageName],
               ...(localEnv && { env: localEnv }),
@@ -75,14 +75,14 @@ function getConfig(client: Client, mode: Mode, mcpUrl: string, apiKey?: string |
     case "claude-code":
       if (mode === "remote") {
         if (apiKey) {
-          return `claude mcp add --transport http prompts.chat ${mcpUrl} --header "PROMPTS_API_KEY: ${apiKey}"`;
+          return `claude mcp add --transport http moove-prompts ${mcpUrl} --header "PROMPTS_API_KEY: ${apiKey}"`;
         }
-        return `claude mcp add --transport http prompts.chat ${mcpUrl}`;
+        return `claude mcp add --transport http moove-prompts ${mcpUrl}`;
       } else {
         const envPrefix = localEnv 
           ? Object.entries(localEnv).map(([k, v]) => `${k}="${v}"`).join(" ") + " "
           : "";
-        return `${envPrefix}claude mcp add prompts.chat -- npx -y ${packageName}`;
+        return `${envPrefix}claude mcp add moove-prompts -- npx -y ${packageName}`;
       }
 
     case "vscode":
@@ -90,7 +90,7 @@ function getConfig(client: Client, mode: Mode, mcpUrl: string, apiKey?: string |
         const config: Record<string, unknown> = {
           mcp: {
             servers: {
-              "prompts.chat": {
+              "moove-prompts": {
                 type: "http",
                 url: mcpUrl,
                 ...(apiKey && { headers: { "PROMPTS_API_KEY": apiKey } }),
@@ -103,7 +103,7 @@ function getConfig(client: Client, mode: Mode, mcpUrl: string, apiKey?: string |
         const config: Record<string, unknown> = {
           mcp: {
             servers: {
-              "prompts.chat": {
+              "moove-prompts": {
                 type: "stdio",
                 command: "npx",
                 args: ["-y", packageName],
@@ -118,20 +118,20 @@ function getConfig(client: Client, mode: Mode, mcpUrl: string, apiKey?: string |
     case "codex":
       if (mode === "remote") {
         if (apiKey) {
-          return `[mcp_servers.prompts_chat]
+          return `[mcp_servers.moove_prompts]
 url = "${mcpUrl}"
 
-[mcp_servers.prompts_chat.headers]
+[mcp_servers.moove_prompts.headers]
 PROMPTS_API_KEY = "${apiKey}"`;
         }
-        return `[mcp_servers.prompts_chat]
+        return `[mcp_servers.moove_prompts]
 url = "${mcpUrl}"`;
       } else {
-        let config = `[mcp_servers.prompts_chat]
+        let config = `[mcp_servers.moove_prompts]
 command = "npx"
 args = ["-y", "${packageName}"]`;
         if (localEnv) {
-          config += "\n\n[mcp_servers.prompts_chat.env]";
+          config += "\n\n[mcp_servers.moove_prompts.env]";
           for (const [key, value] of Object.entries(localEnv)) {
             config += `\n${key} = "${value}"`;
           }
@@ -143,7 +143,7 @@ args = ["-y", "${packageName}"]`;
       if (mode === "remote") {
         const config: Record<string, unknown> = {
           mcpServers: {
-            "prompts.chat": {
+            "moove-prompts": {
               serverUrl: mcpUrl,
               ...(apiKey && { headers: { "PROMPTS_API_KEY": apiKey } }),
             },
@@ -153,7 +153,7 @@ args = ["-y", "${packageName}"]`;
       } else {
         const config: Record<string, unknown> = {
           mcpServers: {
-            "prompts.chat": {
+            "moove-prompts": {
               command: "npx",
               args: ["-y", packageName],
               ...(localEnv && { env: localEnv }),
@@ -166,14 +166,14 @@ args = ["-y", "${packageName}"]`;
     case "gemini":
       if (mode === "remote") {
         if (apiKey) {
-          return `PROMPTS_API_KEY=${apiKey} gemini mcp add prompts.chat --transport sse ${mcpUrl}`;
+          return `PROMPTS_API_KEY=${apiKey} gemini mcp add moove-prompts --transport sse ${mcpUrl}`;
         }
-        return `gemini mcp add prompts.chat --transport sse ${mcpUrl}`;
+        return `gemini mcp add moove-prompts --transport sse ${mcpUrl}`;
       } else {
         const envPrefix = localEnv 
           ? Object.entries(localEnv).map(([k, v]) => `${k}="${v}"`).join(" ") + " "
           : "";
-        return `${envPrefix}gemini mcp add prompts.chat -- npx -y ${packageName}`;
+        return `${envPrefix}gemini mcp add moove-prompts -- npx -y ${packageName}`;
       }
 
     default:
@@ -237,8 +237,10 @@ export function McpConfigTabs({ baseUrl, queryParams, className, mode, onModeCha
         ))}
       </div>
 
-      {/* Mode Toggle - only show if not hidden */}
-      {!hideModeToggle && (
+      {/* Mode Toggle - only show if not hidden. Local mode installs the upstream
+          npm package, which talks to prompts.chat, so it is only offered with
+          official branding. */}
+      {!hideModeToggle && showOfficialBranding && (
         <div className="flex gap-0.5">
           <button
             onClick={() => handleModeChange("remote")}
@@ -325,7 +327,7 @@ export function McpConfigTabs({ baseUrl, queryParams, className, mode, onModeCha
               const localEnv = buildLocalEnv(apiKey, queryParams);
               if (localEnv) cursorConfig.env = localEnv;
               const configBase64 = btoa(JSON.stringify(cursorConfig));
-              window.open(`cursor://anysphere.cursor-deeplink/mcp/install?name=${encodeURIComponent("prompts.chat")}&config=${configBase64}`, "_self");
+              window.open(`cursor://anysphere.cursor-deeplink/mcp/install?name=${encodeURIComponent("moove-prompts")}&config=${configBase64}`, "_self");
             }}
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
