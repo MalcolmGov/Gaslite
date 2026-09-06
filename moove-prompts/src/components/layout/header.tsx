@@ -143,8 +143,11 @@ export function Header({ authProvider = "credentials", allowRegistration = true 
   };
 
   return (
-    <header className="sticky top-[0px] z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className={`flex h-12 items-center gap-4 ${pathname === "/developers" ? "px-4" : "container"}`}>
+    <header className="sticky top-[0px] z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+      {branding.useCloneBranding && (
+        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary via-brand-accent to-primary" aria-hidden="true" />
+      )}
+      <div className={`flex h-14 items-center gap-4 ${pathname === "/developers" ? "px-4" : "container"}`}>
         {/* Mobile menu */}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild className="md:hidden">
@@ -347,7 +350,8 @@ export function Header({ authProvider = "credentials", allowRegistration = true 
                 />
               </>
             )}
-            <span className="font-semibold leading-none mt-[2px]">{branding.name}</span>
+            <span className="font-heading font-bold leading-none mt-[2px] tracking-tight">{branding.name}</span>
+            <span className="hidden lg:inline self-center ms-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">by Moove Digital</span>
           </Link>
         )}
 
@@ -357,13 +361,13 @@ export function Header({ authProvider = "credentials", allowRegistration = true 
             <>
               <Link
                 href="/collection"
-                className="px-3 py-1.5 rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+                className="px-3 py-1.5 rounded-full text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
               >
                 {t("nav.collection")}
               </Link>
               <Link
                 href="/feed"
-                className="px-3 py-1.5 rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+                className="px-3 py-1.5 rounded-full text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
               >
                 {t("nav.feed")}
               </Link>
@@ -371,44 +375,44 @@ export function Header({ authProvider = "credentials", allowRegistration = true 
           )}
           <Link
             href="/prompts"
-            className="px-3 py-1.5 rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+            className="px-3 py-1.5 rounded-full text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
           >
             {t("nav.prompts")}
           </Link>
           <Link
             href="/skills"
-            className="hidden xl:block px-3 py-1.5 rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+            className="hidden xl:block px-3 py-1.5 rounded-full text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
           >
             {t("nav.skills")}
           </Link>
           <Link
             href="/taste"
-            className="hidden xl:block px-3 py-1.5 rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+            className="hidden xl:block px-3 py-1.5 rounded-full text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
           >
             {t("nav.taste")}
           </Link>
           <Link
             href="/workflows"
-            className="hidden xl:block px-3 py-1.5 rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+            className="hidden xl:block px-3 py-1.5 rounded-full text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
           >
             {t("nav.workflows")}
           </Link>
           {/* Categories, Tags, Promptmasters - visible on lg+ screens */}
           <Link
             href="/categories"
-            className="hidden 2xl:block px-3 py-1.5 rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+            className="hidden 2xl:block px-3 py-1.5 rounded-full text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
           >
             {t("nav.categories")}
           </Link>
           <Link
             href="/tags"
-            className="hidden 2xl:block px-3 py-1.5 rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+            className="hidden 2xl:block px-3 py-1.5 rounded-full text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
           >
             {t("nav.tags")}
           </Link>
           <Link
             href="/promptmasters"
-            className="hidden 2xl:block px-3 py-1.5 rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+            className="hidden 2xl:block px-3 py-1.5 rounded-full text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
           >
             {t("nav.promptmasters")}
           </Link>

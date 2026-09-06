@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Noto_Sans_Arabic, Geist_Mono, Playfair_Display } from "next/font/google";
+import { DM_Sans, Noto_Sans_Arabic, JetBrains_Mono, Sora } from "next/font/google";
 import { headers } from "next/headers";
 import { getMessages, getLocale } from "next-intl/server";
 import { Providers } from "@/components/providers";
@@ -15,27 +15,28 @@ import { getConfig } from "@/lib/config";
 import { isRtlLocale } from "@/lib/i18n/config";
 import "./globals.css";
 
-const inter = Inter({
+// Moove Prompts type system: Sora for headings, DM Sans for body copy,
+// JetBrains Mono for prompt text and code.
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-body",
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-brand",
 });
 
 const notoSansArabic = Noto_Sans_Arabic({
   subsets: ["arabic"],
   variable: "--font-arabic",
   weight: ["400", "500", "600", "700"],
-});
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
-});
-
-const playfairDisplay = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -180,8 +181,8 @@ export default async function RootLayout({
   } as React.CSSProperties;
 
   const fontClasses = isRtl 
-    ? `${inter.variable} ${notoSansArabic.variable} ${geistMono.variable} ${playfairDisplay.variable} font-arabic` 
-    : `${inter.variable} ${geistMono.variable} ${playfairDisplay.variable} font-sans`;
+    ? `${dmSans.variable} ${notoSansArabic.variable} ${jetbrainsMono.variable} ${sora.variable} font-arabic` 
+    : `${dmSans.variable} ${jetbrainsMono.variable} ${sora.variable} font-sans`;
 
   return (
     <html lang={locale} dir={isRtl ? "rtl" : "ltr"} suppressHydrationWarning className={themeClasses} style={themeStyles}>

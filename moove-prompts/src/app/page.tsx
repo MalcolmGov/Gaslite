@@ -11,6 +11,7 @@ import { CliCommand } from "@/components/layout/cli-command";
 import { ExtensionLink } from "@/components/layout/extension-link";
 import { AnimatedText } from "@/components/layout/animated-text";
 import { SponsorLink, BecomeSponsorLink, BuiltWithLink } from "@/components/layout/sponsor-link";
+import { MooveHome } from "@/components/home/moove-home";
 
 function getOrdinalSuffix(n: number): string {
   const s = ["th", "st", "nd", "rd"];
@@ -30,6 +31,12 @@ export default async function HomePage() {
 
   const useCloneBranding = config.homepage?.useCloneBranding ?? false;
   const aiGenerationEnabled = config.features?.aiGeneration ?? false;
+
+  // Moove Prompts ships its own homepage; the upstream landing page below is
+  // kept for the non-clone configuration.
+  if (useCloneBranding) {
+    return <MooveHome isLoggedIn={!!session} showRegisterButton={showRegisterButton} isOAuth={isOAuth} />;
+  }
 
   // Fetch GitHub stars dynamically (with caching) - only if not using clone branding
   let githubStars = 139000; // fallback

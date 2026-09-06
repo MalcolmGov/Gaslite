@@ -7,9 +7,75 @@ import DeepWikiIcon from "@/../public/deepwiki.svg";
 import { useBranding } from "@/components/providers/branding-provider";
 import { analyticsExternal } from "@/lib/analytics";
 
+function MooveFooter() {
+  const branding = useBranding();
+  const t = useTranslations("moove.footer");
+  const year = new Date().getFullYear();
+
+  const library = [
+    { href: "/prompts", label: t("prompts") },
+    { href: "/skills", label: t("skills") },
+    { href: "/categories", label: t("categories") },
+    { href: "/tags", label: t("tags") },
+    { href: "/promptmasters", label: t("promptmasters") },
+  ];
+  const contribute = [
+    { href: "/prompts/new", label: t("addPrompt") },
+    { href: "/collection", label: t("collection") },
+    { href: "/docs/api", label: t("api") },
+    { href: "/privacy", label: t("privacy") },
+    { href: "/terms", label: t("terms") },
+  ];
+
+  return (
+    <footer className="mt-auto border-t bg-card/40">
+      <div className="container grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr]">
+        <div>
+          <Link href="/" className="inline-flex items-center gap-2">
+            <Image src={branding.logo} alt="" width={22} height={22} className="dark:hidden" />
+            <Image src={branding.logoDark || branding.logo} alt="" width={22} height={22} className="hidden dark:block" />
+            <span className="font-heading text-lg font-bold tracking-tight">{branding.name}</span>
+          </Link>
+          <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">{t("blurb")}</p>
+          <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("byline")}</p>
+        </div>
+        <nav aria-label={t("libraryHeading")}>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("libraryHeading")}</h2>
+          <ul className="mt-4 space-y-2 text-sm">
+            {library.map((l) => (
+              <li key={l.href}><Link href={l.href} className="hover:text-primary">{l.label}</Link></li>
+            ))}
+          </ul>
+        </nav>
+        <nav aria-label={t("contributeHeading")}>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("contributeHeading")}</h2>
+          <ul className="mt-4 space-y-2 text-sm">
+            {contribute.map((l) => (
+              <li key={l.href}><Link href={l.href} className="hover:text-primary">{l.label}</Link></li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+      <div className="border-t">
+        <div className="container flex flex-col gap-2 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <span>© {year} {branding.name}. {t("rights")}</span>
+          <span>
+            {t("licenceLead")}{" "}
+            <Link href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:underline">CC0 1.0</Link>
+          </span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 export function Footer() {
   const branding = useBranding();
   const t = useTranslations("footer");
+
+  if (branding.useCloneBranding) {
+    return <MooveFooter />;
+  }
 
   return (
     <footer className="border-t shrink-0">
