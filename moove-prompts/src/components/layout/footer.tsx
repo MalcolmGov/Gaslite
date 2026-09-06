@@ -37,7 +37,11 @@ function MooveFooter() {
             <span className="font-heading text-lg font-bold tracking-tight">{branding.name}</span>
           </Link>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">{t("blurb")}</p>
-          <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("byline")}</p>
+          <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            {t("byline")}
+            <span aria-hidden="true"> · </span>
+            <Link href="https://www.movedigital.africa" target="_blank" rel="noopener noreferrer" className="normal-case tracking-normal text-primary hover:underline">{t("website")}</Link>
+          </p>
         </div>
         <nav aria-label={t("libraryHeading")}>
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("libraryHeading")}</h2>

@@ -2257,10 +2257,10 @@
   },
   "moove": {
     "hero": {
-      "eyebrow": "Moove Digital · Prompt Library",
-      "titleLead": "Prompts that",
-      "titleAccent": "moove work forward.",
-      "description": "A curated, searchable library of prompts, agent skills and workflows for ChatGPT, Claude, Gemini and the tools your team already uses. Find one, fill in the blanks, ship.",
+      "eyebrow": "Moove Digital · Applied AI for Africa",
+      "titleLead": "The prompts behind",
+      "titleAccent": "Moove Digital's AI work.",
+      "description": "Moove Digital builds enterprise AI and fintech infrastructure for Africa. This is the working library our strategists and engineers use every day: prompts, agent skills and workflows, opened up so your team can search, adapt and ship faster.",
       "searchPlaceholder": "What do you need a prompt for?",
       "searchButton": "Search",
       "tryLabel": "Try:"
@@ -2305,15 +2305,15 @@
       "all": "All skills"
     },
     "cta": {
-      "title": "Add your own prompts",
-      "description": "Keep the prompts your team relies on in one place. Publish them for everyone or keep them private to your account.",
+      "title": "Bring your team's prompts into the library",
+      "description": "Keep the prompts your team relies on in one place, next to the ones Moove Digital uses on client work. Publish them for everyone or keep them private to your account.",
       "primary": "Create a prompt",
       "secondary": "Browse the library",
       "signIn": "Sign in"
     },
     "footer": {
-      "blurb": "The Moove Digital prompt library. Prompts, agent skills and workflows for the AI tools your team uses every day.",
-      "byline": "Built by Moove Digital",
+      "blurb": "Moove Digital designs enterprise AI and fintech infrastructure for Africa, from digital strategy and platform engineering to applied AI. Moove Prompts is our working library of prompts, agent skills and workflows, open to your team.",
+      "byline": "A Moove Digital product",
       "libraryHeading": "Library",
       "prompts": "Prompts",
       "skills": "Agent skills",
@@ -2327,7 +2327,8 @@
       "privacy": "Privacy",
       "terms": "Terms",
       "rights": "All rights reserved.",
-      "licenceLead": "Community prompts are public domain under"
+      "licenceLead": "Community prompts are public domain under",
+      "website": "movedigital.africa"
     }
   }
 }
