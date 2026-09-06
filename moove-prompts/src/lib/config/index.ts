@@ -96,6 +96,28 @@ let cachedConfig: PromptsConfig | null = null;
  *   PCHAT_LOCALES (comma-separated), PCHAT_DEFAULT_LOCALE
  *   PCHAT_FEATURE_* (true|false for each feature)
  */
+// OAuth providers only work when their credentials are present. Dropping the
+// unconfigured ones here keeps the login page and the NextAuth provider list in
+// sync, so "google" can sit in prompts.config.ts before the keys are added to
+// the environment without showing a button that errors.
+const OAUTH_PROVIDER_ENV: Record<string, string[]> = {
+  google: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
+  github: ["GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET"],
+  apple: ["AUTH_APPLE_ID", "AUTH_APPLE_SECRET"],
+  azure: ["AZURE_AD_CLIENT_ID", "AZURE_AD_CLIENT_SECRET"],
+};
+
+function onlyConfiguredProviders(ids: string[]): string[] {
+  return ids.filter((id) => {
+    const required = OAUTH_PROVIDER_ENV[id];
+    if (!required) return true;
+    const missing = required.filter((key) => !process.env[key]);
+    if (missing.length === 0) return true;
+    console.warn(`[config] Auth provider "${id}" skipped: missing ${missing.join(", ")}`);
+    return false;
+  });
+}
+
 function applyEnvOverrides(config: PromptsConfig): PromptsConfig {
   const env = process.env;
   
@@ -133,9 +155,11 @@ function applyEnvOverrides(config: PromptsConfig): PromptsConfig {
       },
     },
     auth: {
-      providers: env.PCHAT_AUTH_PROVIDERS 
-        ? envArray('PCHAT_AUTH_PROVIDERS', config.auth.providers || ['credentials'])
-        : config.auth.providers,
+      providers: onlyConfiguredProviders(
+        env.PCHAT_AUTH_PROVIDERS
+          ? envArray('PCHAT_AUTH_PROVIDERS', config.auth.providers || ['credentials'])
+          : config.auth.providers || (config.auth.provider ? [config.auth.provider] : ['credentials'])
+      ),
       allowRegistration: env.PCHAT_ALLOW_REGISTRATION !== undefined
         ? envBool('PCHAT_ALLOW_REGISTRATION', config.auth.allowRegistration)
         : config.auth.allowRegistration,

@@ -105,11 +105,15 @@ Logo files to replace with the official Moove Digital artwork:
 
 Any `PCHAT_*` environment variable (for example `PCHAT_NAME`, `PCHAT_COLOR`) overrides the config at runtime without a rebuild, which is handy for Docker deployments.
 
-### Enabling Google or GitHub sign-in
+### Google sign-in
 
-1. Create an OAuth app and add `https://<your-domain>/api/auth/callback/google` (or `/github`) as the callback URL.
-2. Put the client ID and secret in `.env` (`AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`, or `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET`).
-3. Add `"google"` or `"github"` to `auth.providers` in `prompts.config.ts`.
+Google is already listed in `auth.providers`; the button appears as soon as the credentials exist.
+
+1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials) create an **OAuth client ID** of type *Web application*.
+2. Add the authorised redirect URI `https://<your-domain>/api/auth/callback/google` (for local development also `http://localhost:3000/api/auth/callback/google`).
+3. Put the client ID and secret in Vercel (or `.env`) as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, then redeploy.
+
+GitHub works the same way with `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` and `"github"` in `auth.providers`. Providers whose credentials are missing are skipped with a warning in the server log.
 
 ### AI search and generation
 
