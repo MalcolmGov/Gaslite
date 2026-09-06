@@ -112,7 +112,7 @@ interface ServerOptions {
 function createServer(options: ServerOptions = {}) {
   const server = new McpServer(
     {
-      name: "prompts-chat",
+      name: "moove-prompts",
       version: "1.0.0",
     },
     {

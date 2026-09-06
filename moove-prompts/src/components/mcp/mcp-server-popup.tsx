@@ -160,17 +160,19 @@ export function McpServerPopup({
               >
                 Remote
               </button>
-              <button
-                onClick={() => setMcpMode("local")}
-                className={cn(
-                  "px-2 py-1 text-[11px] font-medium rounded transition-colors",
-                  mcpMode === "local"
-                    ? "bg-muted text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                Local
-              </button>
+              {showOfficialBranding && (
+                <button
+                  onClick={() => setMcpMode("local")}
+                  className={cn(
+                    "px-2 py-1 text-[11px] font-medium rounded transition-colors",
+                    mcpMode === "local"
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Local
+                </button>
+              )}
             </div>
           </div>
 
