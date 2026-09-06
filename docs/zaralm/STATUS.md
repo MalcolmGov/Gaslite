@@ -1,6 +1,6 @@
 # Protea / ZaraLM — status and how to resume
 
-_Last updated 2026-09-06 (afternoon). All twelve phase PRs are merged; the CPU dress rehearsal is in progress._
+_Last updated 2026-09-06 (night). All twelve phase PRs are merged; the CPU dress rehearsal has run end to end._
 
 ## Where the work lives
 
@@ -22,21 +22,30 @@ numbers below are the review history.
 | MalcolmGov/aria | #536 | `phase-9-observability` | 9 — per-call model fields, feedback, redaction, dashboard APIs |
 | MalcolmGov/aria | #537 | `phase-10-security-tests` | 10 — injection / unauthorised-tool / cross-tenant tests |
 
-Work after the merge continues on short-lived branches from `main`: `rehearsal-cpu` in protea carries the local
-Hugging Face provider and the CPU rehearsal (training config, adapter, reports).
+Work after the merge continues on short-lived branches from `main`: `rehearsal-cpu` in protea (draft PR #8)
+carries the local Hugging Face provider, the CPU rehearsal (training config, model card, registry entry,
+ZaraBench 0.1.1 and security reports), per-task progress lines for long runs, and a router fix (security-probe
+reports were being read as capability evidence). Not merged: waiting for the word.
 
 ## What has been measured
 
 ZaraBench 0.1.0 frontier baseline, Claude Sonnet 5 with Claude Opus 5 as judge (report committed under
 `evaluation/reports/zarabench-0.1.0/` on protea `phase-10-hardening`): ZaraScore 81%, strict 47%. The failures
-were mostly benchmark strictness, fixed in ZaraBench 0.1.1 (same branch). No Protea model exists yet; no GPU has
-been rented; no training has run. API spend so far: about USD 7.35.
+were mostly benchmark strictness, fixed in ZaraBench 0.1.1 (same branch). API spend so far: about USD 7.35.
+
+CPU dress rehearsal (protea `rehearsal-cpu`, no GPU, no API spend): `protea-agent-0.0.1` = Qwen2.5-0.5B-Instruct
++ LoRA r16, 150 steps on 400 real examples, 46 min of training on 4 CPU cores (train loss 0.754, eval loss 0.547,
+token accuracy 0.90). ZaraBench 0.1.1 without a judge: ZaraScore 51%, strict 26%, 206/206 tasks, no errors
+(five hours on CPU). Security probes: strict 38%, only the PII family clean. `protea release check` passes
+train and validate, fails zarabench and security, and `release promote --to candidate` is refused with both
+blockers, which is exactly the behaviour the pipeline is meant to have for a model this small. Every stage
+(train, card, registry, benchmark, probes, gate, promotion, capability matrix) ran end to end with no manual step.
 
 ## To resume
 
 1. Open https://claude.ai/code, pick the **Gaslite** repository in the sidebar, and continue the session named
    "ZaraLM v0 build specification review" — it has the full history — or start a new session on
-   **MalcolmGov/protea**, branch `phase-10-hardening`, and paste: "Read docs/README.md and the Gaslite
+   **MalcolmGov/protea**, branch `rehearsal-cpu`, and paste: "Read docs/README.md and the Gaslite
    docs/zaralm/STATUS.md, then continue from the next steps."
 2. Re-enable the hourly PR check-in routine ("Hourly check-in: protea PRs #1–#7, aria #534–#537, Gaslite #14")
    in the Routines list if you want the PRs babysat again; it was paused with the work.
@@ -54,7 +63,9 @@ been rented; no training has run. API spend so far: about USD 7.35.
    (`protea dataset build`), first QLoRA run with `protea train remote --confirm` (about USD 2 on an A100).
 4. Serve the adapter behind the facade, run ZaraBench + the security suite, `protea release check`, then
    canary via the routing policy (`protea release promote --to canary`).
-5. (done) All phase PRs merged 2026-09-06.
+5. Free, any time: say "merge" for protea PR #8 and Gaslite PR #22 once CI is green; refresh
+   `configs/economics/zara-v0.yaml` with real volumes; run `protea serve loadtest` against the mock facade.
+6. (done) All phase PRs merged 2026-09-06; CPU rehearsal completed the same night.
 
 ## Economics reminder
 
