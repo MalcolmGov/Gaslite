@@ -1,10 +1,11 @@
 # Protea / ZaraLM — status and how to resume
 
-_Last updated 2026-09-06. Paused by Malcolm after Phase 10 and the first frontier baseline._
+_Last updated 2026-09-06 (afternoon). All twelve phase PRs are merged; the CPU dress rehearsal is in progress._
 
 ## Where the work lives
 
-Nothing is deployed. Everything is in draft pull requests, all green on CI, none merged.
+Nothing is deployed. Every phase is merged to `main` in its repository (merge commits, stack order); the PR
+numbers below are the review history.
 
 | Repo | PR | Branch | Phase |
 |---|---|---|---|
@@ -21,8 +22,8 @@ Nothing is deployed. Everything is in draft pull requests, all green on CI, none
 | MalcolmGov/aria | #536 | `phase-9-observability` | 9 — per-call model fields, feedback, redaction, dashboard APIs |
 | MalcolmGov/aria | #537 | `phase-10-security-tests` | 10 — injection / unauthorised-tool / cross-tenant tests |
 
-The protea PRs are stacked: each targets the one below it. Merge from #1 upward (GitHub retargets the next
-one automatically), or ask for a single combined PR from `phase-10-hardening` to `main`. Same for aria from #534.
+Work after the merge continues on short-lived branches from `main`: `rehearsal-cpu` in protea carries the local
+Hugging Face provider and the CPU rehearsal (training config, adapter, reports).
 
 ## What has been measured
 
@@ -53,7 +54,7 @@ been rented; no training has run. API spend so far: about USD 7.35.
    (`protea dataset build`), first QLoRA run with `protea train remote --confirm` (about USD 2 on an A100).
 4. Serve the adapter behind the facade, run ZaraBench + the security suite, `protea release check`, then
    canary via the routing policy (`protea release promote --to canary`).
-5. Review and merge the PRs in stack order when you are happy with them.
+5. (done) All phase PRs merged 2026-09-06.
 
 ## Economics reminder
 
