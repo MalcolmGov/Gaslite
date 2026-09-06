@@ -4,40 +4,38 @@
 
 ## 1. Where ZaraLM lives
 
-**Decision:** build the model platform as a Python package `zaralm/` inside `MalcolmGov/aria`, with the GPU-bound pieces (training, inference server) packaged as separate containers that never run on the Hetzner VPS.
+**Decision (updated 2026-09-06, supersedes the first draft):** the model platform is its own repository, **`MalcolmGov/protea`**, and the product is named **Protea**. "ZaraLM" remains the name used in the original specification and in these Phase 0 documents. Zara-specific logic stays in `aria`. See `protea/docs/adr/ADR-001-repository-split.md`.
 
-Why `aria`, not `Gaslite` or a new repo:
+Why a separate repository, not `aria` or `Gaslite`:
 
-- `aria` is Python/FastAPI with pytest, a CI test gate, and a deploy pipeline; ZaraLM's data pipeline, validators, registries and router are Python and slot into the same conventions (`pytest.ini`, `requirements.txt`, `ci-tests.yml`).
-- The consumers of ZaraLM (`embed/`, `agent_platform/`, `llm/`, `agent_runtime/`) are all there. A separate repo would force cross-repo schema versioning on day one.
-- The catalogue (`data/agents/`) and registries the extractors read are there, so dataset provenance is `source_commit` of the same repo.
-- `Gaslite` is an unrelated product. These Phase 0 documents are committed here only because this is the designated branch; they should be copied to `aria/docs/zaralm/` when Phase 1 starts.
+- The owner intends to call the model from projects outside Zara (Gaslite, the CRM and others). A model platform embedded in the Zara monolith would force every consumer to import `aria`.
+- GPU tooling (torch, vLLM, training extras) must not enter the 4 GB VPS deploy pipeline of `aria`.
+- `Gaslite` is an unrelated product; these Phase 0 documents live here only because it is the designated working branch.
 
-Layout (adapting §6 of the brief to `aria` conventions):
+What goes where:
+
+| `protea` (project-agnostic) | `aria` (Zara-specific) |
+|---|---|
+| data pipeline, dataset + model registries, experiment tracking | Agent Compiler pipeline and validation gate |
+| evaluation framework (ZaraBench is the Zara suite inside it) | AgentSpec v3 schema and converters |
+| training (SFT / LoRA / QLoRA), remote GPU adapters | tool, skill and connector registries; context builder |
+| serving container (vLLM), `ModelProvider` interface + adapters, client SDK | requirements/completeness engine, Copilot and voice wiring |
+| router, fallback, confidence engine, model cards | Zara facade endpoints (`/v1/agent/*`, `/v1/workflow/*`, `/v1/tools/select`) |
+
+Datasets reference `aria` and `miai-agents` as pinned sources (repository + commit); the catalogue is never a runtime dependency of Protea. `aria` pins the `protea` package version.
+
+Layout of `protea` (adapting §6 of the brief):
 
 ```
-aria/
-├── zaralm/                        # importable package, pure Python, CPU-testable
-│   ├── __init__.py
-│   ├── cli.py                     # `zaralm …` (Typer; the repo already uses argparse/Typer-style tools)
-│   ├── config/                    # pydantic-settings; YAML loaders for models/, training/, inference/, evaluation/
-│   ├── schemas/                   # canonical AgentSpec v3 (Pydantic) + JSON Schema export, dataset example schema
-│   ├── providers/                 # ModelProvider interface + adapters (zaralm, anthropic, openai, google, azure, openai_compatible, mock)
-│   ├── router/                    # task classifier, complexity, policy, capability matrix, fallback, confidence
-│   ├── compiler/                  # Agent Compiler pipeline (wraps agent_platform.compiler + embed registries)
-│   ├── context/                   # Model Context Builder (relevant tools/skills/connectors/schemas only)
-│   ├── data_pipeline/             # discovery, extractors, classifiers, secrets, pii, dedup, normalization, synthetic, validation, exporters
-│   ├── registry/                  # dataset registry, model registry, experiment tracking (MLflow client or file-backed)
-│   ├── evaluation/                # ZaraBench: tasks, evaluators, scorers, reports, golden-set guard
-│   ├── training/                  # SFT/LoRA/QLoRA trainers (TRL + PEFT), callbacks, checkpoint/resume, remote job adapters
-│   ├── inference/                 # vLLM launch config, structured-output helpers, health, OpenAI-compatible client
-│   ├── observability/             # metrics/tracing hooks, privacy-safe logging, feedback linkage
-│   └── security/                  # policies (tool risk, tenant isolation), scanning rules, audit
-├── zaralm_data/                   # versioned datasets + manifests + cards (git-lfs or object storage; golden/ is read-only)
-├── configs/zaralm/                # YAML: models/, training/, inference/, evaluation/
-├── deployment/zaralm/             # Dockerfile.train, Dockerfile.infer (vLLM), compose.gpu.yml, runpod/, azure/ (Bicep), k8s/
-├── docs/zaralm/                   # README, architecture, adr/, model-selection, data-governance, …
-└── tests/zaralm/                  # unit + integration (mock provider) + security tests
+protea/
+├── README.md · pyproject.toml · .env.example · LICENSE (proprietary)
+├── protea/                        # package: cli, doctor (implemented); schemas, providers, router, data_pipeline,
+│                                  #   registry, evaluation, training, inference, observability, security (planned)
+├── configs/{models,training,inference,evaluation}/
+├── protea_data/                   # versioned datasets + manifests + cards (object storage; golden/ read-only)
+├── deployment/                    # Dockerfile.train, Dockerfile.infer, compose.gpu.yml, runpod/, azure/ (generated only)
+├── docs/                          # Phase 0 documents, adr/, planned reference docs
+└── tests/                         # everything runs without a GPU
 ```
 
 ## 2. Integration points (reuse, do not rewrite)
@@ -145,5 +143,5 @@ Adapters: `ZaraLMProvider` (vLLM `/v1/chat/completions` with `response_format`/g
 | ADR-003 dataset format | JSONL chat-messages with tool-call blocks (OpenAI function-call shape) + per-example metadata envelope |
 | ADR-004 model routing | Policy table + capability matrix from ZaraBench, canary by tenant hash |
 | ADR-005 model registry | File/JSON registry versioned in git + MLflow model registry when available |
-| ADR-006 ZaraLM location | `aria/zaralm/` package, GPU containers separate |
+| ADR-006 ZaraLM location | superseded — recorded as `protea` ADR-001: own repository, Zara-specific logic stays in `aria` |
 | ADR-007 AgentSpec v3 | Pydantic v3 schema with converters to package v1, AgentSpec v2 and 17-facet spec |

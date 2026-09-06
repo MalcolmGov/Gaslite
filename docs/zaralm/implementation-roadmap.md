@@ -68,9 +68,9 @@ Indicative v0 experiment cost (estimates, to be confirmed by `zaralm train remot
 
 Each phase begins with inspect → findings → ADR → file list → incremental implementation → tests → docs → summary (§72).
 
-### Phase 1 — Foundation (`aria`)
-1. Port `docs/zaralm/*` from this branch; add `docs/zaralm/README.md`, `adr/ADR-006-zaralm-location.md`, `adr/ADR-007-agentspec-v3.md`.
-2. `zaralm/` package skeleton, `pyproject.toml` extras (`[zaralm]`, `[zaralm-train]`, `[zaralm-serve]`) so the VPS image does not pull torch.
+### Phase 1 — Foundation (`protea` repository; Zara-side pieces in `aria`)
+1. Port `docs/zaralm/*` to `protea/docs/` (done at repository creation), ADR-001 repository split (done), `adr/ADR-002-agentspec-v3.md` in `aria`.
+2. `protea` package skeleton with `pyproject.toml` extras (`[pipeline]`, `[eval]`, `[train]`, `[serve]`) so the Zara VPS image never pulls torch (skeleton and `protea doctor` done at repository creation).
 3. `zaralm/schemas/agentspec_v3.py` + converters + JSON Schema export; tests round-tripping 504 packages, 15 flagship specs and the 17-facet spec.
 4. `zaralm/providers/` interface, `MockProvider`, `AnthropicProvider`, `OpenAIProvider`, `GoogleProvider`, `AzureOpenAIProvider`, `OpenAICompatibleProvider`, `ZaraLMProvider` (client only); usage logging via `log_api_usage` with `model_version`.
 5. `zaralm/cli.py`: `zaralm doctor`, `dataset build|validate|stats`, `train --dry-run`, `evaluate`, `serve` (stubs return `planned` explicitly, no fake results).

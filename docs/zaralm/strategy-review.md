@@ -121,7 +121,7 @@ Explicitly **out** of v0: multi-cloud adapters, canary automation, dashboards be
 
 ## 6. Decisions requested
 
-1. Approve `aria` as the home of `zaralm/` (or name a sibling repository).
+1. ~~Approve `aria` as the home of `zaralm/`~~ **Decided 2026-09-06:** separate repository `MalcolmGov/protea`, product name **Protea**; Zara-specific logic stays in `aria` (ADR-001 in `protea`).
 2. Choose the synthetic-data teacher policy: open-weight teachers by default (recommended), or legal review for frontier outputs.
 3. Confirm the reframing: compiler and router ship first on frontier models; ZaraLM Runtime is evaluated alongside ZaraLM Agent as the first economic target.
 4. Approve fixing the two Gaslite secret findings in a separate PR now.
