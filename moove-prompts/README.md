@@ -1,7 +1,7 @@
 <h1 align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="public/logo-dark.svg">
-    <img height="60" alt="Moove Prompts" src="public/logo.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="public/wordmark-dark.svg">
+    <img height="60" alt="Moove Prompts" src="public/wordmark.svg">
   </picture>
 </h1>
 
@@ -96,7 +96,8 @@ Everything brand-related lives in one file: [`prompts.config.ts`](prompts.config
 
 Logo files to replace with the official Moove Digital artwork:
 
-- `public/logo.svg` and `public/logo-dark.svg` (header and homepage watermark)
+- `public/logo.svg` and `public/logo-dark.svg` (square mark used in the header, footer and homepage watermark)
+- `public/wordmark.svg` and `public/wordmark-dark.svg` (full wordmark for documents and marketing)
 - `public/favicon/*` (browser and home-screen icons)
 - `public/og.png` (social share image, 1200x630)
 
