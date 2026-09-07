@@ -1,6 +1,6 @@
 # Protea / ZaraLM — status and how to resume
 
-_Last updated 2026-09-06 (night). All twelve phase PRs are merged; the CPU dress rehearsal has run end to end._
+_Last updated 2026-09-07. All twelve phase PRs are merged; the CPU dress rehearsal has run end to end and the tool-permission guard is in._
 
 ## Where the work lives
 
@@ -40,6 +40,15 @@ token accuracy 0.90). ZaraBench 0.1.1 without a judge: ZaraScore 51%, strict 26%
 train and validate, fails zarabench and security, and `release promote --to candidate` is refused with both
 blockers, which is exactly the behaviour the pipeline is meant to have for a model this small. Every stage
 (train, card, registry, benchmark, probes, gate, promotion, capability matrix) ran end to end with no manual step.
+
+Follow-ups on the same branch (2026-09-07, still free): the untrained base Qwen2.5-0.5B scored 42.6% on an even
+30-task sample where the trained adapter scores 45.9% on the same tasks (structured output +48 points, business
+reasoning +28, agent generation −52 because long specs hit the 1,500-token cap used for the CPU run). A
+tool-permission guard now wraps every model the facade serves (`tool_policy` in `configs/serve/facade.yaml`):
+denied tool patterns, amount limits that turn into escalations, confidential system-prompt lines that never come
+back out. Behind it the same adapter's security strict score goes from 38% to 78%; what remains (injection via
+tool results, cross-tenant data inside tool results) is the model's and aria's tenant scoping to fix. CPU
+benchmark runs are about 2.5× faster after the thread fix; `evaluate run --per-category N` gives a quick read.
 
 ## To resume
 
