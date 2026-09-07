@@ -43,12 +43,50 @@ blockers, which is exactly the behaviour the pipeline is meant to have for a mod
 
 Follow-ups on the same branch (2026-09-07, still free): the untrained base Qwen2.5-0.5B scored 42.6% on an even
 30-task sample where the trained adapter scores 45.9% on the same tasks (structured output +48 points, business
-reasoning +28, agent generation −52 because long specs hit the 1,500-token cap used for the CPU run). A
+reasoning +28, agent generation −52; the −52 was first blamed on the 1,500-token output cap, which the second
+rehearsal below disproved). A
 tool-permission guard now wraps every model the facade serves (`tool_policy` in `configs/serve/facade.yaml`):
 denied tool patterns, amount limits that turn into escalations, confidential system-prompt lines that never come
 back out. Behind it the same adapter's security strict score goes from 38% to 78%; what remains (injection via
 tool results, cross-tenant data inside tool results) is the model's and aria's tenant scoping to fix. CPU
 benchmark runs are about 2.5× faster after the thread fix; `evaluate run --per-category N` gives a quick read.
+
+### Second CPU rehearsal — sequence-length fix (2026-09-07, free)
+
+`configs/training/rehearsal-cpu-4k.yaml`: same Qwen2.5-0.5B base, but training sequence length raised from 1,024
+to 4,096 tokens (120 steps). Scored on the identical 30-task sample as the base model and the first adapter:
+
+| Category | Base | 1k-seq | 4k-seq |
+|---|---|---|---|
+| structured_output | 38% | 86% | 90% |
+| connector_selection | 28% | 38% | 65% |
+| tool_calling | 39% | 33% | 56% |
+| workflow_generation | 38% | 38% | 62% |
+| hallucination | 33% | 33% | 50% |
+| failure_recovery | 22% | 17% | 39% |
+| agent_generation | 52% | 0% | 0% |
+| business_reasoning | 50% | 78% | 44% |
+| instruction_following | 72% | 72% | 56% |
+| safety | 53% | 64% | 44% |
+| **mean of categories** | **42.6%** | **45.9%** | **50.7%** |
+
+Two findings, both useful for the real 8B run:
+
+1. **Longer training context helps broadly.** Connector selection, tool calling, workflow generation and
+   hallucination all rose once the model was trained on 4,096-token windows instead of 1,024. Mean of categories
+   climbed 42.6 → 45.9 → 50.7.
+2. **agent_generation stays at 0%, and the cause is not the output cap.** Two of the three agent-generation
+   answers were invalid JSON without reaching the 4,000-token output cap (2,559 and 3,969 tokens). The real cause
+   is on the training side: agent-generation targets run ~3,900 tokens, longer than even the 4,096-token training
+   window, so the model never sees a spec's closing braces and cannot learn to finish one — and a 0.5B model is
+   near its ceiling emitting multi-thousand-token valid JSON regardless. **This is already handled for the real
+   run:** `configs/training/protea-agent-8b-qlora.yaml` trains at 6,144 sequence length, which fits the full
+   targets. So the one category the CPU rehearsals fail is the one the 8B config is configured to fix.
+
+Caveats: three tasks per category, so per-category numbers are noisy (business reasoning, instruction following
+and safety regressed here, partly noise and partly 120 steps vs the first run's 150). The reliable signal is the
+category mean. Both adapters live under protea `checkpoints/` only; neither is committed or registered, and there
+was no spend.
 
 ## To resume
 
