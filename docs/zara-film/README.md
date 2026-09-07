@@ -9,7 +9,7 @@ prompts, job IDs, the assembly pipeline, and the credit ledger.
 | Asset | Where |
 |---|---|
 | 1080p master (H.264, AAC, 60.0 s, 24 fps) | Higgsfield media (see `deliverables.md`) |
-| 4K master (Topaz upscale to 3840×2160) | Higgsfield media (see `deliverables.md`) |
+| 4K master (Topaz upscale to 3840×2160, HEVC) | Higgsfield media (see `deliverables.md`) |
 | Contact sheet of the cut | `deliverables.md` |
 | Shot prompts (final) | `shot-prompts.md` / `shot-prompts.json` |
 | Assembly pipeline | `pipeline/` (`assemble.sh`, `build.py`, `endcard.py`, `score.sh`, `clips.env`) |
@@ -52,7 +52,10 @@ the chain in ffmpeg 5.1 (everything after it renders black) — hard cuts must b
 | 5 Connectors | 30.17 | 10.04 s | 0.5 s dissolve | L5 @ 32.0 |
 | 6 Execution | 40.21 | 7.04 s | cut | L6 @ 40.6 |
 | 7 Resolve | 46.75 | 6.04 s | 0.5 s dissolve | L7 @ 47.4 |
-| End card | 52.19 | to 60.0 | 0.6 s fade | tagline @ 53.8 |
+| End card | 52.19 | to 60.0 | 0.6 s fade to #060B14 | tagline @ 53.8 |
+
+Measured on the rendered master: 60.000 s, 1440 frames, integrated loudness −16.5 LUFS, true peak −4.1 dBFS, the only
+black interval is the 0.33 s beat at 52.8–53.1 s before the wordmark fades in.
 
 ## Credits ledger
 

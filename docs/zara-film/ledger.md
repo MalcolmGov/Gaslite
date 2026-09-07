@@ -19,6 +19,9 @@ Account: Plus plan. Opening balance **1198**.
 | Shot 3 retake, 8 s (image-to-video, kept) | cinematic_studio_3_0 | 80 |
 | **Subtotal before final 4K upscale** | | **~644** |
 | Final 60 s Topaz 4K upscale | topaz_video | 60 |
+| **Total** | | **~704** |
+
+Closing balance ≈ **494** credits.
 
 Pricing learned: Cinema Studio 3.0 = 10 cr/s at 1080p, 5 cr/s at 720p, 24 cr/s at native 4K (a native-4K film
 would have been ~1,344 credits, above the balance, hence the upscale route). Topaz 2160p = 1 cr/s.

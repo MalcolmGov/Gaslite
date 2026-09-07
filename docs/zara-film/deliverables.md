@@ -6,7 +6,8 @@ library copies; treat the Higgsfield library as the durable source.
 | Asset | Link / ID |
 |---|---|
 | **1080p master** (1920×1080, 24 fps, H.264 CRF 15, AAC 192k, 60.0 s, −16.5 LUFS) | https://d2ol7oe51mr4n9.cloudfront.net/user_3GrMsDfiBxcEyh4GFU0dUj59sqy/4b3b4972-024f-4ff8-a6c6-cc642e56a675.mp4 (media `4b3b4972-024f-4ff8-a6c6-cc642e56a675`) |
-| **4K master** (Topaz 2160p upscale of the 1080p master) | job `66a7f414-1cae-4240-bd37-a5a08633f1ae` — URL in `README.md` once complete |
+| **4K master** (Topaz 2160p upscale of the 1080p master) | https://d8j0ntlcm91z4.cloudfront.net/user_3GrMsDfiBxcEyh4GFU0dUj59sqy/hf_20260907_173636_66a7f414-1cae-4240-bd37-a5a08633f1ae.mp4 (job `66a7f414-1cae-4240-bd37-a5a08633f1ae`, 3840×2160 HEVC) |
+| Review copy (1080p, 20 MB) | https://d2ol7oe51mr4n9.cloudfront.net/user_3GrMsDfiBxcEyh4GFU0dUj59sqy/4be89be2-3e49-4d2b-ae65-6811be70268a.mp4 |
 | Cut sheet (16 frames) | https://d2ol7oe51mr4n9.cloudfront.net/user_3GrMsDfiBxcEyh4GFU0dUj59sqy/e991fb2e-3936-409b-b47f-9e2aef3a4477.jpg |
 | End card layers | rendered by `pipeline/endcard.py` (Montserrat ExtraBold wordmark, Montserrat Medium tagline) |
 
