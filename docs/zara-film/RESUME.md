@@ -5,7 +5,7 @@
 **v1 is delivered** (60 s, 1080p + 4K, Callan VO). Links in `deliverables.md`. Draft PR #24 carries this folder.
 
 **v2 rewrites the film to name the offering** after feedback that v1 never said what Zara *is*. Everything for v2 is
-generated; the final assembly was rendering when we paused (it uploads itself to the Higgsfield library on completion).
+generated; the final assembly rendered and uploaded before the pause.
 
 ### v2 script (Callan; founder line by Vesper)
 1. Every business runs on a thousand decisions a day. Most of them still wait for you — after hours, by hand, at a cost.
@@ -47,7 +47,7 @@ Rejected: first L6 take (`e17655c8…`, "in compliance" was hearable as "incompl
 - 1080p master → media `6df6a06e-5fb7-47e5-b5d7-64811f969bb9` (https://d2ol7oe51mr4n9.cloudfront.net/user_3GrMsDfiBxcEyh4GFU0dUj59sqy/6df6a06e-5fb7-47e5-b5d7-64811f969bb9.mp4)
 - review copy → media `23a2f190-e2c3-4915-82ba-7ff9b62aa143`
 - 20-frame cut sheet → media `d3f6a89d-f703-4ad1-b6c8-e8fde28d50ba`
-If those were confirmed before the pause, they show in the library; if not, run `media_confirm` (type video / image) first.
+All three were uploaded and **confirmed** before the pause (they are in the Higgsfield library). Globe review sheet: media `59d0bd86-0779-4942-bf56-75c5ca513ec9`. Measured: 81.54 s, 1920×1080, 24 fps, −16.6 LUFS, peak −4.1 dBFS; the only black interval is the intended 0.42 s beat at 73.75 s before the end card.
 
 ## To finish v2 tomorrow
 1. Review the v2 cut sheet + review copy (links above). Check the four titles, the library beat, the globe, the end card.
