@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</title>
+<style>
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;src:url(data:font/woff2;base64,{{POPPINS400}}) format('woff2')}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:500;src:url(data:font/woff2;base64,{{POPPINS500}}) format('woff2')}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:600;src:url(data:font/woff2;base64,{{POPPINS600}}) format('woff2')}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:700;src:url(data:font/woff2;base64,{{POPPINS700}}) format('woff2')}
+@font-face{font-family:'Alexandria';font-style:normal;font-weight:500;src:url(data:font/woff2;base64,{{ALEXANDRIA}}) format('woff2')}
+
+:root{
+  --navy:#003f88; --blue:#00509d; --bright:#2066c8; --indigo:#09016d;
+  --ink:#28292a; --grey:#5c5f63; --line:#dfe4ea; --pale:#f4f6f9; --paler:#fafbfc;
+  --gold:#b98d2f; --white:#fff; --ok:#1e7b4f; --warn:#b3551d;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:'Poppins',-apple-system,'Segoe UI',Arial,sans-serif;color:var(--ink);font-size:9.1pt;line-height:1.55;background:#fff}
+
+/* ---------- page scaffolding ---------- */
+@page{size:A4;margin:0}
+.page{width:210mm;min-height:297mm;padding:20mm 18mm 22mm;position:relative;page-break-after:always;overflow:hidden;background:#fff}
+.page:last-child{page-break-after:auto}
+
+/* ---------- cover ---------- */
+.cover{background:linear-gradient(152deg,#020252 0%,#09016d 34%,#003f88 72%,#00509d 100%);color:#fff;display:flex;flex-direction:column;padding:22mm 20mm}
+.cover .rule{height:3px;width:64mm;background:linear-gradient(90deg,var(--gold),rgba(185,141,47,.15));margin:8mm 0 10mm}
+.cover .logocard{background:#fff;border-radius:14px;width:44mm;height:44mm;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.cover .logocard img{width:36mm;height:36mm}
+.cover h1{font-family:'Alexandria','Poppins',sans-serif;font-weight:500;font-size:29pt;line-height:1.22;margin-top:12mm;letter-spacing:.2px}
+.cover .tag{font-size:13.5pt;font-weight:300;color:#cfe0f5;margin-top:6mm;letter-spacing:.4px}
+.cover .tag b{color:#fff;font-weight:600}
+.cover .meta{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(255,255,255,.25);padding-top:6mm}
+.cover .meta .k{font-size:7pt;text-transform:uppercase;letter-spacing:1.6px;color:#9db9dd;margin-bottom:1mm}
+.cover .meta .v{font-size:10pt;font-weight:500}
+.cover .badge{display:inline-block;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:1.2mm 5mm;font-size:7.5pt;letter-spacing:2.4px;text-transform:uppercase;color:#dbe7f7;margin-bottom:9mm;align-self:flex-start}
+
+/* ---------- running elements ---------- */
+.kicker{font-size:7.2pt;letter-spacing:2.6px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:2.5mm}
+h2.sec{font-family:'Alexandria','Poppins',sans-serif;font-weight:500;font-size:16.5pt;color:var(--navy);line-height:1.25;margin-bottom:1.6mm}
+h2.sec .num{color:var(--gold);font-family:'Poppins';font-weight:300;margin-right:3mm}
+.lede{font-size:10pt;color:var(--grey);font-weight:300;line-height:1.55;margin:2mm 0 4.5mm;max-width:165mm}
+h3{font-size:10.6pt;font-weight:600;color:var(--blue);margin:4.5mm 0 1.8mm}
+h4{font-size:9.8pt;font-weight:600;color:var(--ink);margin:4mm 0 1.5mm}
+p{margin-bottom:2.4mm}
+ul,ol{margin:0 0 3mm 5mm}
+li{margin-bottom:1.2mm}
+b,strong{font-weight:600}
+.small{font-size:8.2pt;color:var(--grey)}
+.src{font-size:7.4pt;color:#8a8f96;margin-top:2mm;line-height:1.5}
+.hr{height:1px;background:var(--line);margin:5mm 0}
+
+/* ---------- components ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:3.5mm;margin:4mm 0}
+.stats.three{grid-template-columns:repeat(3,1fr)}
+.stat{background:var(--pale);border-top:3px solid var(--blue);border-radius:0 0 8px 8px;padding:3.2mm 3.5mm 3mm}
+.stat .n{font-size:14.5pt;font-weight:700;color:var(--navy);line-height:1.1;letter-spacing:-.3px}
+.stat .l{font-size:7.6pt;color:var(--grey);margin-top:1.5mm;line-height:1.45}
+.stat.gold{border-top-color:var(--gold)}
+.callout{background:linear-gradient(135deg,#0a1f4d,#003f88);color:#eaf1fa;border-radius:10px;padding:4mm 5mm;margin:4mm 0}
+.callout h4{color:#fff;margin-top:0}
+.callout p{color:#d5e2f3;margin-bottom:0}
+.note{background:#fdf7ea;border-left:3px solid var(--gold);border-radius:0 6px 6px 0;padding:3mm 4.5mm;margin:3.2mm 0;font-size:8.8pt}
+.note b{color:#7c5c15}
+.panel{background:var(--paler);border:1px solid var(--line);border-radius:10px;padding:3.8mm 4.5mm;margin:2.8mm 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:3.8mm;margin:3.2mm 0}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3.4mm;margin:3.2mm 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:3.4mm 4mm}
+.card h4{margin-top:0;color:var(--navy)}
+.card .chip{display:inline-block;background:var(--pale);color:var(--blue);border-radius:999px;font-size:7pt;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:.8mm 3mm;margin-bottom:2mm}
+.card p,.card li{font-size:8.5pt}
+.card ul{margin-left:4mm;margin-bottom:0}
+
+table{width:100%;border-collapse:collapse;margin:3mm 0;font-size:8.4pt}
+th{background:var(--navy);color:#fff;text-align:left;font-weight:600;font-size:8pt;letter-spacing:.4px;padding:2.1mm 2.8mm;vertical-align:bottom}
+td{border-bottom:1px solid var(--line);padding:2mm 2.8mm;vertical-align:top}
+tr:nth-child(even) td{background:var(--paler)}
+td.r,th.r{text-align:right;white-space:nowrap}
+.tot td{background:var(--pale)!important;font-weight:600;border-top:2px solid var(--navy);color:var(--navy)}
+.tag-a,.tag-b,.tag-c{display:inline-block;font-weight:700;font-size:8pt;border-radius:5px;padding:.5mm 2.4mm;color:#fff}
+.tag-a{background:var(--ok)}.tag-b{background:var(--bright)}.tag-c{background:var(--warn)}
+.pill{display:inline-block;background:var(--pale);border:1px solid var(--line);border-radius:999px;padding:.9mm 3.4mm;font-size:8.2pt;margin:0 1.2mm 1.6mm 0;color:var(--ink)}
+.ok{color:var(--ok);font-weight:600}.no{color:#b3272d;font-weight:600}
+
+/* layered architecture diagram */
+.layer{border-radius:9px;padding:2.8mm 4mm;margin-bottom:2.2mm}
+.layer .lt{font-size:7.4pt;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:1.6mm}
+.layer .items{display:flex;flex-wrap:wrap;gap:1.6mm}
+.layer .it{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:6px;padding:.8mm 2.4mm;font-size:7.6pt}
+.l-ch{background:linear-gradient(90deg,#09016d,#1b2a8a)}.l-ch .lt{color:#aebcf5}
+.l-ai{background:linear-gradient(90deg,#003f88,#0d5bb0)}.l-ai .lt{color:#9cc4ef}
+.l-core{background:linear-gradient(90deg,#00509d,#2066c8)}.l-core .lt{color:#bcd9f7}
+.l-int{background:linear-gradient(90deg,#33547e,#5a7ba6)}.l-int .lt{color:#c9d8ec}
+.l-x{background:var(--pale);border:1px dashed #b9c4d2}.l-x .lt{color:var(--grey)}.l-x .it{background:#fff;border:1px solid var(--line);color:var(--ink)}
+
+/* timeline */
+.phase{display:flex;gap:4mm;margin-bottom:3mm}
+.phase .ph{flex:0 0 30mm;background:var(--navy);color:#fff;border-radius:8px;padding:3mm;text-align:center}
+.phase .ph .pn{font-size:7pt;letter-spacing:1.6px;text-transform:uppercase;color:#9cc4ef}
+.phase .ph .pt{font-weight:600;font-size:9.5pt;line-height:1.3;margin-top:.8mm}
+.phase .ph .pd{font-size:7.6pt;color:#cfe0f5;margin-top:1mm}
+.phase .pb{flex:1;border-left:2px solid var(--line);padding-left:4mm}
+.phase .pb p{font-size:8.6pt;margin-bottom:1.2mm}
+
+/* TOC */
+.toc{columns:2;column-gap:10mm;margin-top:6mm}
+.toc .ti{display:flex;justify-content:flex-start;align-items:baseline;gap:2.5mm;margin-bottom:2.6mm;break-inside:avoid;font-size:9.3pt}
+.toc .ti .n{color:var(--gold);font-weight:600;flex:0 0 7mm}
+.toc .ti .t{font-weight:500}
+.toc .grp{font-size:7.4pt;letter-spacing:2px;text-transform:uppercase;color:var(--grey);margin:4mm 0 2.5mm;break-inside:avoid}
+
+.footline{position:absolute;bottom:9mm;left:18mm;right:18mm;display:flex;justify-content:space-between;font-size:6.9pt;color:#9aa1a9;border-top:1px solid var(--line);padding-top:2mm}
+</style>
+</head>
+<body>
+
+<!-- ================= COVER ================= -->
+<div class="page cover">
+  <div class="badge">Strategy &amp; Implementation Proposal · Confidential</div>
+  <div class="logocard"><img src="data:image/png;base64,{{LOGO}}" alt="Marlin Moodley"></div>
+  <h1>Marlin Moodley<br>Digital Insurance Platform</h1>
+  <div class="rule"></div>
+  <div class="tag">“One conversation. <b>Every policy. Every channel.</b>”</div>
+  <div class="tag" style="font-size:9.5pt;margin-top:4mm;max-width:150mm">From emailing insurers and waiting for quotes, to operating an intelligent, compliant, AI-enabled insurance advisory and quotation platform across web, app and WhatsApp.</div>
+  <div class="meta">
+    <div><div class="k">Prepared for</div><div class="v">Marlin Moodley — Senior Executive Financial Advisor<br><span style="font-size:8pt;font-weight:300;color:#cfe0f5">In partnership with Masthead Financial Planning (Pty) Ltd, FSP 43435</span></div></div>
+    <div style="text-align:right"><div class="k">Prepared by</div><div class="v">Move Digital</div><div style="font-size:8pt;color:#cfe0f5;margin-top:1mm">September 2026 · Version 1.6</div></div>
+  </div>
+</div>
+
+<!-- ================= TOC ================= -->
+<div class="page">
+  <div class="kicker">Contents</div>
+  <h2 class="sec">What’s inside</h2>
+  <p class="lede">A complete strategy: where Marlin Moodley is today, the market opening, the platform and AI architecture we recommend, the compliance framework it must live inside, and a costed, phased implementation plan.</p>
+  <div class="toc">
+    <div class="grp">Strategy</div>
+    <div class="ti"><span class="n">01</span><span class="t">Executive summary</span></div>
+    <div class="ti"><span class="n">02</span><span class="t">Current-state assessment</span></div>
+    <div class="ti"><span class="n">03</span><span class="t">Market opportunity</span></div>
+    <div class="ti"><span class="n">04</span><span class="t">Strategic vision &amp; platform concept</span></div>
+    <div class="ti"><span class="n">05</span><span class="t">Target customers &amp; segmentation</span></div>
+    <div class="ti"><span class="n">06</span><span class="t">Go-to-market strategy</span></div>
+    <div class="grp">Platform</div>
+    <div class="ti"><span class="n">07</span><span class="t">Channel strategy — web, WhatsApp, app</span></div>
+    <div class="ti"><span class="n">08</span><span class="t">Real-time quotes &amp; insurer connectivity</span></div>
+    <div class="ti"><span class="n">09</span><span class="t">AI strategy — agents, intelligence, analytics</span></div>
+    <div class="ti"><span class="n">10</span><span class="t">Customer 360 &amp; Advisor Copilot</span></div>
+    <div class="grp">Trust</div>
+    <div class="ti"><span class="n">11</span><span class="t">Compliance by design — FAIS · POPIA · TCF · COFI</span></div>
+    <div class="ti"><span class="n">12</span><span class="t">Security architecture</span></div>
+    <div class="ti"><span class="n">13</span><span class="t">Technology architecture</span></div>
+    <div class="grp">Execution</div>
+    <div class="ti"><span class="n">14</span><span class="t">Implementation roadmap — 12 weeks to live</span></div>
+    <div class="ti"><span class="n">15</span><span class="t">Team requirements</span></div>
+    <div class="ti"><span class="n">16</span><span class="t">Investment — build &amp; run costs</span></div>
+    <div class="ti"><span class="n">17</span><span class="t">Business case &amp; KPIs</span></div>
+    <div class="ti"><span class="n">18</span><span class="t">Risks &amp; mitigations</span></div>
+    <div class="ti"><span class="n">19</span><span class="t">Recommended next steps</span></div>
+  </div>
+  <div class="callout" style="margin-top:10mm">
+    <h4>The strategic story in one paragraph</h4>
+    <p>Marlin Moodley today is a trusted, advice-led practice that serves clients over email and phone, and requests quotes from insurers manually. The opportunity is not “a website, an app and a chatbot.” It is to build a <b>digital insurance intermediary platform</b> — a quotation-orchestration and AI layer beneath a single customer experience — so a client can start one conversation on any channel and the platform gathers their needs, obtains comparable quotes from multiple insurers (in real time where APIs exist, through automated workflow where they don’t), and hands the advisor a complete, compliant file to advise on. Advice stays human. Everything around it becomes instant.</p>
+  </div>
+</div>
+
+<!-- ================= 01 EXEC SUMMARY ================= -->
+<div class="page">
+  <div class="kicker">Section 01 · Strategy</div>
+  <h2 class="sec"><span class="num">01</span>Executive summary</h2>
+  <p class="lede">South Africa is the most insured market in Africa, yet the life and disability cover gap has widened to R50.4 trillion. Customers now expect to transact in a conversation. A well-run advisory practice that digitises now can serve ten times the clients with the same advice quality.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="n">R50.4trn</div><div class="l">SA life &amp; disability insurance gap at end-2024 — up 12.5% p.a. since 2021 (ASISA, Oct 2025)</div></div>
+    <div class="stat"><div class="n">±29m</div><div class="l">South Africans on WhatsApp — the country’s most-used platform (Statista/GeoPoll 2025)</div></div>
+    <div class="stat"><div class="n">R154bn</div><div class="l">FY2024 non-life insurance revenue, up 9.8% (KPMG SA Insurance Survey 2025)</div></div>
+    <div class="stat gold"><div class="n">&lt;7 min</div><div class="l">Time for 1Life’s June 2026 WhatsApp journey to quote, customise and activate funeral cover</div></div>
+  </div>
+
+  <h3>What we propose</h3>
+  <p>The <b>Marlin Moodley Digital Insurance Platform — Launch Edition</b>: one build that puts the quote journey live on all three channels in 12 weeks. Web and app ship as a single installable PWA; WhatsApp delivers the same journey through the Business API; a launch panel of the practice’s contracted insurers supplies car/household and life quotes — real-time where supported, an automated tracked workflow elsewhere; a custom-built CRM — owned, licence-free, on one data model — is the advisor workspace. Regulated advice and material decisions remain with the advisor. The fuller platform — native app, AI agent suite, Customer&nbsp;360, predictive analytics — is <b>Phase&nbsp;2, scoped on real launch data</b>.</p>
+
+  <div class="grid3">
+    <div class="card"><span class="chip">Decision 1</span><h4>Three-tier insurer connectivity</h4><p>Integrate insurers at whatever level they support — real-time API, digital/batch, or automated email/portal workflow — so launch never waits for the slowest insurer. The customer sees one experience.</p></div>
+    <div class="card"><span class="chip">Decision 2</span><h4>Compliance by design</h4><p>FAIS, POPIA, TCF and the incoming COFI framework are designed into journeys, data and AI guardrails from day one — turning regulation into a trust advantage rather than a retrofit.</p></div>
+    <div class="card"><span class="chip">Decision 3</span><h4>AI assists, humans advise</h4><p>AI agents handle information, intake, comparison, documents and follow-up. Suitability advice, claims outcomes and any decision with significant customer effect stay human-owned and auditable.</p></div>
+  </div>
+
+  <h3>Investment and timeline</h3>
+  <table>
+    <tr><th>Scope</th><th>Delivers</th><th class="r">Investment</th><th class="r">Timeline</th></tr>
+    <tr><td><b>Launch Edition</b> (this proposal)</td><td>Quote journeys on web/PWA, app and WhatsApp across a launch panel of up to 5 short-term + 5 life insurers; custom CRM workspace with document vault; bought-lead ingestion and email automations; compliance &amp; security baseline</td><td class="r"><b>R595k fixed</b></td><td class="r">12 weeks</td></tr>
+    <tr><td><b>Hosting, support &amp; maintenance</b></td><td>Cloud &amp; licences, WhatsApp/AI usage, support and continuous improvement</td><td class="r"><b>R50k /month</b></td><td class="r">from launch</td></tr>
+    <tr><td><b>Phase 2 — scale-up</b></td><td>Native app, AI agent suite, Customer&nbsp;360 intelligence, predictive analytics, more insurers</td><td class="r">Scoped on launch data</td><td class="r">post-launch</td></tr>
+  </table>
+    <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 02 CURRENT STATE ================= -->
+<div class="page">
+  <div class="kicker">Section 02 · Strategy</div>
+  <h2 class="sec"><span class="num">02</span>Current-state assessment</h2>
+  <p class="lede">A new practice with unusual clarity: broad insurer access already contracted, a compliance home at Masthead, and no legacy book to migrate. The digital estate, however, is a brochure — not a platform — and the growth engine the practice plans (bought leads at volume) has nothing to land on yet.</p>
+
+  <div class="grid2">
+    <div class="card"><span class="chip">Strengths</span>
+      <ul>
+        <li><b>Advice-led trust:</b> advising since 2004; positioning as “Senior Executive Financial Advisor”.</li>
+        <li><b>Insurer access already contracted:</b> life agency codes with Momentum, Discovery, Old Mutual, BrightRock, Bidvest Life, PPS, Sanlam and Liberty; short-term with Momentum, Discovery, Old Mutual, Santam, Hollard, CIA, iTOO, One, Elite, Echelon and Brolink.</li>
+        <li><b>Regulatory home:</b> operates in partnership with Masthead Financial Planning (Pty) Ltd, FSP 43435, with a practice manager in place — an established compliance umbrella.</li>
+        <li><b>Clean slate:</b> a new practice with no legacy book — zero data migration — and existing FICA/onboarding documentation to build on.</li>
+      </ul>
+    </div>
+    <div class="card"><span class="chip">Constraints</span>
+      <ul>
+        <li><b>Email-based servicing:</b> every quote is requested manually from multiple insurers and waited on; no orchestration, tracking or SLA visibility.</li>
+        <li><b>No WhatsApp API channel:</b> the business number is on WhatsApp, but without a verified Meta Business Manager there are no journeys, automation or compliance records — only a consumer app.</li>
+        <li><b>No client portal or self-service:</b> no policy view, document vault, claims intake or renewals journey.</li>
+        <li><b>Interim CRM only:</b> Iris (Masthead’s white-labelled system, with an Astute email link) holds client management today — serviceable, but not a platform the practice owns or can extend to its own products.</li>
+        <li><b>Capacity ceiling:</b> growth is currently bounded by the advisor’s and assistants’ inboxes and calendars — untenable at the planned ±50 quotes/week from bought leads.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Website audit — issues to fix regardless of the platform build</h3>
+  <table>
+    <tr><th style="width:34mm">Finding</th><th>Detail</th><th style="width:30mm">Severity</th></tr>
+    <tr><td>Broken contact email</td><td>Contact page shows “info@marlinmoodley” with no domain suffix; no tappable <i>mailto:</i> or <i>tel:</i> links anywhere on the site.</td><td><span class="no">High — losing leads</span></td></tr>
+    <tr><td>Compliance presentation</td><td>No privacy/POPIA notice, complaints process, conflict-of-interest disclosure or advisor representative details visible; only the umbrella FSP number is cited.</td><td><span class="no">High — regulatory</span></td></tr>
+    <tr><td>Trust signals missing</td><td>“Address” heading on the contact page has no address beneath it; no map, no LinkedIn, no reviews surfaced.</td><td><span class="ok" style="color:var(--warn)">Medium</span></td></tr>
+    <tr><td>Unclear hero message</td><td>Homepage headline is jargon-heavy and doesn’t state who the practice serves or what to do next.</td><td><span class="ok" style="color:var(--warn)">Medium</span></td></tr>
+    <tr><td>Template residue &amp; plugin bloat</td><td>Stock template artefacts, factory-default styles, comment forms exposed on the booking page, six overlapping plugins slowing every load.</td><td><span class="ok">Low–Medium</span></td></tr>
+  </table>
+
+  <div class="note"><b>Quick wins (immediate, minimal cost):</b> fix the email address and make phone/email tappable; add a WhatsApp click-to-chat link; publish POPIA privacy notice, complaints and disclosure pages; rewrite the hero headline around client outcomes; remove template residue. These repair the leaks while the platform is built.</div>
+
+  <div class="panel" style="page-break-inside:avoid"><h4 style="margin-top:0">The operating problem in one picture</h4>
+  <p style="margin-bottom:1.5mm;font-size:8.8pt"><b>Today:</b> enquiry → email trail → advisor manually emails 3–6 insurers → days of waiting and re-keying → hand-built comparison → advice → paper-heavy onboarding.</p>
+  <p style="margin-bottom:0;font-size:8.8pt"><b>Tomorrow:</b> conversation on any channel → digital needs analysis → platform requests quotes from every connected insurer at once → comparable results in minutes (Tier A) or tracked hours (Tier B/C) → advisor advises from a complete file → digital onboarding, servicing and renewals.</p></div>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 03 MARKET ================= -->
+<div class="page">
+  <div class="kicker">Section 03 · Strategy</div>
+  <h2 class="sec"><span class="num">03</span>Market opportunity</h2>
+  <p class="lede">Three forces are converging: a widening protection gap, customers living in conversational channels, and an insurance stack that is finally opening its APIs. Intermediaries who orchestrate all three win.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="n">11.5%</div><div class="l">Insurance penetration as % of GDP — Africa’s highest, vs ±6.8% globally</div></div>
+    <div class="stat"><div class="n">R3.1m</div><div class="l">Average underinsurance per income earner across SA’s 16.1m earners (ASISA 2025)</div></div>
+    <div class="stat"><div class="n">39%</div><div class="l">Share of household income needs actually covered; critical-illness cover ratio just 26%</div></div>
+    <div class="stat"><div class="n">R5trn+</div><div class="l">SA life insurers’ assets — first time above R5 trillion (ASISA)</div></div>
+  </div>
+
+  <h3>Why now — three market signals</h3>
+  <div class="grid3">
+    <div class="card"><span class="chip">Signal 1 · Channels</span><h4>Insurance is moving into WhatsApp</h4><p>1Life launched an end-to-end WhatsApp funeral-cover journey in June 2026 — quote to active policy in under 7 minutes. MTN sells Sanlam-underwritten funeral cover entirely via WhatsApp; Sanlam runs WhatsApp self-service. The conversational bar is now set for every product line.</p></div>
+    <div class="card"><span class="chip">Signal 2 · Rails</span><h4>APIs are opening</h4><p>Nedbank publishes a Short-Term Insurance API with sandbox access. Root exposes 500+ insurance APIs; Genasys 450+ endpoints; Brolink’s Websure offers comparative multi-quote into live policy issue. Real-time intermediation is technically feasible today.</p></div>
+    <div class="card"><span class="chip">Signal 3 · Capital</span><h4>Digital models are validated</h4><p>Naked raised $17m (IFC-led, 2023); Pineapple raised R400m (2023) — then Africa’s largest insurtech round. Investors and insurers have proven that digital distribution works in SA; advice-led intermediaries are the under-served spot.</p></div>
+  </div>
+
+  <h3>The intermediary’s advantage</h3>
+  <p>Direct insurtechs sell one balance sheet. Aggregators sell leads. An FSP-backed advisory platform can do what neither can: <b>compare across insurers <i>and</i> advise</b> — with a licensed human accountable for suitability. The ASISA gap study shows the market’s problem is not appetite but access and advice capacity. A platform that lets one advisor run hundreds of concurrent, compliant conversations attacks exactly that constraint.</p>
+
+  <div class="callout"><h4>Opportunity framing</h4>
+  <p>Capturing even a microscopic share of a R50.4-trillion cover gap is a life-changing book of business for a boutique practice. The goal of digitisation is not cost-cutting — it is <b>advice capacity</b>: more needs analyses started, more quotes compared, more policies placed and retained per advisor-hour, at documented TCF quality.</p></div>
+
+  <p class="src">Sources: ASISA Life &amp; Disability Insurance Gap Study 2025 (Oct 2025); KPMG South African Insurance Industry Survey 2025; Statista / Finance in Africa 2025; GeoPoll 2025; FAnews (1Life, Jun 2026); TechCentral (MTN Khava; Pineapple, Nov 2023); TechCrunch (Naked, Feb 2023); Nedbank API Marketplace; rootplatform.com; genasystech.com; brolink.co.za.</p>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 04 VISION ================= -->
+<div class="page">
+  <div class="kicker">Section 04 · Strategy</div>
+  <h2 class="sec"><span class="num">04</span>Strategic vision &amp; platform concept</h2>
+  <p class="lede">One platform, four layers. Customers meet a single brand experience on the channel they prefer; underneath, a shared core and an AI layer orchestrate insurers, documents, workflow and compliance.</p>
+
+  <div class="layer l-ch"><div class="lt">Customer channels — one experience everywhere</div><div class="items"><span class="it">Website / PWA</span><span class="it">WhatsApp Business Platform</span><span class="it">Mobile app (Phase 2)</span><span class="it">Voice (future)</span><span class="it">Human advisor — in the loop on every channel</span></div></div>
+  <div class="layer l-ai"><div class="lt">AI layer — assistive intelligence, guard-railed</div><div class="items"><span class="it">AI Insurance Concierge</span><span class="it">Quote &amp; Application Agent</span><span class="it">Document Intelligence</span><span class="it">Advisor Copilot</span><span class="it">Renewal &amp; Retention Intelligence</span><span class="it">FNOL / Claims Intake</span><span class="it">Next-Best-Action</span><span class="it">Knowledge &amp; Policy Assistant</span></div></div>
+  <div class="layer l-core"><div class="lt">Core platform</div><div class="items"><span class="it">Customer 360</span><span class="it">Identity &amp; consent</span><span class="it">Digital needs analysis</span><span class="it">Quote orchestration engine</span><span class="it">Policy &amp; servicing</span><span class="it">Document management</span><span class="it">Workflow &amp; case management</span><span class="it">CRM / advisor workspace</span><span class="it">Analytics &amp; reporting</span></div></div>
+  <div class="layer l-int"><div class="lt">Insurer connectivity — three tiers (Section 08)</div><div class="items"><span class="it">Tier A · Real-time APIs</span><span class="it">Tier B · Digital / batch</span><span class="it">Tier C · Automated email &amp; portal workflow</span></div></div>
+  <div class="layer l-x"><div class="lt">Cross-cutting</div><div class="items"><span class="it">FAIS / TCF compliance engine</span><span class="it">POPIA consent &amp; privacy</span><span class="it">Audit trail on every interaction</span><span class="it">Security &amp; DevSecOps</span></div></div>
+
+  <h3>Design principles</h3>
+  <div class="grid2" style="gap:3mm">
+    <div class="card"><h4>1 · Conversation-first, channel-agnostic</h4><p>Journeys are designed once as conversational flows, rendered on web, WhatsApp and app. A client can start on WhatsApp and finish with the advisor without repeating themselves.</p></div>
+    <div class="card"><h4>2 · Orchestrate, don’t wait</h4><p>Never block on the slowest insurer: Tier A quotes return live; Tier B/C run as tracked cases with SLAs, automated chasers and visible status.</p></div>
+    <div class="card"><h4>3 · Advice stays human</h4><p>AI prepares; the licensed advisor advises. Every client-facing AI output is explainable, logged and escalation-ready — the FAIS-safe posture and the brand promise.</p></div>
+    <div class="card"><h4>4 · Data compounds</h4><p>Every interaction enriches Customer&nbsp;360 — powering renewals, cross-sell, retention and prediction. The data asset is the long-term moat.</p></div>
+  </div>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 05 SEGMENTS ================= -->
+<div class="page">
+  <div class="kicker">Section 05 · Strategy</div>
+  <h2 class="sec"><span class="num">05</span>Target customers &amp; segmentation</h2>
+  <p class="lede">Digitisation lets the practice serve segments that were previously uneconomic to reach — without diluting the high-touch service that anchors the brand.</p>
+
+  <table>
+    <tr><th style="width:30mm">Segment</th><th>Profile &amp; need</th><th>Primary products</th><th>Lead channel</th></tr>
+    <tr><td><b>Established professionals</b></td><td>35–55, families, peak earning years; ASISA shows even earners with cover hold only ~39% of what households need. Time-poor, expect digital convenience with human advice.</td><td>Life, disability, income protection, critical illness, investments, estate planning</td><td>Web + advisor; WhatsApp servicing</td></tr>
+    <tr><td><b>Young professionals</b></td><td>25–35, first policies; digital-native, comparison-driven, small initial premiums but decades of lifetime value.</td><td>Income protection, life starter cover, retirement annuities</td><td>WhatsApp + web self-serve</td></tr>
+    <tr><td><b>SMME owners</b></td><td>Business + personal lines together: key-person cover, buy-and-sell, business assets, group benefits. Underserved by direct players; value one accountable advisor.</td><td>Business assurance, commercial short-term, group risk, health</td><td>Web + advisor; referrals</td></tr>
+    <tr><td><b>Households (short-term)</b></td><td>Car, household and building cover; the site already receives these requests with no product page behind them. High-frequency quote shoppers — ideal for real-time comparison.</td><td>Motor, household contents, buildings</td><td>WhatsApp + web instant quote</td></tr>
+    <tr><td><b>Existing client base</b></td><td>Retention and share-of-wallet: annual reviews, renewals, beneficiaries, claims support. Cheapest growth available.</td><td>Reviews, top-ups, cross-sell, wills &amp; trusts</td><td>WhatsApp servicing + Copilot-driven outreach</td></tr>
+  </table>
+
+  <h3>Segment strategy</h3>
+  <ul>
+    <li><b>Lead with short-term instant quotes</b> to prove the real-time promise and generate volume; <b>monetise depth</b> through advice-led life, investment and estate work where the practice’s credibility is strongest.</li>
+    <li><b>Protect the premium tier:</b> established professionals and SMMEs get advisor-first journeys with digital convenience — never a purely automated sale.</li>
+    <li><b>Grow the base digitally:</b> young professionals and quote-shoppers enter through low-friction channels and graduate into advised relationships as needs mature — the Next-Best-Action engine manages that progression.</li>
+  </ul>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 06 GTM ================= -->
+<div class="page">
+  <div class="kicker">Section 06 · Strategy</div>
+  <h2 class="sec"><span class="num">06</span>Go-to-market strategy</h2>
+  <p class="lede">Launch on trust, scale on convenience. The GTM sequence mirrors the build: fix the funnel, open WhatsApp, prove instant quotes, then amplify.</p>
+
+  <div class="phase"><div class="ph"><div class="pn">GTM Wave 1</div><div class="pt">Foundation</div><div class="pd">Weeks 1–4</div></div><div class="pb">
+    <p><b>Repair &amp; relaunch the web funnel:</b> outcome-led messaging, working contact paths, compliance pages, WhatsApp click-to-chat, Google Business Profile with reviews. Stand up the lead engine: bought-lead vendor feed into the CRM with automated follow-up — every lead landed, tracked and worked from day one.</p></div></div>
+  <div class="phase"><div class="ph"><div class="pn">GTM Wave 2</div><div class="pt">Conversational launch</div><div class="pd">Weeks 6–12</div></div><div class="pb">
+    <p><b>WhatsApp channel live</b> with needs-analysis and quote-request journeys; POPIA-compliant opt-in capture at every touchpoint. Local SEO + targeted social (the practice already runs Facebook/Instagram) driving to WhatsApp. Referral mechanic: one-tap “share my advisor” card.</p></div></div>
+  <div class="phase"><div class="ph"><div class="pn">GTM Wave 3</div><div class="pt">Instant-quote proof</div><div class="pd">Months 4–6</div></div><div class="pb">
+    <p><b>“Compare real quotes in minutes”</b> campaign on short-term lines once Tier A/B integrations are live — the demonstrable differentiator vs. every traditional brokerage. Content engine: AI-assisted, advisor-approved explainers on the protection gap, one per week, distributed via social + WhatsApp broadcast (opt-in).</p></div></div>
+  <div class="phase"><div class="ph"><div class="pn">GTM Wave 4</div><div class="pt">Scale &amp; partnerships</div><div class="pd">Months 6–12</div></div><div class="pb">
+    <p><b>App adoption push</b> — every active client invited to install the PWA. B2B2C partnerships: accountants, attorneys, estate agents and employers embedding Marlin Moodley journeys (the platform’s API-first design makes each partnership a configuration, not a build). Explore employer group-scheme offerings for SMME clients.</p></div></div>
+
+  <h3>Positioning &amp; message house</h3>
+  <div class="grid3">
+    <div class="card"><h4>Brand promise</h4><p>“One conversation. Every policy. Every channel.” — expert advice with marketplace convenience.</p></div>
+    <div class="card"><h4>vs. direct insurtechs</h4><p>“They sell you one insurer’s product. We compare the market — and a licensed advisor is accountable for the advice.”</p></div>
+    <div class="card"><h4>vs. traditional brokers</h4><p>“Same trusted advice — but quotes in minutes, service on WhatsApp, and your entire portfolio in one view.”</p></div>
+  </div>
+
+  <div class="note"><b>Budget guidance:</b> media and content budgets are detailed in the accompanying commercial presentation. Until Wave 2 begins, the funnel-repair and referral motions are near-zero-cost and typically outperform paid media for advisory practices.</div>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 07 CHANNELS ================= -->
+<div class="page">
+  <div class="kicker">Section 07 · Platform</div>
+  <h2 class="sec"><span class="num">07</span>Channel strategy — web, WhatsApp, app</h2>
+  <p class="lede">Sequence matters: web/PWA rebuilds credibility and captures search demand; WhatsApp meets clients where they already are; the native app rewards the established base. All three share the same journeys and core.</p>
+
+  <h3>Website / PWA — the credibility and conversion engine <span class="small">(Weeks 3–9)</span></h3>
+  <div class="grid2">
+    <div class="card"><h4>Experience</h4><ul>
+      <li>Outcome-led product pages for every line (incl. the missing short-term pages), calculators (life-cover gap, income-protection), and educational content targeting protection-gap search terms.</li>
+      <li>Digital needs-analysis wizard → instant Tier A quotes or tracked quote case; secure client portal: policies, documents, claims status, renewals, secure messaging.</li>
+      <li>PWA: installable, offline-tolerant, push-capable — 80% of app value at 20% of app cost, available from day one.</li></ul></div>
+    <div class="card"><h4>Foundation</h4><ul>
+      <li>Full FAIS/POPIA disclosure set, cookie/consent management, complaints journey, advisor credentials.</li>
+      <li>Analytics with funnel tracking from first visit to policy issue; A/B testing on needs-analysis entry points.</li>
+      <li>Local SEO (practice location, reviews) + structured data for financial services.</li></ul></div>
+  </div>
+
+  <h3>WhatsApp — the servicing and reach channel <span class="small">(Weeks 5–9)</span></h3>
+  <div class="grid2">
+    <div class="card"><h4>Journeys</h4><ul>
+      <li><b>Enquire &amp; quote:</b> guided needs capture, document upload (ID, licence, existing schedules), quote status, appointment booking.</li>
+      <li><b>Service:</b> policy documents, beneficiary updates, claims intake (FNOL), premium queries, renewal confirmations.</li>
+      <li><b>Advisor handover</b> at any moment — the advisor sees full conversation context in the workspace.</li></ul></div>
+    <div class="card"><h4>Economics &amp; compliance</h4><ul>
+      <li>Meta’s July 2025 per-message pricing makes <b>customer-initiated service conversations effectively free</b>, with modest per-template fees for utility and marketing messages. A service-led strategy is structurally cheap to run.</li>
+      <li>POPIA s69: broadcast/marketing only to opted-in contacts, opt-out honoured in-channel; full conversation archival for FAIS record-keeping.</li></ul></div>
+  </div>
+
+  <h3>Mobile app — the loyalty channel <span class="small">(Phase 2)</span></h3>
+  <p>Native app (single codebase, iOS + Android) once the base justifies it: biometric login, portfolio dashboard across all policies and investments, document vault, claims tracking, renewal nudges, secure chat. Success metric is engagement of existing clients — not downloads. The PWA carries acquisition until then, and the app reuses its journeys and APIs, which is why it lands in Phase 2 rather than the launch build.</p>
+
+  <div class="note"><b>Future voice channel:</b> the conversational architecture (intent → journey → core APIs) is voice-ready by design; a phone/IVR AI concierge can be added later without re-platforming.</div>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 08 QUOTES ================= -->
+<div class="page">
+  <div class="kicker">Section 08 · Platform</div>
+  <h2 class="sec"><span class="num">08</span>Real-time quotes &amp; insurer connectivity</h2>
+  <p class="lede">The single most important architectural decision: integrate every insurer at the level they can support today, behind one orchestration engine — so the customer experience never depends on the slowest counterparty.</p>
+
+  <h3>The three-tier connectivity model</h3>
+  <table>
+    <tr><th style="width:16mm">Tier</th><th style="width:44mm">Insurer capability</th><th>Customer &amp; advisor experience</th><th style="width:42mm">How it works</th></tr>
+    <tr><td><span class="tag-a">A</span></td><td>Real-time quote API</td><td><b>Instant quotes</b> — comparable premiums in minutes, side by side</td><td>Direct API integration via the orchestration engine; quote → accept → bind where supported</td></tr>
+    <tr><td><span class="tag-b">B</span></td><td>Digital / batch integration (platform, file exchange, structured portal)</td><td><b>Near-real-time</b> — “your quotes are being prepared; expect them within X hours,” tracked live</td><td>Platform-mediated requests with automated status polling and normalisation into the same comparison view</td></tr>
+    <tr><td><span class="tag-c">C</span></td><td>Email / manual portal only</td><td><b>Automated workflow</b> — structured request generated and sent automatically; case tracked with SLAs and chasers; human handles exceptions only</td><td>Templated submissions from the needs analysis; inbound replies parsed by Document Intelligence into the comparison view</td></tr>
+  </table>
+  <p>Every tier lands in the <b>same normalised quote object</b> — so comparison, advice records and analytics work identically however the quote arrived; as insurers modernise they simply move up a tier with no customer-facing change.</p>
+
+  <div style="page-break-inside:avoid">
+  <h3>The SA connectivity landscape (verified, August 2026)</h3>
+  <table>
+    <tr><th style="width:40mm">Counterparty</th><th style="width:20mm">Likely tier</th><th>What’s available</th></tr>
+    <tr><td>Nedbank Insurance</td><td><span class="tag-a">A</span></td><td>Published Short-Term Insurance API (motor &amp; building) — OAuth 2.0, sandbox for testing</td></tr>
+    <tr><td>Root Platform</td><td><span class="tag-a">A</span></td><td>500+ insurance APIs — quote, policy issue, collections, claims; embedded/white-label distribution</td></tr>
+    <tr><td>Genasys</td><td><span class="tag-a">A</span></td><td>450+ REST endpoints, no-code product builder; powers King Price, GuardRisk, GENRIC, bSpoke</td></tr>
+    <tr><td>Brolink (Websure)</td><td><span class="tag-a">A</span>–<span class="tag-b">B</span></td><td>Comparative multi-quote straight into policy administration; Astute Short-Term Switch connectivity; integration APIs</td></tr>
+    <tr><td>OWLS · Cardinal C360i · SSP</td><td><span class="tag-b">B</span></td><td>API-driven broker/UMA admin platforms — candidate backbones with connectivity built in</td></tr>
+    <tr><td>Santam · Old Mutual Insure · Hollard · Discovery</td><td><span class="tag-c">C</span>→<span class="tag-b">B</span></td><td>Broker portals today (Santam App Store quick-quote, MyOMInsure); automated workflow now, upgrade path as APIs open</td></tr>
+    <tr><td>Life &amp; investment houses</td><td><span class="tag-c">C</span></td><td>Adviser-portal driven; tracked cases with document-intelligence parsing of returned quotes</td></tr>
+  </table>
+
+  <div class="note"><b>Build-vs-buy recommendation:</b> evaluate licensing an established broker-administration backbone (Brolink Websure, OWLS, Genasys, Cardinal) for policy admin + insurer connectivity, and build the differentiation — experience, AI layer, Customer&nbsp;360 — on top. Materially cheaper and faster than integrating insurers one by one; a key Sprint 0 decision.</div>
+  <p class="src">Sources: Nedbank API Marketplace (apim.nedbank.co.za); rootplatform.com; genasystech.com; brolink.co.za &amp; FAnews Websure coverage; owlssoftware.com; cardinal.co.za; santam.co.za broker portal; Old Mutual Broker Corner.</p>
+  </div>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 09 AI ================= -->
+<div class="page">
+  <div class="kicker">Section 09 · Platform</div>
+  <h2 class="sec"><span class="num">09</span>AI strategy — agents, intelligence, analytics</h2>
+  <p class="lede">AI is the force multiplier that lets one advisor run hundreds of concurrent, compliant client journeys. Every agent operates inside explicit FAIS/POPIA guardrails: AI prepares and predicts; the advisor advises and decides.</p>
+
+  <div class="grid3">
+    <div class="card"><span class="chip">Customer-facing</span><h4>AI Insurance Concierge</h4><p>24/7 first responder on web &amp; WhatsApp: explains products factually, answers questions, collects needs-analysis information, books advisor appointments, hands over seamlessly. Never recommends products.</p></div>
+    <div class="card"><span class="chip">Customer-facing</span><h4>Quote &amp; Application Agent</h4><p>Turns a completed needs analysis into structured quote requests across all tiers; prepares applications; identifies missing information and chases it conversationally.</p></div>
+    <div class="card"><span class="chip">Customer-facing</span><h4>FNOL / Claims Intake</h4><p>Guided claims first-notification on WhatsApp/web: captures incident details, documents and photos; creates the case; sets expectations. Claims decisions remain with insurer and advisor.</p></div>
+    <div class="card"><span class="chip">Back-office</span><h4>Document Intelligence</h4><p>Reads IDs, bank confirmations, existing policy schedules and emailed insurer quotes (the Tier C unlock); extracts structured data with human verification on low-confidence fields.</p></div>
+    <div class="card"><span class="chip">Advisor-facing</span><h4>Advisor Copilot</h4><p>Pre-meeting client briefs from Customer&nbsp;360, side-by-side quote summaries with factual differences, drafted (advisor-approved) records of advice, and after-meeting action lists.</p></div>
+    <div class="card"><span class="chip">Advisor-facing</span><h4>Knowledge &amp; Policy Assistant</h4><p>Retrieval-based assistant over insurer product rules, policy wordings and regulatory guidance — answers cite their sources, so the advisor verifies in one click.</p></div>
+    <div class="card"><span class="chip">Intelligence</span><h4>Renewal &amp; Retention</h4><p>Predicts lapse/churn risk from payment, engagement and life-event signals; triggers advisor-approved outreach before the client shops elsewhere. Renewals become campaigns, not surprises.</p></div>
+    <div class="card"><span class="chip">Intelligence</span><h4>Next-Best-Action</h4><p>Surfaces gap-based opportunities per client (e.g. cover ratio vs. ASISA benchmarks, life events, missing product lines) ranked by likelihood and value — feeding the advisor’s day, not spamming the client.</p></div>
+    <div class="card"><span class="chip">Intelligence</span><h4>Predictive analytics</h4><p>Funnel conversion, quote-to-bind rates by insurer/segment, channel economics, workload forecasting — the management dashboard for running the practice as a platform.</p></div>
+  </div>
+
+  <div class="note"><b>Launch Edition scope:</b> structured journeys with a tightly guard-railed assistant, plus Tier&nbsp;C document parsing. The full agent suite below — copilot, retention, next-best-action, predictive analytics — is the Phase&nbsp;2 roadmap, enabled by the same architecture.</div>
+  <h3>The guardrail model — designed for FAIS &amp; POPIA</h3>
+  <div class="grid2">
+    <div class="card" style="border-top:3px solid var(--ok)"><h4 class="ok">AI can</h4>
+      <ul><li>Explain and educate factually; compare factual product attributes</li>
+      <li>Collect information and prepare needs analyses &amp; applications</li>
+      <li>Summarise documents, meetings and portfolios; identify missing information</li>
+      <li>Assist advisors, trigger workflows, draft for human approval</li></ul></div>
+    <div class="card" style="border-top:3px solid #b3272d"><h4 class="no">AI does not, independently</h4>
+      <ul><li>Provide financial advice or product recommendations to clients</li>
+      <li>Make suitability determinations or material underwriting judgements</li>
+      <li>Decide claims outcomes</li>
+      <li>Take any solely automated decision with significant customer consequences (POPIA s71)</li></ul></div>
+  </div>
+  <p class="small">Every AI interaction is logged with inputs, outputs and model version; algorithm performance is monitored and reviewed per FSCA Board Notice 194 of 2017 requirements for automated advice tooling (Section 11). Confidence thresholds route uncertain cases to humans by default.</p>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 10 C360 ================= -->
+<div class="page">
+  <div class="kicker">Section 10 · Platform</div>
+  <h2 class="sec"><span class="num">10</span>Customer 360 &amp; Advisor Copilot</h2>
+  <p class="lede">The quiet engine of the whole strategy: one longitudinal record per client, and a workspace that turns it into advisor leverage.</p>
+
+  <h3>Customer 360 — the single client record</h3>
+  <div class="grid2">
+    <div class="card"><h4>What it holds</h4><ul>
+      <li>Identity &amp; KYC/FICA status; consent and communication preferences (POPIA-grade, per purpose)</li>
+      <li>Household &amp; financial profile from needs analyses; life events</li>
+      <li>Every policy across every insurer — cover, premiums, renewal dates, beneficiaries</li>
+      <li>Full interaction history across web, WhatsApp, app, email and meetings</li>
+      <li>Documents: schedules, records of advice, claims files, wills &amp; trusts</li></ul></div>
+    <div class="card"><h4>What it enables</h4><ul>
+      <li>“Never repeat yourself” journeys across channels</li>
+      <li>Cover-gap analysis per client against ASISA benchmarks — the advice conversation starter</li>
+      <li>Renewal, retention and Next-Best-Action intelligence (Section 9)</li>
+      <li>FAIS record-keeping and TCF evidence as a by-product of normal work, not an admin burden</li></ul></div>
+  </div>
+
+  <h3>Advisor workspace — a day in the life</h3>
+  <div class="panel"><p style="margin-bottom:1.5mm"><b>08:00</b> — Copilot morning brief: 3 renewals at churn risk, 2 completed needs analyses awaiting advice, 5 quote cases (1 Tier C overdue — chaser already sent), today’s meetings with prepared client briefs.</p>
+  <p style="margin-bottom:1.5mm"><b>10:00</b> — Client meeting: side-by-side quote comparison on screen; Copilot drafts the record of advice from the meeting; advisor edits, approves, signs — filed to Customer&nbsp;360 automatically.</p>
+  <p style="margin-bottom:1.5mm"><b>14:00</b> — WhatsApp handover: concierge escalates a complex estate-planning enquiry with full context; advisor answers in-thread; case created.</p>
+  <p style="margin-bottom:0"><b>16:30</b> — Pipeline view: every open case by stage and SLA; management dashboard shows quote-to-bind by insurer and channel economics.</p></div>
+
+  <p>The workspace includes case/workflow management (every quote, claim and service request is a tracked case), a compliance cockpit (outstanding disclosures, advice records, consent status), and campaign tooling for advisor-approved outreach. The CRM is <b>custom-built on the platform’s own data model</b>: no per-seat licence fees, one schema shared by journeys, quotes and conversations (WhatsApp threads natively, no connector), and full POPIA data control. Its v1 scope is deliberately lean — pipeline, client record, case queue, inbox, documents, tasks — fixed with a written “not in v1” list during Sprint 0; Customer&nbsp;360 intelligence is its natural Phase&nbsp;2 evolution rather than an integration project.</p>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 11 COMPLIANCE ================= -->
+<div class="page">
+  <div class="kicker">Section 11 · Trust</div>
+  <h2 class="sec"><span class="num">11</span>Compliance by design — FAIS · POPIA · TCF · COFI</h2>
+  <p class="lede">In financial services, compliance is not a constraint on the platform — it is the product’s trust layer. Every journey is designed against the regulatory frame below, validated with Masthead’s compliance function during Sprint 0.</p>
+
+  <table>
+    <tr><th style="width:34mm">Framework</th><th>What it requires</th><th>How the platform embeds it</th></tr>
+    <tr><td><b>FAIS Act</b> (37 of 2002) + General Code of Conduct</td><td>“Advice” is defined broadly — any recommendation, guidance or proposal on a financial product. Factual information is excluded, but journeys that steer product choice can constitute advice, triggering suitability duties (GCoC s8) and record-keeping.</td><td>Hard separation between factual/educational content (AI-allowed) and advice (advisor-only); digital needs analysis captures client circumstances <i>before</i> advice; records of advice generated, approved and archived per interaction.</td></tr>
+    <tr><td><b>FSCA BN 194 of 2017</b> (automated advice)</td><td>Defines “automated advice” and requires FSPs using algorithms to monitor and review algorithm output, quality and suitability.</td><td>AI guardrail model (Section 9): no autonomous advice; algorithm logging, performance monitoring, human review cycles and documented sign-off built into the AI layer.</td></tr>
+    <tr><td><b>POPIA</b> — s69, s71 + general conditions</td><td>Electronic direct marketing needs opt-in (or existing-customer exception with opt-out everywhere); no solely automated decisions with significant effect; lawful, minimal, secure processing.</td><td>Purpose-level consent registry; marketing sends gated on consent state; s71-sensitive decisions always human-in-the-loop with right to make representations; encryption, retention schedules, subject-access tooling.</td></tr>
+    <tr><td><b>TCF</b> — six outcomes</td><td>Fair culture; products meet identified needs; clear information; suitable advice; products perform as expected; no unreasonable post-sale barriers.</td><td>TCF is instrumented, not filed: journey analytics evidence clear disclosure; needs-based product matching; claims/servicing SLAs; complaint journeys in every channel; management TCF dashboard.</td></tr>
+    <tr><td><b>Insurance Act 2017 + PPRs</b></td><td>Policyholder Protection Rules govern advertising, disclosure and intermediation in any medium — fully applicable to web/app/WhatsApp journeys.</td><td>Disclosure templates versioned per product/channel; advertising sign-off workflow; microinsurance/funeral standards applied where relevant.</td></tr>
+    <tr><td><b>COFI Bill</b> (introduced 17 Apr 2026)</td><td>Will replace FAIS with an activity-based conduct framework under Twin Peaks.</td><td>Activity-based data model and audit trails position the platform for COFI transition without rework — an advantage over legacy intermediary systems.</td></tr>
+  </table>
+
+  <div class="note"><b>Licensing structure — a Sprint 0 workstream, not an afterthought.</b> The practice currently operates in partnership with Masthead Financial Planning (FSP 43435). The digital platform’s journeys, records and AI tooling must be agreed with the licence holder’s compliance function — or, if the ambition is an independent platform brand, obtaining an own FSP licence becomes part of the roadmap. Both paths are workable; the choice shapes branding, approval workflows and time-to-market, so we resolve it first. The IFWG Regulatory Sandbox is available if any journey (e.g. instant bind on WhatsApp) benefits from supervised live testing.</div>
+  <p class="src">Sources: FAIS Act &amp; General Code of Conduct; FSCA Board Notice 194 of 2017; POPIA ss 69, 71; FSCA TCF framework; Insurance Act 18 of 2017 &amp; PPRs; Webber Wentzel / Moonstone on COFI introduction (Apr 2026); ifwg.co.za.</p>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 12 SECURITY ================= -->
+<div class="page">
+  <div class="kicker">Section 12 · Trust</div>
+  <h2 class="sec"><span class="num">12</span>Security architecture</h2>
+  <p class="lede">The platform will hold identity documents, financial profiles and health-adjacent information. Security is engineered to financial-services grade from the first sprint — it is also a POPIA condition, not just good practice.</p>
+
+  <div class="grid2">
+    <div class="card"><h4>Identity &amp; access</h4><ul>
+      <li>Customer identity with OTP + optional biometric (app); step-up authentication for sensitive actions</li>
+      <li>Advisor/staff SSO with MFA; role-based least-privilege access; full admin audit trail</li>
+      <li>WhatsApp number-verification bound to the client record before any personal data is shared in-channel</li></ul></div>
+    <div class="card"><h4>Data protection</h4><ul>
+      <li>Encryption in transit (TLS 1.2+) and at rest; field-level encryption for ID numbers and financial data</li>
+      <li>Data residency in-country or approved region per POPIA s72 transfer rules</li>
+      <li>Purpose-bound retention schedules; secure deletion; documented operator agreements with every processor (cloud, AI, WhatsApp BSP)</li></ul></div>
+    <div class="card"><h4>Application &amp; AI security</h4><ul>
+      <li>OWASP-aligned secure SDLC; dependency and secret scanning in CI/CD; penetration test before each major launch</li>
+      <li>AI-specific controls: prompt-injection defences, PII minimisation to model providers, output filtering, no client data used to train third-party models</li></ul></div>
+    <div class="card"><h4>Operations &amp; resilience</h4><ul>
+      <li>Centralised logging and alerting; incident-response runbook including POPIA breach notification duties</li>
+      <li>Backups with tested restore; RPO/RTO targets defined in Sprint 0; DDoS and WAF protection at the edge</li>
+      <li>Quarterly access reviews; annual security assessment aligned to the licence holder’s requirements</li></ul></div>
+  </div>
+
+  <h3>Compliance artefacts delivered with the build</h3>
+  <p><span class="pill">POPIA impact assessment</span><span class="pill">Information-security policy pack</span><span class="pill">Operator/processor agreements</span><span class="pill">Consent &amp; retention register</span><span class="pill">Incident-response runbook</span><span class="pill">Pen-test report &amp; remediation log</span><span class="pill">AI model &amp; guardrail register</span></p>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 13 TECH ================= -->
+<div class="page">
+  <div class="kicker">Section 13 · Trust</div>
+  <h2 class="sec"><span class="num">13</span>Technology architecture</h2>
+  <p class="lede">Pragmatic and modular: buy the undifferentiated pieces, build the differentiating experience and orchestration, keep every integration behind an interface so components can be swapped as the market matures.</p>
+
+  <table>
+    <tr><th style="width:38mm">Layer</th><th>Recommended approach</th><th style="width:52mm">Candidate technologies</th></tr>
+    <tr><td>Web / PWA</td><td>Modern reactive front-end, server-rendered for SEO, installable PWA</td><td>Next.js/React, TypeScript, Tailwind</td></tr>
+    <tr><td>Mobile app (Phase 2)</td><td>Single cross-platform codebase reusing platform APIs</td><td>React Native or Flutter</td></tr>
+    <tr><td>WhatsApp</td><td>WhatsApp Business Platform via an established BSP; conversation engine shared with web chat</td><td>Meta Cloud API + BSP (e.g. local SA BSP), conversation orchestration service</td></tr>
+    <tr><td>Core services</td><td>API-first modular services (identity, consent, needs analysis, quotes, cases, documents); event-driven where async (quote fan-out, chasers)</td><td>Node.js/TypeScript or .NET, PostgreSQL, REST + events/queues</td></tr>
+    <tr><td>Quote orchestration</td><td>Adapter per insurer/tier behind a normalised quote model; SLA timers &amp; retry logic</td><td>Custom engine + admin-platform APIs (Brolink/OWLS/Genasys/Cardinal per Sprint 0 decision)</td></tr>
+    <tr><td>CRM / Customer 360</td><td>Custom-built advisor workspace on the platform’s own data model — licence-free, single schema, native conversation threading</td><td>Same stack as core services; v1 scope fixed in Sprint 0</td></tr>
+    <tr><td>AI layer</td><td>LLM-agnostic gateway; retrieval (RAG) over curated product/regulatory content; guardrail and logging middleware; evaluation harness</td><td>Claude-class frontier LLM API, vector store, prompt/eval tooling</td></tr>
+    <tr><td>Data &amp; analytics</td><td>Warehouse fed by platform events; dashboards for funnel, TCF and practice management; predictive models as they earn their keep</td><td>Cloud warehouse (BigQuery/Snowflake/Fabric), BI (Metabase/Power BI)</td></tr>
+    <tr><td>Cloud &amp; DevSecOps</td><td>Managed cloud in POPIA-appropriate region; IaC; CI/CD with security gates; observability</td><td>AWS (af-south-1) or Azure (South Africa North), Terraform, GitHub Actions</td></tr>
+  </table>
+
+  <div class="note"><b>Architecture principles:</b> every insurer, CRM and AI provider sits behind an internal interface (swap without re-platforming); conversational journeys defined once, rendered per channel; all customer events flow to one stream (analytics, audit and AI context share a spine); nothing stateful in the channel layer — WhatsApp, web and app are thin clients over the same APIs.</div>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 14 ROADMAP ================= -->
+<div class="page">
+  <div class="kicker">Section 14 · Execution</div>
+  <h2 class="sec"><span class="num">14</span>Implementation roadmap — 12 weeks to live</h2>
+  <p class="lede">One fixed-scope build, live in 12 weeks. The critical path is commercial, not code — Meta’s WhatsApp verification, insurer-panel onboarding and Masthead’s compliance sign-off all start on day one, in parallel with the build.</p>
+
+  <div class="phase"><div class="ph"><div class="pn">Sprint 0</div><div class="pt">Compliance &amp; setup</div><div class="pd">Weeks 1–2</div></div><div class="pb">
+    <p>Masthead journey sign-off pack; insurer launch-panel confirmation and WhatsApp BSP contracting; POPIA essentials (consent model, retention, privacy notices); architecture and fixed-scope build plan. <b>Started day one:</b> Meta business verification, insurer sandbox &amp; onboarding requests, quick-win site fixes from Section 2.</p></div></div>
+  <div class="phase"><div class="ph"><div class="pn">Build</div><div class="pt">One journey, three channels</div><div class="pd">Weeks 3–9</div></div><div class="pb">
+    <p>Web/PWA quote experience (relaunched site, needs-analysis journey, installable PWA, case status); WhatsApp journeys with document upload and advisor handover; launch-panel insurer integrations (real-time where supported) + automated Tier&nbsp;C workflow; bought-lead feed into the CRM; custom CRM advisor workspace (parallel track on the shared backend), document vault, consent capture; security hardening throughout.</p></div></div>
+  <div class="phase"><div class="ph"><div class="pn">Launch</div><div class="pt">Prove it live</div><div class="pd">Weeks 10–12</div></div><div class="pb">
+    <p>UAT with real clients on all three channels; penetration check and fixes; final compliance sign-off; lead-vendor feed switched to production, launch campaign, and go-live with tracked funnel analytics from day one.</p></div></div>
+  <div class="phase"><div class="ph"><div class="pn">Phase 2</div><div class="pt">Scale-up</div><div class="pd">Post-launch</div></div><div class="pb">
+    <p>Scoped on real post-launch data: native app (or store wrapper), AI agent suite (copilot, document intelligence, retention, next-best-action), full Customer&nbsp;360 intelligence, predictive analytics, additional insurer integrations. Everything in the Launch Edition — journeys, data model, vault, integrations — carries forward as its foundation.</p></div></div>
+
+  <h3>Milestones</h3>
+  <table>
+    <tr><th style="width:26mm">Stage</th><th>Milestones</th></tr>
+    <tr><td><b>Mobilise</b><br><span class="small">Weeks 1–2</span></td><td>Launch panel confirmed; WhatsApp BSP contracted; Meta verification submitted; Masthead pack agreed; POPIA essentials designed; site quick wins live; build plan frozen.</td></tr>
+    <tr><td><b>Build</b><br><span class="small">Weeks 3–6</span></td><td>Web/PWA journey in test; first live short-term quote returned end-to-end from an insurer sandbox; CRM pipeline configured; WhatsApp templates submitted for approval.</td></tr>
+    <tr><td><b>Harden</b><br><span class="small">Weeks 7–9</span></td><td>WhatsApp journeys live in test with document upload; Tier&nbsp;C automated workflow replacing manual email internally (immediate time savings); document vault and consent capture complete; hardening &amp; pen check.</td></tr>
+    <tr><td><b>Go-live</b><br><span class="small">Weeks 10–12</span></td><td>Client UAT on all channels; compliance final sign-off; lead feed live; <b>go-live</b>. Funnel scorecard baselined for the Phase&nbsp;2 decision.</td></tr>
+  </table>
+
+  <div class="note"><b>What is never descoped:</b> POPIA consent and retention, the advice/information boundary in every screen and message, FAIS record-keeping of conversations, and secure handling of identity documents. Cheap to build in, existential to skip.</div>
+</div>
+
+<!-- ================= 15 TEAM ================= -->
+<div class="page">
+  <div class="kicker">Section 15 · Execution</div>
+  <h2 class="sec"><span class="num">15</span>Team requirements</h2>
+  <p class="lede">A lean blended team, scaling with phases. Move Digital provides the delivery engine; Marlin Moodley provides domain authority and the compliance interface; specialist skills join when their phase needs them.</p>
+
+  <table>
+    <tr><th>Role</th><th style="width:23mm">Sprint 0</th><th style="width:23mm">Build</th><th style="width:23mm">Phase 2</th><th>Responsibility</th></tr>
+    <tr><td>Engagement / delivery lead</td><td>0.5</td><td>0.5–1</td><td>0.5</td><td>Plan, budget, stakeholders, compliance liaison</td></tr>
+    <tr><td>Solution architect</td><td>0.5</td><td>0.5</td><td>0.25</td><td>Architecture, build-vs-buy, integration design</td></tr>
+    <tr><td>Product designer (UX/UI)</td><td>0.5</td><td>1</td><td>0.5</td><td>Journeys, design system, conversational UX</td></tr>
+    <tr><td>Full-stack engineers</td><td>—</td><td>2–3</td><td>2–3</td><td>Web/PWA, core services, portal, app (Ph 3)</td></tr>
+    <tr><td>Integration engineer</td><td>—</td><td>1</td><td>0.5–1</td><td>Insurer adapters, CRM, WhatsApp BSP</td></tr>
+    <tr><td>AI engineer</td><td>—</td><td>1</td><td>1</td><td>Agents, RAG, guardrails, evaluation</td></tr>
+    <tr><td>QA / test automation</td><td>—</td><td>0.5–1</td><td>0.5</td><td>Functional, journey and regression testing</td></tr>
+    <tr><td>DevSecOps</td><td>—</td><td>0.5</td><td>0.25</td><td>Cloud, CI/CD, security tooling, observability</td></tr>
+    <tr><td>Data engineer / analyst</td><td>—</td><td>0.5</td><td>0.5–1</td><td>Warehouse, dashboards, predictive models (Ph 3)</td></tr>
+    <tr><td>Compliance advisor (specialist)</td><td>0.25</td><td>0.25</td><td>0.1</td><td>FAIS/POPIA/TCF review, Masthead alignment</td></tr>
+  </table>
+  <p class="small">Figures are indicative FTE allocations. Peak team ≈ 4–6 during the build; steady-state run team ≈ 1–2 (Section 16).</p>
+
+  <h3>Client-side commitments that make it work</h3>
+  <ul>
+    <li><b>Domain authority:</b> ±4–6 advisor hours/week during design phases for journey reviews, product rules and advice-record standards — this is what makes the AI layer genuinely expert.</li>
+    <li><b>Compliance interface:</b> a named contact within Masthead’s compliance function, engaged from day one.</li>
+    <li><b>Content &amp; brand sign-off:</b> weekly cadence during launch waves; all client-facing AI content is advisor-approved at template level.</li>
+  </ul>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 16 COSTS ================= -->
+<div class="page">
+  <div class="kicker">Section 16 · Execution</div>
+  <h2 class="sec"><span class="num">16</span>Investment — build &amp; run costs</h2>
+  <p class="lede">A total build investment of <b>R595,000 — fixed</b>, delivered in 12 weeks, with a flat <b>R50k per month</b> for hosting, support and maintenance from launch. Four scope decisions make the number possible; the figures match Quotation&nbsp;№&nbsp;MM-2026-01 and are fixed on acceptance.</p>
+
+  <h3>The four scope decisions</h3>
+  <div class="grid2">
+    <div class="card"><h4>1 · The PWA is the app</h4><p>One installable Progressive Web App — home-screen icon, push, offline tolerance — delivers “web” and “app” from one codebase. An app-store wrapper is available as a priced option; the native app proper is Phase&nbsp;2.</p></div>
+    <div class="card"><h4>2 · One journey, rendered twice</h4><p>Needs capture → quote → follow-up is designed once as a conversational flow, delivered on web/PWA and on WhatsApp via the Business API. No per-channel builds — the trick that keeps three channels in one budget.</p></div>
+    <div class="card"><h4>3 · Integrate the contracted panel</h4><p>A launch panel of up to <b>5 short-term + 5 life insurers</b>, drawn from the practice’s existing agency codes and integrated at whatever tier each supports; every other insurer rides the automated Tier&nbsp;C email workflow. Further integrations are priced add-ons, never blockers.</p></div>
+    <div class="card"><h4>4 · Own the back office</h4><p>A custom-built CRM is the advisor workspace — pipeline, client record, case queue, WhatsApp inbox threaded per client, encrypted document vault. No licence fees, one data model, and reusable IP; the AI suite and Customer&nbsp;360 intelligence build on it in Phase&nbsp;2.</p></div>
+  </div>
+
+  <h3>Build budget</h3>
+  <table>
+    <tr><th>Workstream</th><th>Covers</th><th class="r">Fixed fee</th></tr>
+    <tr><td>Sprint 0 — foundation <span class="small">(2 wks)</span></td><td>Masthead journey sign-off pack, insurer panel confirmation, POPIA essentials, architecture, Meta verification started</td><td class="r">R60k</td></tr>
+    <tr><td>Web/PWA quote experience</td><td>Relaunched site, needs-analysis journey, installable PWA, case status, light brand refresh</td><td class="r">R130k</td></tr>
+    <tr><td>WhatsApp channel</td><td>BSP setup &amp; verification, journeys, document upload, advisor handover</td><td class="r">R75k</td></tr>
+    <tr><td>Quote engine &amp; insurer integrations</td><td>Launch panel of up to 5 short-term + 5 life insurers (Tier A/B where supported) + automated Tier&nbsp;C email workflow</td><td class="r">R140k</td></tr>
+    <tr><td>Custom CRM, consent, security &amp; tracking</td><td>Custom advisor workspace (v1 scope fixed in Sprint 0), FICA onboarding, document vault, POPIA consent, hardening, analytics</td><td class="r">R150k</td></tr>
+    <tr><td>Lead ingestion &amp; email automations</td><td>One bought-lead vendor feed into the CRM; automated follow-up and onboarding sequences</td><td class="r">R40k</td></tr>
+    <tr class="tot"><td colspan="2"><b>Launch Edition total</b> · fixed price, ex VAT · 12 weeks</td><td class="r"><b>R595,000</b></td></tr>
+  </table>
+
+  <div style="page-break-inside:avoid">
+  <h3>Ongoing: hosting, support &amp; maintenance</h3>
+  <table>
+    <tr><th>Item</th><th>Covers</th><th class="r">Monthly</th></tr>
+    <tr><td>Hosting &amp; licences</td><td>Cloud infrastructure, WhatsApp BSP licences, observability — no CRM licence fees (the CRM is owned)</td><td class="r">included</td></tr>
+    <tr><td>Usage</td><td>WhatsApp messaging (customer-initiated service ≈ free under Meta’s 2025 pricing) and AI assistant usage</td><td class="r">included</td></tr>
+    <tr><td>Support &amp; maintenance</td><td>Fixes, insurer/API changes, journey optimisation and continuous improvement</td><td class="r">included</td></tr>
+    <tr class="tot"><td colspan="2"><b>Total ongoing</b> — flat monthly fee, reviewed annually</td><td class="r"><b>R50k / month</b></td></tr>
+  </table>
+  <p class="small">Excluded: usage-based third-party fees passed through at cost (Meta conversation fees, document-AI processing, lead-vendor charges); own-FSP licensing costs if that path is chosen; performance-media budgets (GTM Wave 2 onward); insurer-specific certification costs where applicable.</p>
+  <div class="callout"><h4>How to read this investment</h4><p>R595k buys the <b>proof</b>: real quotes on all three channels, live, inside a quarter. Phase&nbsp;2 — native app, AI agent suite, full Customer&nbsp;360 intelligence, analytics — is then scoped and priced on measured conversion and channel economics instead of projections. Every rand carries forward: the journeys, data model, vault and integrations built here are Phase&nbsp;2’s foundation, not a throwaway pilot.</p></div>
+  </div>
+</div>
+
+<!-- ================= 17 BUSINESS CASE ================= -->
+<div class="page">
+  <div class="kicker">Section 17 · Execution</div>
+  <h2 class="sec"><span class="num">17</span>Business case &amp; KPIs</h2>
+  <p class="lede">The investment pays back through four compounding levers. Each has a measurable KPI tree the platform reports natively.</p>
+
+  <div class="grid2">
+    <div class="card"><span class="chip">Lever 1</span><h4>Advice capacity</h4><p>Automating intake, quoting and admin typically releases 40–60% of advisor time. Same advisor, several times the concurrent client journeys — capacity that currently caps revenue.</p>
+      <p class="small"><b>KPIs:</b> needs analyses started/completed per month · quote cases per advisor-hour · time from enquiry to advice meeting.</p></div>
+    <div class="card"><span class="chip">Lever 2</span><h4>Conversion &amp; speed</h4><p>Quotes in minutes instead of days collapses drop-off between enquiry and comparison — the leakiest part of today’s email funnel.</p>
+      <p class="small"><b>KPIs:</b> enquiry→quote rate · quote→bind rate by insurer &amp; segment · median time-to-first-quote (target: minutes for Tier A; &lt;24h Tier B; SLA-met % Tier C).</p></div>
+    <div class="card"><span class="chip">Lever 3</span><h4>Retention &amp; wallet share</h4><p>Renewal intelligence and Customer&nbsp;360 turn lapse-risk into pre-emptive conversations, and cover-gap analysis into structured cross-sell.</p>
+      <p class="small"><b>KPIs:</b> policy lapse rate · renewals retained % · products per client · NBA actions taken/converted.</p></div>
+    <div class="card"><span class="chip">Lever 4</span><h4>New digital demand</h4><p>WhatsApp + instant quotes open segments the practice could never economically serve by email — volume that compounds the book.</p>
+      <p class="small"><b>KPIs:</b> new clients by channel · CAC by channel · WhatsApp journey completion % · portal/app monthly active clients.</p></div>
+  </div>
+
+  <h3>Illustrative payback framing</h3>
+  <p>A brokerage book earns recurring commission on premiums under advisement. If the Launch Edition enables the new practice to build <b>R300k–R500k in annual recurring commission</b> within 18 months of go-live — modest capture at the planned ±50 quotes/week from bought leads — the R595k investment recovers in roughly 14–24 months, while building a sellable, systematised asset: a platform-enabled book is worth a multiple of an inbox-dependent one. Sprint 0 replaces this framing with a model built on actual lead costs, conversion and commission rates.</p>
+
+  <div class="callout"><h4>Governance cadence</h4><p>Monthly platform scorecard (KPIs above + TCF dashboard + cost-to-serve), quarterly strategy review against this document, and a post-launch investment gate before Phase 2 — so spend follows evidence, not momentum.</p></div>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 18 RISKS ================= -->
+<div class="page">
+  <div class="kicker">Section 18 · Execution</div>
+  <h2 class="sec"><span class="num">18</span>Risks &amp; mitigations</h2>
+  <p class="lede">Every material risk has an owner, a design answer and an early-warning signal. The top eight:</p>
+
+  <table>
+    <tr><th style="width:38mm">Risk</th><th style="width:15mm">Rating</th><th>Mitigation</th></tr>
+    <tr><td>Regulatory breach via AI (advice boundary crossed)</td><td><span class="no">High</span></td><td>Guardrail model (S9), BN194 monitoring, advisor approval of client-facing templates, compliance pre-approval of journeys, full audit logging, periodic conversation sampling.</td></tr>
+    <tr><td>Licensing-structure delay (Masthead alignment / own FSP)</td><td><span class="no">High</span></td><td>Sprint 0 workstream from week 1 with named compliance contact; both paths scoped; platform build decoupled so foundation work proceeds during resolution.</td></tr>
+    <tr><td>Insurer integration slower than planned</td><td><span style="color:var(--warn);font-weight:600">Medium–High</span></td><td>Three-tier model means launch never depends on any insurer; admin-platform route (Brolink/OWLS/Genasys) bundles many integrations; Tier C automation delivers value on day one.</td></tr>
+    <tr><td>POPIA incident / data breach</td><td><span class="no">High impact</span></td><td>Security architecture (S12), minimisation to AI providers, operator agreements, pen tests, incident runbook with notification duties rehearsed.</td></tr>
+    <tr><td>Adoption shortfall (clients stay on email/phone)</td><td><span style="color:var(--warn);font-weight:600">Medium</span></td><td>WhatsApp meets clients in an app they already use daily; base-activation GTM; advisor personally introduces the channel; email/phone remain supported — the platform captures them as cases either way.</td></tr>
+    <tr><td>Scope creep / budget overrun</td><td><span style="color:var(--warn);font-weight:600">Medium</span></td><td>Fixed-scope phases with investment gates; Sprint 0 converts envelopes to committed SOWs; monthly burn vs. scorecard.</td></tr>
+    <tr><td>Key-person dependency (solo advisor)</td><td><span style="color:var(--warn);font-weight:600">Medium</span></td><td>The platform itself is the mitigation: codified journeys, Customer&nbsp;360 and case management make the practice resilient and scalable beyond one inbox; consider a paraplanner/assistant as volume grows.</td></tr>
+    <tr><td>Vendor lock-in (admin platform, BSP, AI provider)</td><td><span class="ok">Low–Medium</span></td><td>Interface-first architecture (S13): every external dependency behind an adapter; data exportable; LLM-agnostic AI gateway.</td></tr>
+  </table>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+<!-- ================= 19 NEXT STEPS ================= -->
+<div class="page">
+  <div class="kicker">Section 19 · Execution</div>
+  <h2 class="sec"><span class="num">19</span>Recommended next steps</h2>
+  <p class="lede">Momentum matters more than perfection. Five concrete steps start the journey within two weeks:</p>
+
+  <div class="phase"><div class="ph"><div class="pn">Step 1</div><div class="pt">Strategy workshop</div><div class="pd">Week 1</div></div><div class="pb"><p>Half-day session: walk this document with Marlin Moodley, confirm the Launch Edition scope, segment priorities and the licensing question’s importance.</p></div></div>
+  <div class="phase"><div class="ph"><div class="pn">Step 2</div><div class="pt">Engage Masthead</div><div class="pd">Weeks 1–2</div></div><div class="pb"><p>Joint session with the licence holder’s compliance function on digital journeys, AI guardrails and record-keeping — establishing the partnership (or surfacing the own-FSP conversation) before a line of code is written.</p></div></div>
+  <div class="phase"><div class="ph"><div class="pn">Step 3</div><div class="pt">Ship the quick wins</div><div class="pd">Week 2</div></div><div class="pb"><p>Fix the contact leaks, publish compliance pages, add WhatsApp click-to-chat, sharpen the homepage message. Small cost, immediate lead recovery, visible momentum for the client.</p></div></div>
+  <div class="phase"><div class="ph"><div class="pn">Step 4</div><div class="pt">Commission Sprint 0</div><div class="pd">Week 2</div></div><div class="pb"><p>Accept Quotation № MM-2026-01: R60,000 starts Sprint 0, credited in full against the R595,000 fixed price. Covers licensing alignment, insurer launch-panel confirmation, POPIA essentials, and the 12-week build plan.</p></div></div>
+  <div class="phase"><div class="ph"><div class="pn">Step 5</div><div class="pt">Secure early integrations</div><div class="pd">Weeks 2–8</div></div><div class="pb"><p>Open conversations with the priority insurers on the launch panel and the WhatsApp BSP in parallel — commercial lead times, not engineering, usually set the critical path.</p></div></div>
+
+  <div class="callout" style="margin-top:8mm">
+    <h4>The closing argument</h4>
+    <p>The South African insurance gap is R50.4 trillion and widening. Customers already live in the channels this platform serves. The APIs exist. The regulation is navigable — and favours whoever builds compliance in from the start. Marlin Moodley’s trusted-advice brand is the hardest asset to replicate; everything in this document is engineering around it. The practices that move from “email and wait” to “orchestrate and advise” in the next 24 months will own the intermediary space in their segments. We recommend starting now.</p>
+  </div>
+
+  <div style="margin-top:12mm;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:5mm">
+    <div><div style="font-family:'Alexandria';font-size:12pt;color:var(--navy);font-weight:500">Move Digital</div><div class="small">Digital strategy · Platform engineering · Applied AI</div></div>
+    <div style="text-align:right" class="small">Prepared September 2026 · Version 1.6 · Confidential<br>Figures as per Quotation № MM-2026-01</div>
+  </div>
+  <div class="footline"><span>Marlin Moodley Digital Insurance Platform — Strategy &amp; Implementation Proposal</span><span>Move Digital · September 2026 · Confidential</span></div>
+</div>
+
+</body>
+</html>
