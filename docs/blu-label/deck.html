@@ -133,6 +133,22 @@ h1 .b{color:var(--blue)}h1 .g{color:var(--green)}h1 .p{color:var(--purple)}h1 .t
 .frow p{font-size:7.4pt;color:#B9C6DB;line-height:1.4}
 .frow .fx{font-size:7.4pt;color:#7E93B8;text-align:right}
 .frow .fx b{color:var(--pc)}
+.jrow{display:flex;align-items:stretch;gap:2.6mm;margin:1mm 0 4mm}
+.jstep{flex:1;background:#0F2038cc;border:1px solid #1E3A66;border-top:1mm solid var(--pc);border-radius:3.4mm;padding:3.2mm 3.6mm;display:flex;flex-direction:column}
+.jstep .jn{font-size:6.8pt;font-weight:700;letter-spacing:.18em;color:var(--pc);margin-bottom:1.2mm}
+.jstep h4{font-size:10pt;font-weight:700;color:#fff;margin-bottom:1.2mm}
+.jstep p{font-size:7.6pt;color:#B9C6DB;line-height:1.42;flex:1}
+.jstep .jm{margin-top:1.8mm;padding-top:1.6mm;border-top:1px solid #1E3A66;font-size:7pt;color:#7E93B8}
+.jstep .jm b{color:var(--pc)}
+.jarr{align-self:center;color:#3B5A8F;font-size:13pt;font-weight:700}
+.jbar{display:flex;align-items:center;justify-content:center;gap:6mm;background:linear-gradient(90deg,#0F2038,#13294D,#0F2038);border:1px solid #1E3A66;border-radius:3mm;padding:2.6mm 5mm;margin-bottom:4.5mm;font-size:9pt;color:#B9C6DB}
+.jbar b{color:#fff;font-size:10.5pt}
+.jbar .sep{color:#3B5A8F}
+.moat3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3.6mm}
+.moat{background:#0F2038cc;border:1px solid #1E3A66;border-radius:3.4mm;padding:3.4mm 4.2mm}
+.moat h4{font-size:11pt;font-weight:800;color:#fff;margin-bottom:1.2mm}
+.moat h4 span{color:var(--pc)}
+.moat p{font-size:7.8pt;color:#B9C6DB;line-height:1.45}
 /* misc */
 .smallnote{font-size:9.5pt;color:var(--soft);margin-top:5mm}
 .chips{display:flex;flex-wrap:wrap;gap:2.2mm;margin-top:2.6mm}
@@ -340,22 +356,29 @@ table.cmp td .n{color:#DC2626;font-weight:700}
 </div>
 
 <!-- 09 ZARA MARKETPLACE 3 - USP -->
-<div class="s">
-  <div class="hdr"><img class="picon" src="assets/zara.png"><div class="wm">Zara <span>Agentic Marketplace</span></div><div class="conf">Confidential</div></div>
-  <div class="kick">Platform deep dive · 5 of 5</div>
-  <h1>The USP: agents that <span class="g">transact</span>, not just chat.</h1>
-  <table class="cmp" style="margin-top:2mm">
-    <tr><th style="width:60mm">Capability</th><th>Generic chatbot platforms</th><th>Zara Agentic Marketplace</th></tr>
-    <tr><td>Money moves in-chat</td><td><span class="n">✕</span> &nbsp;Redirects to a website or call centre</td><td><span class="y">✓</span> &nbsp;Payments, vouchers &amp; remittance executed on licensed rails</td></tr>
-    <tr><td>Identity under the journey</td><td><span class="n">✕</span> &nbsp;KYC is someone else's problem</td><td><span class="y">✓</span> &nbsp;eKYC Africa verifies in &lt;60s, inside the conversation</td></tr>
-    <tr><td>Fraud at transaction time</td><td><span class="n">✕</span> &nbsp;None</td><td><span class="y">✓</span> &nbsp;PayGuard scores every transaction in &lt;100ms</td></tr>
-    <tr><td>African languages &amp; context</td><td><span class="n">✕</span> &nbsp;English-first, US-tuned</td><td><span class="y">✓</span> &nbsp;Protea LLM — SA-tuned, multilingual, data-resident</td></tr>
-    <tr><td>Where customers actually are</td><td><span class="n">✕</span> &nbsp;Web widgets</td><td><span class="y">✓</span> &nbsp;WhatsApp-native, data-light, works on any phone</td></tr>
-    <tr><td>Voice &amp; multi-agent</td><td><span class="n">✕</span> &nbsp;Text chat only</td><td><span class="y">✓</span> &nbsp;Live voice agents, avatar video calls and the AI Executive Boardroom</td></tr>
-    <tr><td>White-label &amp; multi-tenant</td><td>Partial — per-seat SaaS pricing</td><td><span class="y">✓</span> &nbsp;Branded per customer with CNAME domains, priced per tenant, rev-share friendly</td></tr>
-  </table>
-  <p class="smallnote">The moat is the combination: no other platform in the region pairs an agent marketplace with its own identity, fraud and settlement layers — live, in one stack.</p>
-  <div class="foot"><span class="dot"></span> Zara Agentic Marketplace · zaraai.digital/business <span class="pg"><b>11</b> / 34</span></div>
+<div class="s dark">
+  <div class="hdr"><img class="picon" src="assets/zara.png"><div class="wm" style="color:#fff">Zara <span style="color:#5B9BFF">Agentic Marketplace</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Platform deep dive · 5 of 5 · The USP</div>
+  <h1>One conversation. <span style="color:#4ADE80">Verified, quoted, paid, protected.</span></h1>
+  <div class="jrow">
+    <div class="jstep" style="--pc:#5B9BFF"><div class="jn">01 · THE ASK</div><h4>Sipho messages on WhatsApp</h4><p>"Ngicela i-quote ye-inshorense yemoto" — the agent answers in isiZulu, on the phone he already owns, on the app he already uses.</p><div class="jm">Zara Agents · <b>Protea LLM</b></div></div>
+    <div class="jarr">→</div>
+    <div class="jstep" style="--pc:#2DD4BF"><div class="jn">02 · VERIFIED</div><h4>Identity, in the chat</h4><p>ID document photographed, passive liveness confirmed, sanctions screened — without ever leaving the conversation.</p><div class="jm">eKYC Africa · <b>&lt;60 seconds</b></div></div>
+    <div class="jarr">→</div>
+    <div class="jstep" style="--pc:#A78BFA"><div class="jn">03 · CLOSED</div><h4>Quoted &amp; agreed</h4><p>The agent compares options, answers objections from the business's own knowledge, and confirms the deal — with memory of every prior interaction.</p><div class="jm">Agent runtime · <b>RAG + memory</b></div></div>
+    <div class="jarr">→</div>
+    <div class="jstep" style="--pc:#4ADE80"><div class="jn">04 · PAID</div><h4>Money moves on licensed rails</h4><p>Voucher, payment or remittance executed in-chat on Blu Label's regulated rails — no redirect, no drop-off, no call centre.</p><div class="jm">Blu rails · Swifter · <b>in-chat</b></div></div>
+    <div class="jarr">→</div>
+    <div class="jstep" style="--pc:#F87171"><div class="jn">05 · PROTECTED</div><h4>Fraud scored, PII shielded</h4><p>Every transaction scored across 40+ signals before the money moves; SA IDs redacted, cards masked, everything logged.</p><div class="jm">PayGuard · <b>&lt;100ms</b></div></div>
+  </div>
+  <div class="jbar"><span><b>±4 minutes</b> end-to-end</span><span class="sep">·</span><span><b>Zero</b> human touches</span><span class="sep">·</span><span><b>Full</b> FICA/POPIA audit trail</span><span class="sep">·</span><span><b>Live</b> in the console today</span></div>
+  <div class="moat3">
+    <div class="moat" style="--pc:#4ADE80"><h4>Others chat. <span>Zara transacts.</span></h4><p>Chatbot platforms hand off to a website when money appears. Here the payment, the vouchers and the remittance are native to the conversation.</p></div>
+    <div class="moat" style="--pc:#5B9BFF"><h4>Others bolt trust on. <span>Ours is built in.</span></h4><p>Identity, fraud and compliance aren't integration projects for the customer — they're the platform's own eKYC, PayGuard and POPIA shield, under every agent.</p></div>
+    <div class="moat" style="--pc:#A78BFA"><h4>Others sell seats. <span>We hand you platforms.</span></h4><p>White-label tenants with CNAME domains and per-tenant billing — Blu Label sells a branded platform to each customer, not licences to a tool.</p></div>
+  </div>
+  <p class="smallnote" style="color:#8FA3C2">No other platform in the region pairs an agent marketplace with its own identity, fraud and settlement layers — live, in one stack. That combination is the moat.</p>
+  <div class="foot"><span class="dot"></span> Zara Agentic Marketplace · zaraai.digital/agentplatform <span class="pg"><b>11</b> / 34</span></div>
 </div>
 
 <!-- 10 PROTEA LLM 1 -->
