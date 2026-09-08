@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quotation — Marlin Moodley Digital Insurance Platform</title>
+<style>
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;src:url(data:font/woff2;base64,{{POPPINS400}}) format('woff2')}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:500;src:url(data:font/woff2;base64,{{POPPINS500}}) format('woff2')}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:600;src:url(data:font/woff2;base64,{{POPPINS600}}) format('woff2')}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:700;src:url(data:font/woff2;base64,{{POPPINS700}}) format('woff2')}
+@font-face{font-family:'Alexandria';font-style:normal;font-weight:500;src:url(data:font/woff2;base64,{{ALEXANDRIA}}) format('woff2')}
+:root{--navy:#003F88;--blue:#00509D;--bright:#2066C8;--ink:#28292A;--grey:#5C5F63;--line:#DFE4EA;--pale:#F4F6F9;--gold:#B98D2F}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:'Poppins',Arial,sans-serif;color:var(--ink);font-size:9pt;line-height:1.5;background:#fff}
+@page{size:A4;margin:14mm 14mm 16mm}
+.hdr{display:flex;align-items:center;gap:5mm;border-bottom:2.5px solid var(--navy);padding-bottom:3.4mm;margin-bottom:3.6mm}
+.hdr img{width:17mm;height:17mm}
+.hdr .t1{font-family:'Alexandria';font-size:17pt;color:var(--navy);line-height:1.2}
+.hdr .t2{font-size:8.5pt;color:var(--grey);margin-top:1mm}
+.hdr .right{margin-left:auto;text-align:right;font-size:7.6pt;color:var(--grey);line-height:1.55}
+.hdr .right b{color:var(--navy)}
+.meta{display:flex;gap:3.4mm;margin-bottom:3.6mm}
+.meta .cell{flex:1;background:var(--pale);border-radius:8px;padding:2.2mm 3.2mm}
+.meta .lbl{font-size:6.8pt;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);margin-bottom:.6mm}
+.meta .val{font-size:8.8pt;font-weight:500;color:var(--ink)}
+h2{font-size:11.5pt;font-weight:600;color:var(--navy);margin:0 0 1.6mm}
+h2 .no{color:var(--gold);margin-right:1.6mm}
+.sec{margin-bottom:3.4mm;page-break-inside:avoid}
+p.lede{font-size:8.7pt;color:var(--ink);margin-bottom:2mm}
+.scope{display:grid;grid-template-columns:1fr 1fr;gap:2mm}
+.scope .card{border:1px solid var(--line);border-left:3px solid var(--bright);border-radius:6px;padding:2mm 2.8mm}
+.scope .card b{display:block;color:var(--navy);font-size:9pt;margin-bottom:.6mm}
+.scope .card span{font-size:8pt;color:var(--grey)}
+table{width:100%;border-collapse:collapse;font-size:8.6pt}
+th{background:var(--navy);color:#fff;font-weight:600;text-align:left;padding:1.7mm 3mm;font-size:8.4pt;white-space:nowrap}
+th.r,td.r{text-align:right}
+td{padding:1.5mm 3mm;border-bottom:1px solid var(--line);vertical-align:top}
+td .sub{display:block;font-size:7.7pt;color:var(--grey);margin-top:.3mm}
+tr.total td{background:var(--pale);font-weight:700;color:var(--navy);font-size:10pt;border-bottom:none}
+tr.total td .ex{font-weight:500;font-size:7.8pt;color:var(--grey)}
+.banner{display:flex;gap:3.4mm;margin-bottom:3.6mm}
+.banner .b{flex:1;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;border-radius:8px;padding:2.1mm 3.4mm}
+.banner .b .big{font-size:13.5pt;font-weight:700;line-height:1.25}
+.banner .b .big small{font-size:8.5pt;font-weight:500;opacity:.85}
+.banner .b .sm{display:block;font-size:7.5pt;opacity:.88;margin-top:.4mm}
+.monthly{display:flex;gap:3.4mm;margin-top:2.2mm}
+.monthly .box{flex:1;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;border-radius:8px;padding:2.6mm 3.6mm}
+.monthly .box .amt{font-size:13pt;font-weight:700}
+.monthly .box .amt small{font-size:8.5pt;font-weight:500;opacity:.85}
+.monthly .box .d{font-size:7.9pt;opacity:.9;margin-top:.8mm;line-height:1.45}
+.monthly .box.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.monthly .box.alt .amt{color:var(--navy)}
+.monthly .box.alt .d{color:var(--grey);opacity:1}
+ol.dep{margin-left:5mm;font-size:8.6pt}
+ol.dep li{margin-bottom:1.1mm;padding-left:1mm}
+ol.dep b{color:var(--navy)}
+.opts-t td{font-size:8.6pt}
+.pagebreak{page-break-before:always}
+.sign{display:flex;gap:8mm;margin-top:5mm}
+.sign .blk{flex:1}
+.sign .role{font-size:7.4pt;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--gold);margin-bottom:9mm}
+.sign .ln{border-top:1px solid var(--ink);padding-top:1.2mm;font-size:8pt;color:var(--grey)}
+.foot{margin-top:4mm;border-top:1px solid var(--line);padding-top:2.5mm;font-size:7.6pt;color:var(--grey);display:flex;justify-content:space-between}
+.smallprint{font-size:7.8pt;color:var(--grey);margin-top:2.2mm}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <img src="data:image/png;base64,{{LOGO}}" alt="Marlin Moodley">
+  <div>
+    <div class="t1">Quotation</div>
+    <div class="t2">Marlin Moodley Digital Insurance Platform — Launch Edition</div>
+  </div>
+  <div class="right"><b>Quote № MM-2026-01</b><br>Issued 8 September 2026<br>Valid to 8 October 2026 · Confidential</div>
+</div>
+
+<div class="meta">
+  <div class="cell"><div class="lbl">Prepared for</div><div class="val">Marlin Moodley · Masthead FSP 43435</div></div>
+  <div class="cell"><div class="lbl">Prepared by</div><div class="val">Move Digital</div></div>
+  <div class="cell"><div class="lbl">Reference</div><div class="val">Strategy &amp; Implementation Proposal v1.5</div></div>
+</div>
+
+<div class="banner">
+  <div class="b"><span class="big">R595,000</span><span class="sm">Fixed price for the full build · excl. VAT</span></div>
+  <div class="b"><span class="big">R50,000 <small>/month</small></span><span class="sm">Hosting, support &amp; maintenance from go-live</span></div>
+  <div class="b"><span class="big">12 weeks</span><span class="sm">To launch, from Sprint 0 kick-off</span></div>
+</div>
+
+<div class="sec">
+  <h2><span class="no">1.</span>What this quotation covers</h2>
+  <p class="lede">A fixed-scope, fixed-price build of the digital insurance platform from our Strategy &amp; Implementation Proposal (v1.5), refined with your questionnaire answers: one platform serving clients on the web, as an installable app and on WhatsApp, with your own custom CRM at the centre — the foundation for your own products and, in time, an offering to the advisor and broker market.</p>
+  <div class="scope">
+    <div class="card"><b>Website &amp; installable web app</b><span>Marketing site and client portal on your domain, installable on any phone (PWA). Light brand refresh included.</span></div>
+    <div class="card"><b>Custom CRM &amp; back office</b><span>Clients, leads, pipeline, FICA onboarding, document vault and compliance records — owned by you, no licences.</span></div>
+    <div class="card"><b>Quote engine &amp; insurer connectivity</b><span>Car/household and life quotable at launch — real-time where insurers support it, automated email elsewhere.</span></div>
+    <div class="card"><b>WhatsApp business channel</b><span>Verified WhatsApp Business API on your existing number: enquiries, quote requests, document collection and notifications.</span></div>
+    <div class="card"><b>Lead ingestion &amp; automations</b><span>Bought-lead feed straight into the CRM, with email automations for follow-up, quotes and onboarding.</span></div>
+    <div class="card"><b>Compliance-first journeys</b><span>FAIS/POPIA-aligned client journeys built on your existing FICA documentation, prepared for Masthead sign-off.</span></div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2><span class="no">2.</span>Investment — fixed price</h2>
+  <table>
+    <tr><th>Workstream</th><th class="r">Fee (ex VAT)</th></tr>
+    <tr><td><b>Sprint 0 — foundation</b><span class="sub">Discovery, architecture, compliance pack, insurer panel confirmation, Meta verification started</span></td><td class="r">R60,000</td></tr>
+    <tr><td><b>Website &amp; installable web app (PWA)</b><span class="sub">Marketing site, client portal, quote journeys, light brand refresh</span></td><td class="r">R130,000</td></tr>
+    <tr><td><b>Custom CRM &amp; back office</b><span class="sub">Client &amp; lead management, pipeline, FICA onboarding, document vault, team roles</span></td><td class="r">R150,000</td></tr>
+    <tr><td><b>Quote engine &amp; insurer integrations</b><span class="sub">Launch panel: up to 5 short-term + 5 life insurers; remainder via automated email lane</span></td><td class="r">R140,000</td></tr>
+    <tr><td><b>WhatsApp business channel</b><span class="sub">WhatsApp Business API, conversational quote &amp; service flows, document collection</span></td><td class="r">R75,000</td></tr>
+    <tr><td><b>Lead ingestion &amp; email automations</b><span class="sub">One lead-vendor feed, automated follow-up and onboarding sequences</span></td><td class="r">R40,000</td></tr>
+    <tr class="total"><td>Total — fixed price <span class="ex">All figures exclude VAT</span></td><td class="r">R595,000</td></tr>
+  </table>
+  <p class="smallprint">Only R60,000 to start — Sprint 0 is credited in full against the fixed price. Payment milestones overleaf.</p>
+  </div>
+</div>
+
+<div class="sec">
+  <h2><span class="no">3.</span>Payment milestones</h2>
+  <table>
+    <tr><th>Milestone</th><th>When</th><th class="r">Amount (ex VAT)</th></tr>
+    <tr><td><b>Acceptance — Sprint 0</b><span class="sub">Signed quotation; discovery and architecture begin</span></td><td>On signature</td><td class="r">R60,000</td></tr>
+    <tr><td><b>Build milestone 1</b><span class="sub">CRM core and website foundations demonstrated</span></td><td>End of week 4</td><td class="r">R180,000</td></tr>
+    <tr><td><b>Build milestone 2</b><span class="sub">Quote engine, WhatsApp flows and integrations demonstrated</span></td><td>End of week 8</td><td class="r">R180,000</td></tr>
+    <tr><td><b>Go-live</b><span class="sub">Platform live on your domain; training and handover complete</span></td><td>Week 12</td><td class="r">R175,000</td></tr>
+    <tr class="total"><td colspan="2">Total</td><td class="r">R595,000</td></tr>
+  </table>
+</div>
+
+<div class="pagebreak"></div>
+
+<div class="sec">
+  <h2><span class="no">4.</span>Assumptions &amp; client dependencies</h2>
+  <ol class="dep">
+    <li><b>Compliance sign-off.</b> Approval of client-facing journeys by Masthead / the licence holder is a client responsibility and a precondition for launch. Delays in obtaining sign-off move the delivery date, not the price. We recommend engaging your Masthead contact during Sprint 0 with the working prototype.</li>
+    <li><b>Launch insurer panel.</b> Integrations cover a named panel of up to 5 short-term and 5 life insurers, confirmed together in Sprint 0. Further insurers connect through the automated email lane at launch and can be upgraded to full integrations afterwards (see options below).</li>
+    <li><b>WhatsApp verification.</b> Meta Business Manager verification is initiated in week 1; WhatsApp go-live is contingent on Meta's approval timeline, which is outside our control.</li>
+    <li><b>Third-party fees at cost.</b> Usage-based fees (Meta conversation fees, document-AI processing, lead-vendor charges) are passed through at cost and are not marked up.</li>
+    <li><b>One lead vendor.</b> Version 1 integrates a single bought-lead vendor; additional vendors are priced separately.</li>
+    <li><b>Access &amp; content.</b> You provide domain, hosting and WordPress access, brand assets, your FICA/onboarding documentation, and feedback within 3 business days at each milestone.</li>
+    <li><b>Out of scope for v1.</b> Native app-store apps, full rebrand, commission/accounting modules and additional product lines — available as priced options below or scoped in Phase 2.</li>
+  </ol>
+</div>
+
+<div class="sec">
+  <h2><span class="no">5.</span>Priced options — add anytime</h2>
+  <table class="opts-t">
+    <tr><th>Option</th><th class="r">Indicative fee (ex VAT)</th></tr>
+    <tr><td>Additional real-time insurer integration (per insurer)</td><td class="r">R25,000 – R40,000</td></tr>
+    <tr><td>Native iOS &amp; Android app-store apps</td><td class="r">Priced on request</td></tr>
+    <tr><td>Additional lead-vendor feed (per vendor)</td><td class="r">R15,000 – R25,000</td></tr>
+    <tr><td>Full rebrand (strategy, identity, rollout)</td><td class="r">Separate scope</td></tr>
+  </table>
+  <p class="smallprint">This quotation is valid for 30 days from the issue date. A detailed statement of work, incorporating the assumptions above and the agreed insurer panel, will be issued for signature on acceptance. All figures exclude VAT.</p>
+</div>
+
+<div class="sec">
+  <h2><span class="no">6.</span>Acceptance</h2>
+  <div class="sign">
+    <div class="blk"><div class="role">For Marlin Moodley</div><div class="ln">Name, signature &amp; date</div></div>
+    <div class="blk"><div class="role">For Move Digital</div><div class="ln">Name, signature &amp; date</div></div>
+  </div>
+</div>
+
+<div class="foot">
+  <span><b>Marlin Moodley Digital Insurance Platform</b> — Quotation № MM-2026-01</span>
+  <span>Move Digital · Confidential</span>
+</div>
+
+</body>
+</html>
