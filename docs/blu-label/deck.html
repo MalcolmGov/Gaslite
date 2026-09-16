@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Move Digital × Blu Label — Strategy &amp; Proposition</title>
+<style>
+@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;src:url(fonts/inter-var.woff2) format('woff2')}
+:root{
+--ink:#0F172A;--grey:#5B6B80;--soft:#94A3B8;--line:#E2E8F0;
+--blue:#2563EB;--blue2:#3B82F6;--green:#16A34A;--purple:#7C3AED;--teal:#0891B2;--amber:#D97706;--pink:#DB2777;
+--bgblue:#EFF6FF;--bggreen:#ECFDF5;--bgpurple:#F5F3FF;--bgteal:#ECFEFF;--bgamber:#FFFBEB;--bggrey:#F8FAFC;--bgpink:#FDF2F8;
+--navy:#0A1424;--navy2:#122240;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@page{size:338.667mm 190.5mm;margin:0}
+body{font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;color:var(--ink);background:#fff}
+.s{width:338.667mm;height:190.5mm;overflow:hidden;page-break-after:always;position:relative;background:#fff;padding:12mm 17mm 14mm}
+.s:last-child{page-break-after:auto}
+.hdr{display:flex;align-items:center;gap:3.4mm;margin-bottom:8mm}
+.hdr img{width:9mm;height:9mm;border-radius:2.2mm}
+.hdr .wm{font-size:13.5pt;font-weight:800;letter-spacing:-.02em}
+.hdr .wm span{color:var(--blue)}
+.hdr .conf{margin-left:auto;font-size:9pt;color:var(--soft)}
+.blu{display:flex;flex-direction:column;justify-content:center;border-left:1.5px solid var(--line);padding-left:3.4mm;margin-left:.6mm}
+.blu .b1{font-size:13pt;font-weight:800;color:#2B6BE4;letter-spacing:-.02em;line-height:1}
+.blu .b2{font-size:4.6pt;font-weight:600;letter-spacing:.24em;color:#5B6B80;margin-top:.8mm}
+.kick{font-size:9.5pt;font-weight:700;letter-spacing:.28em;color:var(--blue);text-transform:uppercase;margin-bottom:5mm}
+h1{font-size:33pt;font-weight:800;letter-spacing:-.028em;line-height:1.12;margin-bottom:7mm}
+h1 .b{color:var(--blue)}h1 .g{color:var(--green)}h1 .p{color:var(--purple)}h1 .t{color:var(--teal)}h1 .a{color:var(--amber)}h1 .k{color:var(--pink)}
+.foot{position:absolute;left:17mm;right:17mm;bottom:6.5mm;display:flex;align-items:center;font-size:8.5pt;color:var(--grey)}
+.foot .dot{width:2.6mm;height:2.6mm;border-radius:50%;background:#A855F7;margin-right:2.2mm}
+.foot .pg{margin-left:auto;background:#EEF2FF;border-radius:3mm;padding:.8mm 3mm;color:var(--soft);font-weight:600}
+.foot .pg b{color:var(--blue)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5mm}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4.5mm}
+.card{border:1px solid var(--line);border-radius:4mm;padding:5mm 5.5mm;background:#fff}
+.card .lb{font-size:8.5pt;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:2.4mm}
+.card h4{font-size:14pt;font-weight:700;letter-spacing:-.01em;margin-bottom:2mm}
+.card p{font-size:10pt;color:var(--grey);line-height:1.5}
+.card ul{margin-left:4.2mm;font-size:10pt;color:var(--grey);line-height:1.55}
+.card ul li{margin-bottom:1.2mm}
+.cb{background:var(--bgblue);border-color:#DBEAFE}.cb .lb{color:var(--blue)}
+.cg{background:var(--bggreen);border-color:#D1FAE5}.cg .lb{color:var(--green)}
+.cp{background:var(--bgpurple);border-color:#EDE9FE}.cp .lb{color:var(--purple)}
+.ct{background:var(--bgteal);border-color:#CFFAFE}.ct .lb{color:var(--teal)}
+.ca{background:var(--bgamber);border-color:#FDE68A}.ca .lb{color:var(--amber)}
+.ck{background:var(--bgpink);border-color:#FBCFE8}.ck .lb{color:var(--pink)}
+.cx{background:var(--bggrey)}.cx .lb{color:var(--grey)}
+.stat{background:var(--bggrey);border:1px solid var(--line);border-radius:4mm;padding:5mm 5.5mm}
+.stat .n{font-size:23pt;font-weight:800;letter-spacing:-.02em}
+.stat .l{font-size:9.5pt;color:var(--grey);margin-top:1.4mm}
+.nb{color:var(--blue)}.ng{color:var(--green)}.np{color:var(--purple)}.nt{color:var(--teal)}.na{color:var(--amber)}.nk{color:var(--pink)}
+.bullets{list-style:none}
+.bullets li{position:relative;padding-left:7mm;font-size:11.5pt;color:var(--grey);line-height:1.55;margin-bottom:4mm}
+.bullets li::before{content:'';position:absolute;left:0;top:2.2mm;width:2.8mm;height:2.8mm;border-radius:50%;background:var(--blue)}
+.bullets b{color:var(--ink)}
+/* product one-pager */
+.prod .col{display:grid;grid-template-columns:1.05fr 1fr;gap:8mm;align-items:start}
+.prod .lead{font-size:12pt;color:var(--grey);line-height:1.6;margin-top:8mm}
+.prod .lead b{color:var(--ink)}
+.pbox{border-radius:4mm;padding:5.5mm 6mm}
+.pbox .t{font-size:9.5pt;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:3mm}
+.pbox ul{list-style:none}
+.pbox li{position:relative;padding-left:5.4mm;font-size:10.5pt;color:#3B4A5F;line-height:1.5;margin-bottom:2.2mm}
+.pbox li::before{content:'';position:absolute;left:0;top:2mm;width:1.9mm;height:1.9mm;border-radius:50%}
+.pb-b{background:var(--bgblue)}.pb-b .t{color:var(--blue)}.pb-b li::before{background:var(--blue)}
+.pb-g{background:var(--bggreen)}.pb-g .t{color:var(--green)}.pb-g li::before{background:var(--green)}
+.pb-p{background:var(--bgpurple)}.pb-p .t{color:var(--purple)}.pb-p li::before{background:var(--purple)}
+.pb-t{background:var(--bgteal)}.pb-t .t{color:var(--teal)}.pb-t li::before{background:var(--teal)}
+.pb-a{background:var(--bgamber)}.pb-a .t{color:var(--amber)}.pb-a li::before{background:var(--amber)}
+.pb-k{background:var(--bgpink)}.pb-k .t{color:var(--pink)}.pb-k li::before{background:var(--pink)}
+.stats3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5mm;margin-top:7mm}
+.picon{width:9mm;height:9mm;border-radius:2.2mm;object-fit:cover;background:#0B1220}
+.tile{width:9mm;height:9mm;border-radius:2.2mm;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:11pt}
+/* cover */
+.cover{background:radial-gradient(90mm 90mm at 82% 28%,#16305c55,transparent 70%),radial-gradient(120mm 80mm at 95% 85%,#10254a66,transparent 70%),linear-gradient(150deg,#0C1930,#0A1424 55%);color:#fff;padding:16mm 20mm}
+.cover .badge{display:inline-block;background:#13294D;color:#BFD3F5;font-size:9.5pt;font-weight:700;letter-spacing:.22em;border-radius:2.6mm;padding:2.6mm 5mm;margin:20mm 0 9mm}
+.cover h1{font-size:44pt;color:#fff;margin-bottom:6mm}
+.cover .rule{width:22mm;height:1.8mm;border-radius:1mm;background:var(--blue2);margin:2mm 0 8mm}
+.cover p{font-size:13pt;color:#B9C6DB;max-width:200mm;line-height:1.6}
+.cover .meta{position:absolute;bottom:12mm;left:20mm;font-size:9.5pt;color:#8FA3C2;display:flex;align-items:center;gap:2.2mm}
+.cover .meta .dot{width:2.4mm;height:2.4mm;border-radius:50%;background:#A855F7}
+/* roadmap */
+.dark{background:radial-gradient(100mm 80mm at 80% 20%,#16305c55,transparent 70%),radial-gradient(120mm 90mm at 10% 95%,#10254a66,transparent 70%),linear-gradient(150deg,#0C1930,#0A1424 55%);color:#fff}
+.dark .kick{color:#5B9BFF}
+.dark h1{color:#fff}
+.dark .conf{color:#7E93B8}
+.dark .wm{color:#fff}.dark .wm span{color:#5B9BFF}
+.dark .foot{color:#8FA3C2}
+.dark .foot .pg{background:#13294D;color:#8FA3C2}.dark .foot .pg b{color:#5B9BFF}
+.rline{position:relative;height:1.4mm;background:linear-gradient(90deg,#2563EB,#7C3AED 55%,#DB2777);border-radius:1mm;margin:9mm 2mm 6mm}
+.rline .nd{position:absolute;top:50%;transform:translate(-50%,-50%);width:4.6mm;height:4.6mm;border-radius:50%;background:#0A1424;border:1.2mm solid #5B9BFF;box-shadow:0 0 4mm #3B82F6aa}
+.rcols{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4.5mm}
+.rcol{background:#0F2038cc;border:1px solid #1E3A66;border-radius:4mm;padding:4.5mm 5mm}
+.rcol .ph{font-size:8.5pt;font-weight:700;letter-spacing:.22em;margin-bottom:1.6mm}
+.rcol h4{font-size:13pt;font-weight:700;color:#fff;margin-bottom:2.4mm}
+.rcol ul{list-style:none}
+.rcol li{position:relative;padding-left:4.6mm;font-size:9.5pt;color:#B9C6DB;line-height:1.5;margin-bottom:1.8mm}
+.rcol li::before{content:'';position:absolute;left:0;top:2mm;width:1.8mm;height:1.8mm;border-radius:50%}
+.rc1 .ph{color:#4ADE80}.rc1 li::before{background:#4ADE80}
+.rc2 .ph{color:#5B9BFF}.rc2 li::before{background:#5B9BFF}
+.rc3 .ph{color:#A78BFA}.rc3 li::before{background:#A78BFA}
+.rc4 .ph{color:#F472B6}.rc4 li::before{background:#F472B6}
+.rstats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4.5mm;margin-bottom:5mm}
+.rstat{background:#0F2038cc;border:1px solid #1E3A66;border-radius:3.4mm;padding:2.8mm 4mm;border-left:1.2mm solid #5B9BFF}
+.rstat .k{font-size:7pt;font-weight:700;letter-spacing:.2em;color:#7E93B8;margin-bottom:.8mm}
+.rstat .v{font-size:14pt;font-weight:800;color:#fff;line-height:1.1}
+.rstat .d{font-size:7.5pt;color:#8FA3C2;margin-top:.8mm}
+.pgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3.6mm}
+.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:3.6mm;margin-bottom:4mm}
+.pcard{background:#0F2038cc;border:1px solid #1E3A66;border-radius:3.4mm;padding:3.4mm 4mm;border-top:1mm solid var(--pc)}
+.pcard .prow{display:flex;justify-content:space-between;align-items:center;gap:2mm;margin-bottom:1.6mm}
+.pcard .pb{font-size:6.6pt;font-weight:700;letter-spacing:.14em;color:var(--pc);background:#0A1424;border:1px solid #1E3A66;border-radius:1.6mm;padding:.7mm 1.9mm;white-space:nowrap}
+.pcard .pt{font-size:6.6pt;color:#7E93B8;letter-spacing:.06em;white-space:nowrap}
+.pcard h4{font-size:9.8pt;font-weight:700;color:#fff;line-height:1.25;margin-bottom:1.4mm}
+.pcard p{font-size:7.5pt;color:#B9C6DB;line-height:1.42}
+.pcard .hl{background:#0A1424aa;border:1px solid #1E3A66;border-radius:2mm;padding:1.7mm 2.3mm;margin-top:1.7mm;font-size:7.2pt;color:#8FA3C2;line-height:1.4}
+.pcard .hl b{color:var(--pc);display:block;font-size:6.6pt;letter-spacing:.1em;margin-bottom:.5mm}
+.pcard .meta{display:flex;justify-content:space-between;margin-top:1.8mm;padding-top:1.6mm;border-top:1px solid #1E3A66;font-size:7pt;color:#7E93B8}
+.pcard .meta b{color:var(--pc)}
+.strip{display:flex;align-items:center;gap:3mm;background:#0F2038cc;border:1px solid #1E3A66;border-left:1mm solid var(--pc);border-radius:3mm;padding:2.6mm 4mm;margin-top:3.4mm}
+.strip .pb{font-size:6.6pt;font-weight:700;letter-spacing:.14em;color:var(--pc);background:#0A1424;border:1px solid #1E3A66;border-radius:1.6mm;padding:.7mm 1.9mm;white-space:nowrap}
+.strip .st1{font-size:8pt;font-weight:700;color:#fff;white-space:nowrap}
+.strip .st2{font-size:7.4pt;color:#B9C6DB;line-height:1.35}
+.strip .st3{font-size:7pt;color:var(--pc);font-weight:700;white-space:nowrap;margin-left:auto}
+.frow{display:grid;grid-template-columns:52mm 1fr 30mm;gap:4.5mm;align-items:center;background:#0F2038cc;border:1px solid #1E3A66;border-left:1mm solid var(--pc);border-radius:3mm;padding:2.8mm 4.5mm;margin-bottom:3.2mm}
+.frow .fb{display:flex;flex-direction:column;gap:1.2mm;align-items:flex-start}
+.frow .pb{font-size:6.6pt;font-weight:700;letter-spacing:.14em;color:var(--pc);background:#0A1424;border:1px solid #1E3A66;border-radius:1.6mm;padding:.7mm 1.9mm;white-space:nowrap}
+.frow .pt{font-size:6.8pt;color:#7E93B8;letter-spacing:.06em}
+.frow h4{font-size:9.6pt;font-weight:700;color:#fff;margin-bottom:.8mm}
+.frow p{font-size:7.4pt;color:#B9C6DB;line-height:1.4}
+.frow .fx{font-size:7.4pt;color:#7E93B8;text-align:right}
+.frow .fx b{color:var(--pc)}
+.jrow{display:flex;align-items:stretch;gap:2.6mm;margin:1mm 0 4mm}
+.jstep{flex:1;background:#0F2038cc;border:1px solid #1E3A66;border-top:1mm solid var(--pc);border-radius:3.4mm;padding:3.2mm 3.6mm;display:flex;flex-direction:column}
+.jstep .jn{font-size:6.8pt;font-weight:700;letter-spacing:.18em;color:var(--pc);margin-bottom:1.2mm}
+.jstep h4{font-size:10pt;font-weight:700;color:#fff;margin-bottom:1.2mm}
+.jstep p{font-size:7.6pt;color:#B9C6DB;line-height:1.42;flex:1}
+.jstep .jm{margin-top:1.8mm;padding-top:1.6mm;border-top:1px solid #1E3A66;font-size:7pt;color:#7E93B8}
+.jstep .jm b{color:var(--pc)}
+.jarr{align-self:center;color:#3B5A8F;font-size:13pt;font-weight:700}
+.jbar{display:flex;align-items:center;justify-content:center;gap:6mm;background:linear-gradient(90deg,#0F2038,#13294D,#0F2038);border:1px solid #1E3A66;border-radius:3mm;padding:2.6mm 5mm;margin-bottom:4.5mm;font-size:9pt;color:#B9C6DB}
+.jbar b{color:#fff;font-size:10.5pt}
+.jbar .sep{color:#3B5A8F}
+.moat3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3.6mm}
+.moat{background:#0F2038cc;border:1px solid #1E3A66;border-radius:3.4mm;padding:3.4mm 4.2mm}
+.moat h4{font-size:11pt;font-weight:800;color:#fff;margin-bottom:1.2mm}
+.moat h4 span{color:var(--pc)}
+.moat p{font-size:7.8pt;color:#B9C6DB;line-height:1.45}
+.agrid{display:grid;grid-template-columns:repeat(5,1fr);gap:2.8mm;margin-bottom:4mm}
+.acard{border:1px solid var(--line);border-radius:3mm;padding:2.8mm 3.2mm;background:#fff}
+.acard h5{font-size:9.5pt;font-weight:700;margin-bottom:.8mm}
+.acard p{font-size:7.4pt;color:var(--grey);line-height:1.35}
+.indstrip{background:var(--bggrey);border:1px solid var(--line);border-radius:3.4mm;padding:3mm 4.5mm;margin-bottom:4mm}
+.indstrip .lb{font-size:8pt;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin-bottom:1.8mm}
+.setup{display:flex;align-items:stretch;gap:3mm}
+.setup .st{flex:1;border:1px solid var(--line);border-radius:3.4mm;padding:3mm 4mm;background:var(--bgblue);border-color:#DBEAFE}
+.setup .st .n{font-size:8pt;font-weight:700;letter-spacing:.16em;color:var(--blue);margin-bottom:1mm}
+.setup .st h5{font-size:10.5pt;font-weight:700;margin-bottom:1mm}
+.setup .st p{font-size:8pt;color:var(--grey);line-height:1.4}
+.setup .st .tm{display:inline-block;margin-top:1.6mm;font-size:7.5pt;font-weight:700;color:#fff;background:var(--blue);border-radius:2mm;padding:.8mm 2.4mm}
+.setup .sar{align-self:center;color:var(--soft);font-size:14pt;font-weight:700}
+/* misc */
+.smallnote{font-size:9.5pt;color:var(--soft);margin-top:5mm}
+.chips{display:flex;flex-wrap:wrap;gap:2.2mm;margin-top:2.6mm}
+.chip{font-size:8pt;font-weight:600;color:#3B4A5F;background:#fff;border:1px solid var(--line);border-radius:2.2mm;padding:1mm 2.6mm}
+.flow{display:flex;align-items:stretch;gap:3.2mm}
+.flow .n{flex:1;border:1px solid var(--line);border-radius:4mm;background:var(--bggrey);padding:5mm 4mm;text-align:center}
+.flow .n .t{font-size:14pt;font-weight:800}
+.flow .n .d{font-size:9pt;color:var(--grey);margin-top:1.4mm}
+.flow .arr{align-self:center;color:var(--soft);font-size:16pt;font-weight:700}
+.flow .hot{background:var(--blue);border-color:var(--blue)}
+.flow .hot .t,.flow .hot .d{color:#fff}
+table.cmp{width:100%;border-collapse:collapse;font-size:10pt}
+table.cmp th{background:var(--navy);color:#fff;text-align:left;font-weight:700;padding:2.8mm 4mm;font-size:9.5pt}
+table.cmp td{border-bottom:1px solid var(--line);padding:2.6mm 4mm;color:var(--grey);vertical-align:top}
+table.cmp td:first-child{color:var(--ink);font-weight:600}
+table.cmp td .y{color:var(--green);font-weight:700}
+table.cmp td .n{color:#DC2626;font-weight:700}
+.rowlab{display:grid;grid-template-columns:44mm 1fr;border:1px solid var(--line);border-radius:3mm;overflow:hidden;margin-bottom:3.2mm}
+.rowlab .k{padding:3.6mm 4.5mm;font-size:10.5pt;font-weight:700;background:var(--bggrey)}
+.rowlab .v{padding:3.6mm 4.5mm;font-size:10.5pt;color:var(--grey)}
+.rowlab.hb .k{background:var(--bgblue);color:var(--blue)}
+.rowlab.hg .k{background:var(--bggreen);color:var(--green)}
+.rowlab.hp .k{background:var(--bgpurple);color:var(--purple)}
+</style>
+</head>
+<body>
+
+<!-- 01 COVER -->
+<div class="s cover">
+  <div style="display:flex;align-items:center;gap:4mm">
+    <img src="assets/move-logo.png" style="width:12mm;height:12mm;border-radius:3mm">
+    <div style="font-size:17pt;font-weight:800;letter-spacing:-.02em">Move Digital</div>
+    <div class="blu" style="border-color:#24406F"><div class="b1" style="color:#5B9BFF">blu</div><div class="b2" style="color:#7E93B8">BLU LABEL UNLIMITED</div></div>
+  </div>
+  <div class="badge">STRATEGY &amp; PROPOSITION · 2026</div>
+  <h1>AI and fintech infrastructure,<br><span style="color:#4D8DFF">for Africa’s enterprises.</span></h1>
+  <div class="rule"></div>
+  <p>Move Digital as Blu Label Unlimited's technology partner — the Zara Agentic Marketplace, Protea&nbsp;LLM and an eight-product AI &amp; fintech stack, white-labelled onto Blu Label's licensed wallet rails and offered to the enterprise customers Blu Label already serves: banks, formal retail, SPAR, petroleum forecourts, government and betting operators.</p>
+  <div class="meta"><span class="dot"></span> Move Digital × Blu Label Unlimited &nbsp;·&nbsp; Strategy &amp; Proposition &nbsp;·&nbsp; Confidential</div>
+</div>
+
+<!-- 02 EXEC PROPOSITION -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="blu"><div class="b1">blu</div><div class="b2">BLU LABEL UNLIMITED</div></div><div class="conf">Confidential</div></div>
+  <div class="kick">The proposition</div>
+  <h1>Blu Label sells AI. <span class="b">Move Digital powers it.</span></h1>
+  <div class="grid3">
+    <div class="card cb"><div class="lb">01 · The platform exists</div><h4>Live, not a roadmap</h4><p>Eight products in market today — consumer AI, an agent marketplace, sovereign language models, payments, identity, fraud and enterprise tooling. Integration is measured in days.</p></div>
+    <div class="card cg"><div class="lb">02 · The channel exists</div><h4>Your enterprise base</h4><p>Blu Label already serves the buyers — banks, formal retailers, SPAR, petroleum forecourts, government programmes and betting operators. One trusted commercial wrapper, many AI deals.</p></div>
+    <div class="card cp"><div class="lb">03 · The trust exists</div><h4>Compliance baked in</h4><p>FICA, POPIA, SARB &amp; FATF alignment, SOC&nbsp;2-grade controls, on-prem options and real-time fraud defence are part of the stack — not an integration project for the customer.</p></div>
+  </div>
+  <div class="stats3">
+    <div class="stat"><div class="n nb">8</div><div class="l">Live products, one studio — white-label &amp; multi-tenant ready</div></div>
+    <div class="stat"><div class="n ng">Days</div><div class="l">To stand up a branded deployment for a Blu Label customer</div></div>
+    <div class="stat"><div class="n np">B2B2B</div><div class="l">Blu Label owns the customer; Move Digital runs the technology</div></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>02</b> / 34</span></div>
+</div>
+
+<!-- 03 WHO WE ARE -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Who we are</div>
+  <h1>An African product studio building<br>at the edge of <span class="b">AI</span> and <span class="g">money</span>.</h1>
+  <ul class="bullets" style="margin-top:4mm">
+    <li><b>We ship products, not slideware.</b> Move Digital designs, builds and operates eight of its own AI and fintech products — live, in-market, and used by real people and institutions.</li>
+    <li><b>Africa-first by design.</b> WhatsApp-native, data-light, multilingual, and compliant with local rails and regulation — FICA, POPIA, SARB.</li>
+    <li><b>Full-stack, in-house.</b> Consumer AI, agents, language models, payments, identity, fraud, marketplaces and developer tools — one team across the whole value chain.</li>
+  </ul>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>03</b> / 34</span></div>
+</div>
+
+<!-- 04 SIX DOMAINS -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">What we build</div>
+  <h1>Seven domains of the modern <span class="b">African stack</span>.</h1>
+  <div class="grid4" style="grid-template-columns:1fr 1fr 1fr 1fr;row-gap:4.5mm">
+    <div class="card cb"><div class="lb">Consumer AI</div><h4>The channel</h4><p>A personal AI on WhatsApp — the demand layer and the direct consumer relationship.</p></div>
+    <div class="card cb"><div class="lb">AI agents</div><h4>The workforce</h4><p>A marketplace of business AI agents that sell, support and run operations in plain language.</p></div>
+    <div class="card cp"><div class="lb">Language models</div><h4>The intelligence</h4><p>Protea LLM — a sovereign, SA-tuned model layer with data residency and on-prem deployment.</p></div>
+    <div class="card cx"><div class="lb">Fintech infrastructure</div><h4>The rails</h4><p>Compliant, instant cross-border settlement for banks and fintechs.</p></div>
+    <div class="card cg"><div class="lb">Identity &amp; fraud</div><h4>The trust layer</h4><p>KYC/KYB verification and real-time fraud scoring under every transaction.</p></div>
+    <div class="card cp"><div class="lb">Marketplaces</div><h4>The platforms</h4><p>Agent and commerce marketplaces with KYC, e-contracts and payments built in.</p></div>
+    <div class="card cx"><div class="lb">Developer &amp; enterprise</div><h4>The tools</h4><p>AI security scanning and financial-reporting automation for enterprises.</p></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>04</b> / 34</span></div>
+</div>
+
+<!-- 05 PORTFOLIO -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">The portfolio</div>
+  <h1>Eight products. <span class="b">One studio.</span></h1>
+  <div class="grid4" style="row-gap:4.5mm">
+    <div class="card"><div style="display:flex;align-items:center;gap:2.6mm;margin-bottom:2.2mm"><img class="picon" src="assets/zara.png"><b style="font-size:12pt">Zara AI</b></div><p>Personal Life OS on WhatsApp.</p><p style="margin-top:1.6mm;font-size:8pt;font-weight:700;letter-spacing:.12em;color:var(--blue)">ZARAAI.DIGITAL</p></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:2.6mm;margin-bottom:2.2mm"><img class="picon" src="assets/zara.png"><b style="font-size:12pt">Zara Agents</b></div><p>Agentic marketplace for business.</p><p style="margin-top:1.6mm;font-size:8pt;font-weight:700;letter-spacing:.12em;color:var(--blue)">ZARAAI.DIGITAL/BUSINESS</p></div>
+    <div class="card cp" style="border-width:1.5px"><div style="display:flex;align-items:center;gap:2.6mm;margin-bottom:2.2mm"><div class="tile" style="background:linear-gradient(135deg,#7C3AED,#DB2777)">P</div><b style="font-size:12pt">Protea LLM</b></div><p>South Africa's sovereign AI model layer.</p><p style="margin-top:1.6mm;font-size:8pt;font-weight:700;letter-spacing:.12em;color:var(--purple)">NEW · SOVEREIGN MODEL LAYER</p></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:2.6mm;margin-bottom:2.2mm"><img class="picon" src="assets/swifter.png"><b style="font-size:12pt">Swifter</b></div><p>Cross-border stablecoin remittance.</p><p style="margin-top:1.6mm;font-size:8pt;font-weight:700;letter-spacing:.12em;color:var(--blue)">SWIFTER.DIGITAL/SEND</p></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:2.6mm;margin-bottom:2.2mm"><img class="picon" src="assets/payguard.png"><b style="font-size:12pt">PayGuard</b></div><p>ML real-time fraud defence.</p><p style="margin-top:1.6mm;font-size:8pt;font-weight:700;letter-spacing:.12em;color:var(--blue)">PAYGUARD.AFRICA</p></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:2.6mm;margin-bottom:2.2mm"><img class="picon" src="assets/ekyc.png"><b style="font-size:12pt">eKYC Africa</b></div><p>Digital identity verification.</p><p style="margin-top:1.6mm;font-size:8pt;font-weight:700;letter-spacing:.12em;color:var(--blue)">EKYC-AFRICA.COM</p></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:2.6mm;margin-bottom:2.2mm"><img class="picon" src="assets/results.png" style="object-fit:contain;padding:1mm"><b style="font-size:12pt">Results Studio</b></div><p>Financial results PDF → verified HTML.</p><p style="margin-top:1.6mm;font-size:8pt;font-weight:700;letter-spacing:.12em;color:var(--blue)">RESULTS STUDIO</p></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:2.6mm;margin-bottom:2.2mm"><img class="picon" src="assets/codeviz.png"><b style="font-size:12pt">CodeViz</b></div><p>AI security scanning &amp; fixes.</p><p style="margin-top:1.6mm;font-size:8pt;font-weight:700;letter-spacing:.12em;color:var(--blue)">CODEVIZ</p></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>05</b> / 34</span></div>
+</div>
+
+<!-- 06 ZARA AI -->
+<div class="s prod">
+  <div class="hdr"><img class="picon" src="assets/zara.png"><div class="wm">Zara AI</div><div class="conf">Confidential</div></div>
+  <div class="kick">Product · Consumer AI</div>
+  <h1>Your Personal Life OS — <span class="b">right inside WhatsApp.</span></h1>
+  <div class="col">
+    <p class="lead"><b>A personal AI super-assistant on the app everyone already has.</b> No download, no menus, no USSD. Zara handles daily tasks, bookings, briefings, shopping and more — in plain language, in 7 languages including isiZulu, isiXhosa and Afrikaans.</p>
+    <div class="pbox pb-b"><div class="t">What it does</div><ul>
+      <li>40+ command groups &amp; 50+ AI models in one chat</li>
+      <li>Outbound calls — books restaurants &amp; appointments for you</li>
+      <li>Google, Spotify &amp; calendar integration</li>
+      <li>07:00 morning briefing — weather, load-shedding, deals</li>
+      <li>Multi-store price comparison across SA retailers</li>
+      <li>Persistent memory &amp; a photorealistic voice avatar</li>
+    </ul></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Zara AI · zaraai.digital <span class="pg"><b>06</b> / 34</span></div>
+</div>
+
+<!-- 07 ZARA MARKETPLACE 1 -->
+<div class="s">
+  <div class="hdr"><img class="picon" src="assets/zara.png"><div class="wm">Zara <span>Agentic Marketplace</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Platform deep dive · 1 of 6</div>
+  <h1>The agentic marketplace — <span class="b">an AI workforce as a platform.</span></h1>
+  <div class="grid4">
+    <div class="card cb"><div class="lb">The catalogue</div><h4>500+ pre-built agents</h4><p>Customer support, sales, invoicing, procurement, BI, legal, collections, chief-of-staff and more — plus Autonomous Enterprise Suites: pre-configured multi-agent departments that deploy as one.</p></div>
+    <div class="card cg"><div class="lb">The builder</div><h4>No-code agent studio</h4><p>Compose an agent from skills, knowledge and guardrails — by form, by voice, or with the 10-second website-to-agent cloner. Test in a self-serve sandbox before anything ships.</p></div>
+    <div class="card cp"><div class="lb">The runtime</div><h4>Durable execution</h4><p>An orchestration engine that chains tasks end-to-end, calls tools, holds state across days and recovers from failures — production-grade, not a demo loop.</p></div>
+    <div class="card ct"><div class="lb">The console</div><h4>Admin &amp; analytics</h4><p>Per-tenant usage, performance and cost dashboards; human handover queues; full conversation audit for compliance teams.</p></div>
+  </div>
+  <div class="stats3">
+    <div class="stat"><div class="n nb">500+</div><div class="l">Pre-built agents across every business function</div></div>
+    <div class="stat"><div class="n ng">Minutes</div><div class="l">To embed an agent on WhatsApp, web or API</div></div>
+    <div class="stat"><div class="n np">Multi-tenant</div><div class="l">White-label ready — every Blu Label customer gets their own branded instance</div></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Zara Agentic Marketplace · zaraai.digital/business <span class="pg"><b>07</b> / 34</span></div>
+</div>
+
+
+<!-- 07b AGENT CATALOGUE -->
+<div class="s">
+  <div class="hdr"><img class="picon" src="assets/zara.png"><div class="wm">Zara <span>Agentic Marketplace</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Platform deep dive · 2 of 6</div>
+  <h1>500+ agents, pre-built. <span class="b">Live in minutes, no code.</span></h1>
+  <div class="agrid">
+    <div class="acard"><h5>🎧 Customer support</h5><p>Tickets, FAQs, order status, returns — resolved 24/7 in the customer's language.</p></div>
+    <div class="acard"><h5>💼 Sales reps</h5><p>Qualify leads, follow up, quote, negotiate and close — with memory of every contact.</p></div>
+    <div class="acard"><h5>🧾 Invoice AI</h5><p>Billing, statements, reconciliation and respectful debtor chasing on WhatsApp &amp; email.</p></div>
+    <div class="acard"><h5>💰 Collections</h5><p>Autonomous cash recovery — payment nudges, arrangements and settlement tracking.</p></div>
+    <div class="acard"><h5>📊 BI analysts</h5><p>"Why did sales dip in KZN?" — answers from the business's own data, on demand.</p></div>
+    <div class="acard"><h5>📦 Procurement</h5><p>RFQs, supplier comparison and purchase orders run end-to-end.</p></div>
+    <div class="acard"><h5>⚖️ Legal AI</h5><p>Contract review, compliance checks and POPIA queries — flagged for human sign-off.</p></div>
+    <div class="acard"><h5>👥 HR &amp; people</h5><p>Candidate screening, onboarding, leave and policy questions handled in-chat.</p></div>
+    <div class="acard"><h5>📣 Marketing</h5><p>Campaign copy, social replies and promotion broadcasts — advisor-approved templates.</p></div>
+    <div class="acard"><h5>🤝 Chief of Staff</h5><p>Diary, briefings, meeting prep and cross-team coordination for the executive.</p></div>
+  </div>
+  <div class="indstrip"><div class="lb">Built for the industries Blu Label serves</div>
+    <div class="chips" style="margin-top:0"><span class="chip">Banking &amp; fintech</span><span class="chip">Insurance</span><span class="chip">Retail &amp; e-commerce</span><span class="chip">Petroleum &amp; forecourts</span><span class="chip">Betting &amp; gaming</span><span class="chip">Government &amp; public services</span><span class="chip">Logistics</span><span class="chip">Hospitality</span><span class="chip">Healthcare</span><span class="chip">Real estate</span><span class="chip">Professional services</span><span class="chip">Education</span></div>
+  </div>
+  <div class="setup">
+    <div class="st"><div class="n">STEP 1 · PICK</div><h5>Choose from the catalogue</h5><p>Browse 500+ pre-built agents or point the cloner at any company website for an instant branded draft.</p><span class="tm">~10 seconds to clone</span></div>
+    <div class="sar">→</div>
+    <div class="st"><div class="n">STEP 2 · CONFIGURE</div><h5>No code, by form or voice</h5><p>Load knowledge, set guardrails and brand voice — describe what you want out loud and the studio builds it.</p><span class="tm">No engineering team</span></div>
+    <div class="sar">→</div>
+    <div class="st"><div class="n">STEP 3 · DEPLOY</div><h5>Live on WhatsApp, web or API</h5><p>Test in the sandbox, then ship. Autonomous Enterprise Suites deploy whole departments as one.</p><span class="tm">Minutes to live</span></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Zara Agentic Marketplace · zaraai.digital/agentplatform <span class="pg"><b>08</b> / 34</span></div>
+</div>
+
+<!-- 08 ZARA MARKETPLACE 2 -->
+<div class="s">
+  <div class="hdr"><img class="picon" src="assets/zara.png"><div class="wm">Zara <span>Agentic Marketplace</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Platform deep dive · 3 of 6</div>
+  <h1>The bells and whistles — <span class="b">all standard, all live.</span></h1>
+  <div class="grid3" style="row-gap:4mm">
+    <div class="card"><h4 style="font-size:11.5pt">🧠 Persistent memory</h4><p>Agents remember every customer across conversations, channels and months — context compounds instead of resetting.</p></div>
+    <div class="card"><h4 style="font-size:11.5pt">📚 Company knowledge (RAG)</h4><p>Upload policies, price lists and product docs; agents answer from the business's own knowledge, with citations.</p></div>
+    <div class="card"><h4 style="font-size:11.5pt">📞 Voice &amp; outbound calling</h4><p>Agents speak — inbound voice notes understood, outbound calls placed for bookings, reminders and collections.</p></div>
+    <div class="card"><h4 style="font-size:11.5pt">⚡ Tools &amp; actions</h4><p>Agents do, not just say: take payments, verify identity, book slots, update the CRM, issue vouchers — via governed tool calls.</p></div>
+    <div class="card"><h4 style="font-size:11.5pt">🔗 Workflow chaining</h4><p>Chain agents into end-to-end journeys — lead → qualify → KYC → quote → payment → onboarding — with state carried through.</p></div>
+    <div class="card"><h4 style="font-size:11.5pt">🙋 Human handover</h4><p>Confidence-based escalation to human teams with full context attached; humans and agents share one inbox.</p></div>
+    <div class="card"><h4 style="font-size:11.5pt">🛡️ POPIA data shield</h4><p>Real-time SA ID redaction and PCI-DSS card masking in every conversation, plus topic fences, approval gates and a complete audit log.</p></div>
+    <div class="card"><h4 style="font-size:11.5pt">📊 Metering &amp; billing</h4><p>Token and action metering per tenant, per agent — usage-based billing your finance team can reconcile.</p></div>
+    <div class="card"><h4 style="font-size:11.5pt">⚡ Website-to-agent cloner</h4><p>Point it at any company website and get a working branded agent in ~10 seconds — the fastest demo in every sales meeting.</p></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Zara Agentic Marketplace · zaraai.digital/business <span class="pg"><b>09</b> / 34</span></div>
+</div>
+
+<!-- 8b CONNECTORS -->
+<div class="s">
+  <div class="hdr"><img class="picon" src="assets/zara.png"><div class="wm">Zara <span>Agentic Marketplace</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Platform deep dive · 4 of 6</div>
+  <h1>Connected to the systems <span class="b">business already runs on.</span></h1>
+  <div class="grid3">
+    <div class="card cb"><div class="lb">Business data connectors</div><h4>Finance &amp; accounting</h4><p>Read-only connectors give agents live business context — invoices chased, cash-flow questions answered, reconciliations flagged.</p><div class="chips"><span class="chip">Xero</span><span class="chip">Sage</span><span class="chip">QuickBooks</span><span class="chip">Paystack</span></div></div>
+    <div class="card cg"><div class="lb">Platform connectors</div><h4>Commerce &amp; service</h4><p>Agents act inside the tools teams already use — orders looked up, tickets resolved, customers messaged where they are.</p><div class="chips"><span class="chip">Shopify</span><span class="chip">Zendesk</span><span class="chip">WhatsApp Business</span><span class="chip">Web &amp; in-app</span></div></div>
+    <div class="card cp"><div class="lb">Developer surface</div><h4>Webhooks &amp; MCP</h4><p>REST API with test/live keys, webhook endpoints for events, and MCP servers so agents plug into any backend — including Blu Label's rails and a customer's core systems.</p><div class="chips"><span class="chip">REST API</span><span class="chip">Webhooks</span><span class="chip">MCP servers</span><span class="chip">HMAC-signed</span></div></div>
+  </div>
+  <div class="stats3">
+    <div class="stat"><div class="n nb">MCP</div><div class="l">Open protocol — any system a customer runs can become an agent tool</div></div>
+    <div class="stat"><div class="n ng">Events out</div><div class="l">Webhooks push every agent action into the customer's own stack</div></div>
+    <div class="stat"><div class="n np">Test → live</div><div class="l">Sandboxed keys and staged rollout, the way payment platforms do it</div></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Zara Agentic Marketplace · zaraai.digital/agentplatform <span class="pg"><b>10</b> / 34</span></div>
+</div>
+
+<!-- 8c VOICE & BOARDROOM -->
+<div class="s">
+  <div class="hdr"><img class="picon" src="assets/zara.png"><div class="wm">Zara <span>Agentic Marketplace</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Platform deep dive · 5 of 6</div>
+  <h1>Voice-native, and an <span class="b">AI Boardroom</span> on call.</h1>
+  <div class="grid2">
+    <div class="card cb"><div class="lb">Voice, end to end</div><h4>Build by voice. Deploy by voice.</h4><ul>
+      <li>Describe the agent you want out loud — the studio builds it from the conversation</li>
+      <li>Deploy it as a <b>live voice agent</b> that answers and places calls, not just chats</li>
+      <li><b>AI Voice Simulation Arena</b> — rehearse and stress-test agents against realistic callers before go-live</li>
+      <li>Real-time WebRTC <b>avatar video calls</b> — a face and a voice for sales, service and negotiation</li>
+    </ul></div>
+    <div class="card cp"><div class="lb">AI Executive Boardroom</div><h4>Multi-agent consensus for big decisions</h4><ul>
+      <li>Convene up to <b>10 C-suite agent roles</b> — CFO, COO, CMO, CISO, CRO, General Counsel, Compliance Lead, CHRO, CPO, Head of Enterprise Sales</li>
+      <li>Each seat argues its brief; the boardroom converges on a documented recommendation</li>
+      <li>A structured second opinion for pricing, launches, risk and policy calls — minutes, not weeks</li>
+      <li>Every deliberation logged and auditable — governance-grade by design</li>
+    </ul></div>
+  </div>
+  <div class="chips" style="margin-top:3mm"><span class="chip">Simli WebRTC avatars</span><span class="chip">Bland.ai</span><span class="chip">Twilio</span><span class="chip">Africa's Talking</span><span class="chip">WhatsApp voice</span><span class="chip">Neural voice</span></div>
+  <p class="smallnote">Voice and the Boardroom are live in the platform console today — the demo that separates this proposal from every slideware pitch a customer has seen.</p>
+  <div class="foot"><span class="dot"></span> Zara Agentic Marketplace · zaraai.digital/agentplatform <span class="pg"><b>11</b> / 34</span></div>
+</div>
+
+<!-- 09 ZARA MARKETPLACE 3 - USP -->
+<div class="s dark">
+  <div class="hdr"><img class="picon" src="assets/zara.png"><div class="wm" style="color:#fff">Zara <span style="color:#5B9BFF">Agentic Marketplace</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Platform deep dive · 6 of 6 · The USP</div>
+  <h1>One conversation. <span style="color:#4ADE80">Verified, quoted, paid, protected.</span></h1>
+  <div class="jrow">
+    <div class="jstep" style="--pc:#5B9BFF"><div class="jn">01 · THE ASK</div><h4>Sipho messages on WhatsApp</h4><p>"Ngicela i-quote ye-inshorense yemoto" — the agent answers in isiZulu, on the phone he already owns, on the app he already uses.</p><div class="jm">Zara Agents · <b>Protea LLM</b></div></div>
+    <div class="jarr">→</div>
+    <div class="jstep" style="--pc:#2DD4BF"><div class="jn">02 · VERIFIED</div><h4>Identity, in the chat</h4><p>ID document photographed, passive liveness confirmed, sanctions screened — without ever leaving the conversation.</p><div class="jm">eKYC Africa · <b>&lt;60 seconds</b></div></div>
+    <div class="jarr">→</div>
+    <div class="jstep" style="--pc:#A78BFA"><div class="jn">03 · CLOSED</div><h4>Quoted &amp; agreed</h4><p>The agent compares options, answers objections from the business's own knowledge, and confirms the deal — with memory of every prior interaction.</p><div class="jm">Agent runtime · <b>RAG + memory</b></div></div>
+    <div class="jarr">→</div>
+    <div class="jstep" style="--pc:#4ADE80"><div class="jn">04 · PAID</div><h4>Money moves on licensed rails</h4><p>Voucher, payment or remittance executed in-chat on Blu Label's regulated rails — no redirect, no drop-off, no call centre.</p><div class="jm">Blu rails · Swifter · <b>in-chat</b></div></div>
+    <div class="jarr">→</div>
+    <div class="jstep" style="--pc:#F87171"><div class="jn">05 · PROTECTED</div><h4>Fraud scored, PII shielded</h4><p>Every transaction scored across 40+ signals before the money moves; SA IDs redacted, cards masked, everything logged.</p><div class="jm">PayGuard · <b>&lt;100ms</b></div></div>
+  </div>
+  <div class="jbar"><span><b>±4 minutes</b> end-to-end</span><span class="sep">·</span><span><b>Zero</b> human touches</span><span class="sep">·</span><span><b>Full</b> FICA/POPIA audit trail</span><span class="sep">·</span><span><b>Live</b> in the console today</span></div>
+  <div class="moat3">
+    <div class="moat" style="--pc:#4ADE80"><h4>Others chat. <span>Zara transacts.</span></h4><p>Chatbot platforms hand off to a website when money appears. Here the payment, the vouchers and the remittance are native to the conversation.</p></div>
+    <div class="moat" style="--pc:#5B9BFF"><h4>Others bolt trust on. <span>Ours is built in.</span></h4><p>Identity, fraud and compliance aren't integration projects for the customer — they're the platform's own eKYC, PayGuard and POPIA shield, under every agent.</p></div>
+    <div class="moat" style="--pc:#A78BFA"><h4>Others sell seats. <span>We hand you platforms.</span></h4><p>White-label tenants with CNAME domains and per-tenant billing — Blu Label sells a branded platform to each customer, not licences to a tool.</p></div>
+  </div>
+  <p class="smallnote" style="color:#8FA3C2">No other platform in the region pairs an agent marketplace with its own identity, fraud and settlement layers — live, in one stack. That combination is the moat.</p>
+  <div class="foot"><span class="dot"></span> Zara Agentic Marketplace · zaraai.digital/agentplatform <span class="pg"><b>12</b> / 34</span></div>
+</div>
+
+<!-- 10 PROTEA LLM 1 -->
+<div class="s prod">
+  <div class="hdr"><div class="tile" style="background:linear-gradient(135deg,#7C3AED,#DB2777)">P</div><div class="wm">Protea <span style="color:var(--purple)">LLM</span></div><div class="conf">Confidential</div></div>
+  <div class="kick" style="color:var(--purple)">Product · Language models</div>
+  <h1>South Africa's <span class="p">sovereign AI layer.</span></h1>
+  <div class="col">
+    <p class="lead"><b>A South African language-model layer — tuned here, hosted here, governed here.</b> Protea pairs SA-tuned models for local languages and context with a provider-agnostic router across 50+ frontier models — so every workload runs on the right model, and sensitive workloads never have to leave the country.</p>
+    <div class="pbox pb-p"><div class="t">What it delivers</div><ul>
+      <li>SA-tuned models — isiZulu, isiXhosa, Afrikaans, Sesotho &amp; more</li>
+      <li>Data residency in South Africa · POPIA-first by design</li>
+      <li>On-prem &amp; private-cloud deployment for banks and government</li>
+      <li>Provider-agnostic routing with automatic fallback &amp; cost guards</li>
+      <li>Domain packs: financial services, retail, public services</li>
+      <li>Powers Zara, the agent marketplace and every white-label tenant</li>
+    </ul></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Protea LLM · Move Digital <span class="pg"><b>13</b> / 34</span></div>
+</div>
+
+<!-- 11 PROTEA LLM 2 -->
+<div class="s">
+  <div class="hdr"><div class="tile" style="background:linear-gradient(135deg,#7C3AED,#DB2777)">P</div><div class="wm">Protea <span style="color:var(--purple)">LLM</span></div><div class="conf">Confidential</div></div>
+  <div class="kick" style="color:var(--purple)">Why it matters</div>
+  <h1>Sovereignty is the <span class="p">enterprise unlock.</span></h1>
+  <div class="grid4">
+    <div class="card cp"><div class="lb">Government</div><h4>Sovereign by default</h4><p>Citizen data stays in-country, on infrastructure the state can inspect — the precondition for public-sector AI at any scale.</p></div>
+    <div class="card cb"><div class="lb">Banks</div><h4>Regulator-ready</h4><p>On-prem or private-cloud inference, full audit trails and POPIA data residency — AI the compliance office can approve.</p></div>
+    <div class="card cg"><div class="lb">Reach</div><h4>Speaks the market</h4><p>Local-language fluency is conversion: customers transact in the language they trust, from Sandton to Umlazi.</p></div>
+    <div class="card ca"><div class="lb">Economics</div><h4>Right-sized cost</h4><p>Routing sends heavy reasoning to frontier models and volume traffic to efficient local models — measured per token, per tenant.</p></div>
+  </div>
+  <div class="stats3">
+    <div class="stat"><div class="n np">11</div><div class="l">Official languages in scope for the Protea programme</div></div>
+    <div class="stat"><div class="n nb">On-prem</div><div class="l">Deployment option — data never leaves the customer's network</div></div>
+    <div class="stat"><div class="n ng">50+</div><div class="l">Models routed behind one API — no vendor lock-in</div></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Protea LLM · Move Digital <span class="pg"><b>14</b> / 34</span></div>
+</div>
+
+<!-- 12 SWIFTER -->
+<div class="s prod">
+  <div class="hdr"><img class="picon" src="assets/swifter.png"><div class="wm">Swifter</div><div class="conf">Confidential</div></div>
+  <div class="kick">Product · Fintech infrastructure</div>
+  <h1>Cross-border stablecoin remittance, <span class="b">settled in seconds.</span></h1>
+  <div class="col">
+    <p class="lead"><b>The invisible technology layer behind compliant remittance.</b> Licensed banks and fintechs integrate one REST API — Swifter never holds customer funds, and settles across 20+ African corridors in under 60 seconds via stablecoin rails.</p>
+    <div class="pbox pb-b"><div class="t">Under the hood</div><ul>
+      <li>Real-time FX aggregation across liquidity providers</li>
+      <li>Settlement in &lt;60s via USDC on Solana</li>
+      <li>Built-in KYC, AML &amp; sanctions — SARB &amp; FATF aligned</li>
+      <li>Payouts to bank, mobile wallet &amp; business A2A</li>
+      <li>~50% cheaper than correspondent banking</li>
+      <li>99.97% uptime SLA · white-label dashboard</li>
+    </ul></div>
+  </div>
+  <div class="stats3">
+    <div class="stat"><div class="n nb">20+</div><div class="l">African corridors live</div></div>
+    <div class="stat"><div class="n nb">&lt;60s</div><div class="l">End-to-end settlement</div></div>
+    <div class="stat"><div class="n nb">99.97%</div><div class="l">Uptime SLA</div></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Swifter · swifter.digital/send <span class="pg"><b>15</b> / 34</span></div>
+</div>
+
+<!-- 13 PAYGUARD -->
+<div class="s prod">
+  <div class="hdr"><img class="picon" src="assets/payguard.png"><div class="wm">PayGuard</div><div class="conf">Confidential</div></div>
+  <div class="kick" style="color:var(--green)">Product · Fraud prevention</div>
+  <h1>ML fraud defence — <span class="g">before the money moves.</span></h1>
+  <div class="col">
+    <p class="lead"><b>A transaction-time fraud decision engine.</b> PayGuard detects, scores and blocks fraud in under 100 ms — across payments, SIM swap, social engineering, account takeover and mule networks. Four lines of code to integrate.</p>
+    <div class="pbox pb-g"><div class="t">How it defends</div><ul>
+      <li>40+ device &amp; behavioural signals in real time</li>
+      <li>20+ fraud rules across 6 attack categories</li>
+      <li>Neo4j fraud graph for mule-network detection</li>
+      <li>ML anomaly detection trained on African patterns</li>
+      <li>Device fingerprinting · emulator &amp; jailbreak detection</li>
+      <li>Native iOS &amp; Android SDK · analytics dashboard</li>
+    </ul></div>
+  </div>
+  <div class="stats3">
+    <div class="stat"><div class="n ng">&lt;100ms</div><div class="l">Fraud decision at transaction time</div></div>
+    <div class="stat"><div class="n ng">4 lines</div><div class="l">Of code to integrate the SDK</div></div>
+    <div class="stat"><div class="n ng">6</div><div class="l">Attack categories covered</div></div>
+  </div>
+  <div class="foot"><span class="dot"></span> PayGuard · payguard.africa <span class="pg"><b>16</b> / 34</span></div>
+</div>
+
+<!-- 14 EKYC -->
+<div class="s prod">
+  <div class="hdr"><img class="picon" src="assets/ekyc.png"><div class="wm">eKYC Africa</div><div class="conf">Confidential</div></div>
+  <div class="kick" style="color:var(--teal)">Product · Identity &amp; compliance</div>
+  <h1>Verify any African ID in <span class="t">under 60 seconds.</span></h1>
+  <div class="col">
+    <p class="lead"><b>Africa's leading eKYC platform — built for all 54 countries.</b> AI document verification, passive biometric liveness and AML screening in one flow. FICA &amp; POPIA compliant, and it even works offline or over WhatsApp.</p>
+    <div class="pbox pb-t"><div class="t">What it verifies</div><ul>
+      <li>200+ document types across 54 African countries</li>
+      <li>Passive biometric liveness — no user actions needed</li>
+      <li>Screening vs 1,300+ sanctions, PEP &amp; watchlists</li>
+      <li>KYB — business, registry &amp; beneficial-owner checks</li>
+      <li>WhatsApp verification &amp; offline capture with sync</li>
+      <li>AES-256 · SOC 2 · GDPR · POPIA ready</li>
+    </ul></div>
+  </div>
+  <div class="stats3">
+    <div class="stat"><div class="n nt">54</div><div class="l">African countries covered</div></div>
+    <div class="stat"><div class="n nt">99.8%</div><div class="l">Verification accuracy</div></div>
+    <div class="stat"><div class="n nt">&lt;60s</div><div class="l">Time to verified</div></div>
+  </div>
+  <div class="foot"><span class="dot"></span> eKYC Africa · ekyc-africa.com <span class="pg"><b>17</b> / 34</span></div>
+</div>
+
+<!-- 16 CODEVIZ -->
+<div class="s prod">
+  <div class="hdr"><img class="picon" src="assets/codeviz.png"><div class="wm">CodeViz</div><div class="conf">Confidential</div></div>
+  <div class="kick" style="color:var(--purple)">Product · Developer &amp; security</div>
+  <h1>Find, verify and fix vulnerabilities — <span class="p">automatically.</span></h1>
+  <div class="col">
+    <p class="lead"><b>The AI security platform that fixes what it finds.</b> Deterministic static analysis pairs with AI triage to surface real vulnerabilities, suppress false positives, and ship the fix as a pull request — all on your own infrastructure. No code leaves your network.</p>
+    <div class="pbox pb-p"><div class="t">How it works</div><ul>
+      <li>13 analysis dimensions · Semgrep security engine</li>
+      <li>AI-verified findings that cut false positives</li>
+      <li>Auto-remediation — patches shipped as a real PR</li>
+      <li>SARIF export &amp; CI/CD gates (Azure DevOps, GitHub)</li>
+      <li>Self-hosted — zero cloud, MNPI-safe</li>
+      <li>Compliance reporting (SOC 2 / PCI)</li>
+    </ul></div>
+  </div>
+  <div class="foot"><span class="dot"></span> CodeViz · Move Digital <span class="pg"><b>18</b> / 34</span></div>
+</div>
+
+<!-- 17 RESULTS STUDIO -->
+<div class="s prod">
+  <div class="hdr"><img class="picon" src="assets/results.png" style="object-fit:contain;background:#0B1220;padding:1mm"><div class="wm">Results Studio</div><div class="conf">Confidential</div></div>
+  <div class="kick" style="color:var(--green)">Product · Financial reporting</div>
+  <h1>Financial results PDF → <span class="g">verified interactive HTML.</span></h1>
+  <div class="col">
+    <p class="lead"><b>Turn a published results PDF into a brand-faithful microsite.</b> A nine-step pipeline with human gates derives every visual decision from the source PDF's measured design DNA — and <b>the AI never touches a number</b>: numeric content flows by reference only, verified by blocking gates before export.</p>
+    <div class="pbox pb-g"><div class="t">The pipeline</div><ul>
+      <li>Design-DNA extraction — brand pulled from the PDF</li>
+      <li>Verbatim numbers, end-to-end — never re-typed</li>
+      <li>Blocking QA gates before anything ships</li>
+      <li>Human review &amp; sign-off workflow</li>
+      <li>Private &amp; secure by design — MNPI-grade</li>
+      <li>Export-ready interactive results microsite</li>
+    </ul></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Results Studio · Move Digital <span class="pg"><b>19</b> / 34</span></div>
+</div>
+
+<!-- 18 ECOSYSTEM -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">The ecosystem</div>
+  <h1>Verify once. <span class="b">Serve across the stack.</span></h1>
+  <div class="flow" style="margin:4mm 0 8mm">
+    <div class="n"><div class="t">Zara</div><div class="d">AI channel &amp; demand</div></div><div class="arr">→</div>
+    <div class="n"><div class="t">Protea</div><div class="d">Understand &amp; decide</div></div><div class="arr">→</div>
+    <div class="n"><div class="t">eKYC</div><div class="d">Verify identity</div></div><div class="arr">→</div>
+    <div class="n hot"><div class="t">Swifter</div><div class="d">Move the money</div></div><div class="arr">→</div>
+    <div class="n"><div class="t">PayGuard</div><div class="d">Protect every transaction</div></div>
+  </div>
+  <ul class="bullets">
+    <li><b>One consumer identity, verified once</b> — eKYC clears a customer for Zara, Swifter and any partner on the network.</li>
+    <li><b>The money moves and stays safe</b> — Swifter settles it, PayGuard scores every transaction in real time so trust scales with volume.</li>
+    <li><b>Enterprise tools compound the moat</b> — CodeViz secures the code and Results Studio automates financial reporting for the same institutions.</li>
+  </ul>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>20</b> / 34</span></div>
+</div>
+
+<!-- 19 THE FIT -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="blu"><div class="b1">blu</div><div class="b2">BLU LABEL UNLIMITED</div></div><div class="conf">Confidential</div></div>
+  <div class="kick">The fit</div>
+  <h1>Two halves of <span class="b">one offering.</span></h1>
+  <div class="grid2">
+    <div class="card cg"><div class="lb">Blu Label brings</div><ul>
+      <li>Licensed wallet rails &amp; the ADLA remittance licence — the regulated money layer</li>
+      <li>A trusted, regulated brand SA enterprises already work with</li>
+      <li>Aggregation at scale — one platform integration reaches many enterprises</li>
+      <li>The enterprise relationships — banks, formal retail, SPAR, forecourts, government &amp; betting</li>
+    </ul></div>
+    <div class="card cb"><div class="lb">Move Digital brings</div><ul>
+      <li>The Zara Agentic Marketplace — a white-label AI workforce platform</li>
+      <li>Protea LLM — sovereign, multilingual, on-prem-ready intelligence</li>
+      <li>eKYC identity + PayGuard fraud + Swifter remittance technology</li>
+      <li>A live eight-product stack — days to integrate, not quarters</li>
+    </ul></div>
+  </div>
+  <p style="font-size:12pt;margin-top:6mm">Together: <b>the AI solutions provider to Blu Label's enterprise base</b> — sold under a brand those customers already trust, powered by a stack that already exists.</p>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>21</b> / 34</span></div>
+</div>
+
+<!-- 20 ROUTE TO MARKET -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="blu"><div class="b1">blu</div><div class="b2">BLU LABEL UNLIMITED</div></div><div class="conf">Confidential</div></div>
+  <div class="kick">Route to market</div>
+  <h1>Your customers. Our platform. <span class="b">One offer.</span></h1>
+  <div class="flow" style="margin:2mm 0 7mm">
+    <div class="n" style="flex:1.1"><div class="t" style="font-size:12pt">Move Digital</div><div class="d">Platform, models, engineering, run &amp; support</div></div><div class="arr">→</div>
+    <div class="n hot" style="flex:1.1"><div class="t" style="font-size:12pt">Blu Label</div><div class="d">Brand, wallet rails, licences &amp; the enterprise relationships</div></div><div class="arr">→</div>
+    <div class="n" style="flex:2"><div class="t" style="font-size:12pt">Enterprise customers</div><div class="d">Banks · formal retail · SPAR · petroleum forecourts · government · betting operators</div></div><div class="arr">→</div>
+    <div class="n" style="flex:.9"><div class="t" style="font-size:12pt">Consumers</div><div class="d">On WhatsApp, web &amp; in-store</div></div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4 style="font-size:12pt">White-label everything</h4><p>Productised today — custom branding, CNAME domains and per-tenant billing are a platform tier, not a project. Move Digital stays the invisible engine room.</p></div>
+    <div class="card"><h4 style="font-size:12pt">Revenue share, per tenant</h4><p>Platform licence + usage metering per customer; Blu Label margins the commercial layer it owns.</p></div>
+    <div class="card"><h4 style="font-size:12pt">One integration, many deals</h4><p>Blu Label integrates the stack once; every subsequent enterprise deal is configuration and branding, not a new build.</p></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>22</b> / 34</span></div>
+</div>
+
+<!-- 21 SECTOR: BANKS -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Sector play · 01</div>
+  <h1>Banks — <span class="b">agentic banking, compliantly.</span></h1>
+  <div class="grid4">
+    <div class="card cb"><div class="lb">Serve</div><h4>Banking agents on WhatsApp</h4><p>Balance, statements, disputes, product questions — resolved by agents in the customer's language, with human handover.</p><div class="chips"><span class="chip">Zara Agents</span><span class="chip">Protea</span></div></div>
+    <div class="card ct"><div class="lb">Onboard</div><h4>FICA at digital scale</h4><p>Account opening and KYC-refresh campaigns in chat — document, liveness and sanctions checks in under 60 seconds.</p><div class="chips"><span class="chip">eKYC Africa</span></div></div>
+    <div class="card cg"><div class="lb">Protect</div><h4>Fraud under every rand</h4><p>Transaction-time scoring, SIM-swap and mule-network detection — &lt;100ms decisions that cut losses without adding friction.</p><div class="chips"><span class="chip">PayGuard</span></div></div>
+    <div class="card cp"><div class="lb">Expand</div><h4>Remittance in a box</h4><p>A branded cross-border product on Swifter's rails and Blu Label's ADLA licence — 20+ corridors, settled in seconds.</p><div class="chips"><span class="chip">Swifter</span><span class="chip">Blu rails</span></div></div>
+  </div>
+  <p class="smallnote">Deployment options the compliance office can sign: on-prem Protea inference, SA data residency, full audit logs, SOC 2-grade controls.</p>
+  <div class="foot"><span class="dot"></span> Sector strategies · Banks <span class="pg"><b>23</b> / 34</span></div>
+</div>
+
+<!-- 22 SECTOR: RETAIL & FORECOURTS -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Sector play · 02</div>
+  <h1>Formal retail, SPAR &amp; <span class="a">petroleum forecourts.</span></h1>
+  <div class="grid3">
+    <div class="card ca"><div class="lb">Retail &amp; SPAR</div><h4>The WhatsApp storefront</h4><p>Ordering, promotions, price checks and store-finder agents per banner or per store — with payments and rewards completed in-chat on Blu Label wallet rails.</p><div class="chips"><span class="chip">Zara Agents</span><span class="chip">Blu wallet</span></div></div>
+    <div class="card ca"><div class="lb">Retail operations</div><h4>Back-of-store agents</h4><p>Supplier KYB onboarding, staff helpdesk, shrinkage reporting and head-office knowledge agents that answer from the retailer's own manuals.</p><div class="chips"><span class="chip">eKYC KYB</span><span class="chip">RAG</span></div></div>
+    <div class="card ca"><div class="lb">Forecourts</div><h4>The driver relationship</h4><p>Loyalty, fuel vouchers, fleet accounts and rewards at the till — a per-forecourt agent that turns a fill-up into a repeat customer.</p><div class="chips"><span class="chip">Zara Agents</span><span class="chip">PayGuard</span><span class="chip">Blu vouchers</span></div></div>
+  </div>
+  <div class="stats3">
+    <div class="stat"><div class="n na">Per-store</div><div class="l">Tenanting — every banner, region or site gets its own branded agent</div></div>
+    <div class="stat"><div class="n na">In-chat</div><div class="l">Payments &amp; vouchers on rails Blu Label already operates</div></div>
+    <div class="stat"><div class="n na">Data</div><div class="l">First-party conversational data the retailer owns — consented, POPIA-clean</div></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Sector strategies · Retail &amp; forecourts <span class="pg"><b>24</b> / 34</span></div>
+</div>
+
+<!-- 23 SECTOR: GOVERNMENT -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Sector play · 03</div>
+  <h1>Government — <span class="p">citizen services that answer.</span></h1>
+  <div class="grid4">
+    <div class="card cp"><div class="lb">Access</div><h4>Multilingual citizen assistants</h4><p>Municipal billing, service requests, programme information — answered on WhatsApp in all official languages, 24/7.</p><div class="chips"><span class="chip">Zara Agents</span><span class="chip">Protea</span></div></div>
+    <div class="card ct"><div class="lb">Identity</div><h4>Verification at scale</h4><p>Grant, licence and registration journeys with document + biometric verification built in — fraud reduced at the source.</p><div class="chips"><span class="chip">eKYC Africa</span></div></div>
+    <div class="card cp"><div class="lb">Sovereignty</div><h4>On-prem Protea</h4><p>Citizen data stays on state-controlled infrastructure, in-country — the deployment model public-sector AI requires.</p><div class="chips"><span class="chip">Protea LLM</span></div></div>
+    <div class="card cg"><div class="lb">Integrity</div><h4>Auditable by design</h4><p>Every AI answer logged, every action gated, POPIA-first data handling — accountability that survives an audit.</p><div class="chips"><span class="chip">Governance layer</span></div></div>
+  </div>
+  <p class="smallnote">Blu Label's national footprint and existing public-sector relationships carry the offer; Move Digital's stack makes it deliverable this fiscal year.</p>
+  <div class="foot"><span class="dot"></span> Sector strategies · Government <span class="pg"><b>25</b> / 34</span></div>
+</div>
+
+<!-- 24 SECTOR: BETTING -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Sector play · 04</div>
+  <h1>Betting &amp; gaming — <span class="k">growth with guardrails.</span></h1>
+  <div class="grid4">
+    <div class="card ck"><div class="lb">Onboard</div><h4>FICA in the chat</h4><p>Punter registration with ID, liveness and age verification in under a minute — conversion up, compliance intact.</p><div class="chips"><span class="chip">eKYC Africa</span></div></div>
+    <div class="card cg"><div class="lb">Protect</div><h4>Fraud &amp; bonus abuse</h4><p>Mule networks, multi-accounting, SIM-swap and bonus-abuse rings detected at transaction time.</p><div class="chips"><span class="chip">PayGuard</span></div></div>
+    <div class="card ck"><div class="lb">Engage</div><h4>Betting concierge agents</h4><p>Deposits, withdrawals, odds queries and support on WhatsApp — with vouchers and top-ups on Blu Label's rails.</p><div class="chips"><span class="chip">Zara Agents</span><span class="chip">Blu vouchers</span></div></div>
+    <div class="card cb"><div class="lb">Responsible play</div><h4>Guardrails as a feature</h4><p>Limit-setting, self-exclusion honouring, cooling-off flows and responsible-messaging enforcement built into every agent — provincial-regulator alignment by design.</p><div class="chips"><span class="chip">Governance layer</span></div></div>
+  </div>
+  <p class="smallnote">Betting is one of the highest-volume categories on Blu Label's voucher rails — the sector where conversational AI plus compliance tooling monetises fastest.</p>
+  <div class="foot"><span class="dot"></span> Sector strategies · Betting &amp; gaming <span class="pg"><b>26</b> / 34</span></div>
+</div>
+
+<!-- 25 ARCHITECTURE -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Technical architecture</div>
+  <h1>Built like infrastructure, <span class="b">not a demo.</span></h1>
+  <div style="margin-top:2mm">
+    <div class="rowlab"><div class="k">Channels</div><div class="v">WhatsApp Business API · web · native iOS &amp; Android SDKs — integrate in days</div></div>
+    <div class="rowlab hb"><div class="k">AI &amp; orchestration</div><div class="v">Protea LLM + provider-agnostic router · agent runtime · durable workflow engine · intent + step-up auth</div></div>
+    <div class="rowlab"><div class="k">Product services</div><div class="v">Zara · Swifter · PayGuard · eKYC — independent REST + webhook microservices, multi-tenant</div></div>
+    <div class="rowlab hg"><div class="k">Data &amp; rails</div><div class="v">Postgres system of record · Neo4j fraud graph · stablecoin rails (USDC / Solana) · private blob storage</div></div>
+  </div>
+  <div class="chips" style="margin-top:5mm">
+    <span class="chip">TypeScript</span><span class="chip">Next.js</span><span class="chip">React</span><span class="chip">Python</span><span class="chip">FastAPI</span><span class="chip">Flask</span><span class="chip">Postgres</span><span class="chip">Neo4j</span><span class="chip">Redis</span><span class="chip">Docker</span><span class="chip">Semgrep</span><span class="chip">Playwright</span><span class="chip">zod / Drizzle</span>
+  </div>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>27</b> / 34</span></div>
+</div>
+
+<!-- 26 GOVERNANCE -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">AI strategy &amp; governance</div>
+  <h1>AI where it helps. <span class="b">Guardrails where it counts.</span></h1>
+  <div class="grid3">
+    <div class="card cb"><div class="lb">Model strategy</div><ul>
+      <li>Protea LLM + provider-agnostic layer — Claude, GPT / Azure OpenAI, self-hostable open models</li>
+      <li>Routing + automatic fallback; the right model per task (cost / latency / quality)</li>
+      <li>50+ models across the platform — no vendor lock-in</li>
+      <li>Measured token accounting &amp; per-call cost guards</li>
+    </ul></div>
+    <div class="card cx"><div class="lb">AI governance</div><ul>
+      <li><b>The AI never touches a number</b> — financials flow by reference, checked by deterministic gates</li>
+      <li><b>AI never holds funds or credentials</b> — it reads intent; licensed rails execute after step-up auth</li>
+      <li>Deterministic engines where correctness is non-negotiable, AI-verified before action</li>
+      <li>Human-in-the-loop gates · blocking QA before anything ships</li>
+    </ul></div>
+    <div class="card cg"><div class="lb">Security &amp; compliance</div><ul>
+      <li>KYC / KYB, AML &amp; sanctions — FICA, POPIA, GDPR, SOC 2, SARB &amp; FATF</li>
+      <li>AES-256 · RBAC · audit logs · HMAC webhooks · OIDC / Entra SSO</li>
+      <li>Self-hosted / on-prem option — data never leaves the network</li>
+      <li>Real-time fraud scoring under every transaction (&lt;100ms)</li>
+    </ul></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>28</b> / 34</span></div>
+</div>
+
+<!-- 27 AVAILABLE NOW -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick" style="color:var(--green)">Readiness</div>
+  <h1>Not a roadmap. <span class="g">Available right now.</span></h1>
+  <div class="grid2" style="grid-template-columns:1.25fr 1fr;gap:7mm">
+    <div>
+      <table class="cmp">
+        <tr><th>Capability</th><th>Status today</th><th>To white-label for a Blu customer</th></tr>
+        <tr><td>Zara Agentic Marketplace</td><td><span class="y">Live</span> — 500+ agents · zaraai.digital/agentplatform</td><td>Days — branding + tenant config</td></tr>
+        <tr><td>eKYC Africa</td><td><span class="y">Live</span> — 54 countries, 200+ documents</td><td>Days — API keys + flow styling</td></tr>
+        <tr><td>PayGuard</td><td><span class="y">Live</span> — SDK, 4 lines of code</td><td>Days — SDK drop-in</td></tr>
+        <tr><td>Swifter remittance</td><td><span class="y">Live</span> — 20+ corridors</td><td>Weeks — corridor &amp; licence config</td></tr>
+        <tr><td>Protea LLM (hosted)</td><td><span class="y">Live</span> — routing layer in production</td><td>Days — tenant policy + language packs</td></tr>
+        <tr><td>Protea LLM (on-prem)</td><td>Deployable — hardware dependent</td><td>Weeks — customer infrastructure</td></tr>
+      </table>
+    </div>
+    <div class="card cg"><div class="lb">The 90-day lighthouse</div><ul>
+      <li><b>Weeks 1–2:</b> pick two Blu Label customers and one use case each; sign the data &amp; brand pack</li>
+      <li><b>Weeks 3–8:</b> white-label deployment, integration with the customer's systems, compliance sign-off</li>
+      <li><b>Weeks 9–12:</b> live pilot with real customers, measured against agreed KPIs</li>
+      <li><b>Day 90:</b> joint case study + rate card — the sales asset for the rest of the base</li>
+    </ul></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>29</b> / 34</span></div>
+</div>
+
+
+<!-- ROADMAP A: GLOBAL SIGNALS -->
+<div class="s dark">
+  <div class="hdr"><img class="picon" src="assets/zara.png"><div class="wm">Zara <span>× Blu Label</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Strategic roadmap · Global signals</div>
+  <h1>The consumerization &amp; <span style="color:#5B9BFF">financialization of AI.</span></h1>
+  <div class="sgrid">
+    <div class="pcard" style="--pc:#22D3EE"><div class="prow"><span class="pb">SIGNAL 01 · RETAIL BANKING</span></div><h4>Credit-card token rewards</h4><p>Moonshot AI (Kimi) partnered with the Agricultural Bank of China to grant monthly AI reasoning tokens instead of airline miles or cash points.</p><div class="hl"><b>✦ ZARA APPLICATION</b>Discovery Vitality, FNB eBucks, Standard Bank UCount and Nedbank Greenbacks redeem points for Zara AI tokens.</div></div>
+    <div class="pcard" style="--pc:#A78BFA"><div class="prow"><span class="pb">SIGNAL 02 · TELECOM PIPELINES</span></div><h4>Telco token bundling &amp; TokenHub</h4><p>China Telecom sells 10M-token monthly packages for ¥9.9 (~R25) alongside 5G plans, with cross-platform token trading and gifting.</p><div class="hl"><b>✦ ZARA APPLICATION</b>AI access bundled into telco data plans and reverse-billed, zero-rated WhatsApp channels — reasoning as a utility, distributed to the enterprise base.</div></div>
+    <div class="pcard" style="--pc:#4ADE80"><div class="prow"><span class="pb">SIGNAL 03 · FINTECH COLLATERAL</span></div><h4>The "token loan" paradigm</h4><p>Bank of China and Haizhu District underwrite low-interest SME loans collateralized by verified model-inference usage and training assets.</p><div class="hl"><b>✦ ZARA APPLICATION</b>Growth OS business telemetry (deal velocity, invoice collections, response times) serves as Proof-of-Operations for working-capital credit.</div></div>
+    <div class="pcard" style="--pc:#F87171"><div class="prow"><span class="pb">SIGNAL 04 · LINGUISTIC ARBITRAGE</span></div><h4>The "tokenizer tax"</h4><p>Global LLMs penalize non-English tongues: English is ~1.2 tok/word, while African languages (isiZulu, isiXhosa, Afrikaans) suffer a 3.5×–4.5× penalty.</p><div class="hl"><b>✦ ZARA APPLICATION</b>The sovereign LLM's Pan-African BPE tokenizer slashes local inference cost by 70% and latency by 65%.</div></div>
+  </div>
+  <p class="smallnote" style="color:#8FA3C2">Key architectural extractions from East Asian token economies, applied to Zara on Blu Label's rails — the economic frame behind the 12 pillars that follow.</p>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>30</b> / 34</span></div>
+</div>
+
+<!-- ROADMAP B: JOINT PILLARS -->
+<div class="s dark">
+  <div class="hdr"><img class="picon" src="assets/zara.png"><div class="wm">Zara <span>× Blu Label</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Strategic roadmap · Joint pillars</div>
+  <h1>Six pillars we build <span style="color:#5B9BFF">with Blu Label.</span></h1>
+  <div class="pgrid" style="gap:3.2mm">
+    <div class="pcard" style="--pc:#4ADE80"><div class="prow"><span class="pb">PILLAR 03 · WALLET &amp; LOYALTY</span><span class="pt">Formal Retail &amp; Banks</span></div><h4>AI-Native Loyalty &amp; Closed-Loop Wallets</h4><p>Blu Label's wallet rails power AI-managed loyalty for formal retailers and banks — points earned, redeemed and topped up inside the conversation, with target partners FNB eBucks, Standard Bank UCount and Discovery Miles. Rewards become a channel, not a cost centre.</p><div class="meta"><span>Disruption <b>9.3/10</b></span><span>Horizon <b>Next (90–180d)</b></span></div></div>
+    <div class="pcard" style="--pc:#5B9BFF"><div class="prow"><span class="pb">JOINT PILLAR · CROSS-BORDER MONEY</span><span class="pt">Swifter × ADLA</span></div><h4>Remittance-in-a-Box</h4><p>A branded cross-border product on Swifter's stablecoin rails under Blu Label's ADLA licence — 20+ corridors, &lt;60s settlement, ~50% cheaper than correspondent banking. The most bankable joint asset: sellable to banks and retailers from day one.</p><div class="meta"><span>Rails <b>Live today</b></span><span>Horizon <b>Now (0–90d)</b></span></div></div>
+    <div class="pcard" style="--pc:#22D3EE"><div class="prow"><span class="pb">PILLAR 01 · SWARM OS</span><span class="pt">Company-in-a-Box</span></div><h4>The Synthetic C-Suite &amp; Autonomous Enterprise Swarms</h4><p>Specialised agent teams operating 24/7 inside Growth OS — CMO (pipeline), CFO (invoicing &amp; debtor chasing), COO (inventory &amp; delivery), Legal Counsel — with virtual boardroom debates before executive sign-off. The product every SME on Blu's network can buy.</p><div class="meta"><span>Disruption <b>9.8/10</b></span><span>Horizon <b>Now (0–90d)</b></span></div></div>
+    <div class="pcard" style="--pc:#818CF8"><div class="prow"><span class="pb">PILLARS 07+11 · SOVEREIGN STATE</span><span class="pt">Civic AI · GovTech</span></div><h4>SA CitizenAI &amp; the 11-Language Civic Concierge</h4><p>Free government intelligence for 60M citizens — SASSA, SARS, Home Affairs, UIF, Eskom — plus municipal services (licence renewals, indigent claims, bill disputes) in the home tongue, via WhatsApp, USSD and toll-free voice. Funded by government SLAs, B-BBEE CSI, zero-rating deals and DFI grants.</p><div class="meta"><span>Disruption <b>9.8/10</b></span><span>Horizon <b>Next (90–180d)</b></span></div></div>
+    <div class="pcard" style="--pc:#60A5FA"><div class="prow"><span class="pb">PILLAR 05 · ALTERNATIVE CREDIT</span><span class="pt">Proof-of-Operations</span></div><h4>Token Velocity Underwriting &amp; Cognitive Financing</h4><p>SMEs running their pipeline through Growth OS generate un-fakeable telemetry, packaged as real-time Proof-of-Operations for working-capital credit — a data product built for the banks Blu Label already serves.</p><div class="meta"><span>Disruption <b>9.2/10</b></span><span>Horizon <b>Next (90–180d)</b></span></div></div>
+    <div class="pcard" style="--pc:#FB923C"><div class="prow"><span class="pb">PILLAR 12 · BETTING &amp; GAMING</span><span class="pt">SportsTech · AI Odds</span></div><h4>SA BetIntel — the AI Layer for SA's R30B Betting Market</h4><p>AI odds intelligence, retention agents, multilingual CX bots and responsible-gambling AI, with a white-label engine for the bookmakers — B2B at R85k–R250k/mo, B2C at R299/mo — on the voucher rails where betting already runs through Blu Label.</p><div class="meta"><span>Disruption <b>9.6/10</b></span><span>Horizon <b>Next (90–180d)</b></span></div></div>
+  </div>
+  <div class="strip" style="--pc:#FBBF24"><span class="pb">PILLAR 10 · RISK ESCROW</span><span class="st1">The trust wrapper under all six:</span><span class="st2">"aiSure" cognitive-insurance performance bonds guarantee deals up to R250,000 against hallucination — target underwriting partners Santam, Hollard or Munich Re, at a 3%–5% cognitive-risk surcharge.</span><span class="st3">9.6/10 · Next (90–180d)</span></div>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>31</b> / 34</span></div>
+</div>
+
+<!-- 28 PARTNER MODELS -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="blu"><div class="b1">blu</div><div class="b2">BLU LABEL UNLIMITED</div></div><div class="conf">Confidential</div></div>
+  <div class="kick">The opportunities</div>
+  <h1>Three ways to partner — <span class="b">on the table.</span></h1>
+  <div class="grid3">
+    <div class="card cb" style="border-width:1.5px"><div class="lb">01 · Tech partner</div><h4>Blu Label sells AI solutions</h4><p>Move Digital becomes Blu Label's technology partner: the Zara Marketplace, Protea and the trust stack, white-labelled to Blu's enterprise customers under a platform licence + revenue share.</p></div>
+    <div class="card"><div class="lb" style="color:var(--soft)">02 · Wallet &amp; payments</div><h4>Transact on Blu Label rails</h4><p>AI journeys settle on Blu Label's wallet rails and ADLA remittance licence — payments, rewards and cross-border, executed in-chat for enterprise customers.</p></div>
+    <div class="card"><div class="lb" style="color:var(--soft)">03 · Solutions on demand</div><h4>Move Digital builds for Blu</h4><p>Blu engages Move Digital for custom AI and fintech builds across identity, fraud, remittance and tooling — deal by deal.</p></div>
+  </div>
+  <p style="font-size:11.5pt;margin-top:6mm;color:var(--grey)">The models compound: the tech-partner motion (01) creates the platform economics, while (02) and (03) deepen the relationship on both sides. We propose starting with <b style="color:var(--ink)">01 — two lighthouse customers in 90 days.</b></p>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>32</b> / 34</span></div>
+</div>
+
+<!-- 29 WHY MOVE DIGITAL -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Why Move Digital</div>
+  <h1>Built for Africa. <span class="b">Shipped fast.</span></h1>
+  <div class="grid4" style="margin-top:14mm">
+    <div class="card cx"><div class="lb">Africa-first</div><p>Data-light, multilingual, WhatsApp-native — built for how the continent really transacts.</p></div>
+    <div class="card cx"><div class="lb">Compliant</div><p>Licensed rails, KYC/AML, FICA, POPIA, SARB &amp; FATF alignment baked in, not bolted on.</p></div>
+    <div class="card cx"><div class="lb">Full-stack</div><p>Eight products spanning channel, agents, models, payments, identity, fraud and tooling.</p></div>
+    <div class="card cb" style="border-width:1.5px"><div class="lb">Ships in days</div><p>Live products and standard APIs — integrate in days, not quarters.</p></div>
+  </div>
+  <div class="foot"><span class="dot"></span> Move Digital × Blu Label · Strategy &amp; Proposition <span class="pg"><b>33</b> / 34</span></div>
+</div>
+
+<!-- 30 CONTACT -->
+<div class="s">
+  <div class="hdr"><img src="assets/move-logo.png"><div class="wm">Move <span>Digital</span></div><div class="conf">Confidential</div></div>
+  <div class="kick">Get in touch</div>
+  <h1>The next move is <span class="b">yours.</span></h1>
+  <p style="font-size:12.5pt;color:var(--grey);max-width:200mm;line-height:1.6;margin-bottom:9mm">Whichever entry point fits best — the tech-partner platform, wallet &amp; payments, or solutions on demand — the stack is live and the first two lighthouse deployments can start this quarter. We're ready when you are.</p>
+  <div class="grid2" style="max-width:250mm">
+    <div class="card cx"><div class="lb">Contact</div><h4 style="font-size:15pt">Malcolm Govender</h4><p style="margin-top:1mm">Founder, Move Digital</p></div>
+    <div class="card cx"><div class="lb" style="color:var(--blue)">Get in touch</div>
+      <p style="font-size:12pt;color:var(--ink);font-weight:600">malcolm@movedigital.africa</p>
+      <p style="font-size:12pt;color:var(--ink);font-weight:600;margin-top:1mm">083 465 4639</p>
+      <p style="font-size:11pt;color:var(--blue);font-weight:600;margin-top:1mm">movedigital.africa</p>
+      <p style="font-size:9.5pt;color:var(--soft);margin-top:2mm">Move Digital (Pty) Ltd · Johannesburg, South Africa</p>
+    </div>
+  </div>
+  <div class="foot"><span class="dot"></span> Zara · Protea · Swifter · PayGuard · eKYC · CodeViz · Results Studio <span class="pg"><b>34</b> / 34</span></div>
+</div>
+
+</body>
+</html>
