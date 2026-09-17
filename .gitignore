@@ -5,3 +5,15 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .vercel
+
+# env / secrets (never commit these; see .replit VAPID finding in docs/zaralm)
+.env
+.env.*
+!.env.example
+
+# build output and tool caches
+coverage
+*.tsbuildinfo
+.eslintcache
+*.log
+npm-debug.log*
