@@ -1,0 +1,17 @@
+{
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.next/**": true,
+    "**/coverage/**": true,
+    "**/attached_assets/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.next": true,
+    "**/coverage": true,
+    "**/package-lock.json": true,
+    "**/attached_assets": true
+  }
+}

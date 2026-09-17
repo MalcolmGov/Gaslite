@@ -1,0 +1,11 @@
+# Keep the Railway/Docker build context to what `npm run build` needs.
+# moove-prompts is a separate Next.js app deployed on its own; the Gaslite
+# build never reads it, docs/ or the git history.
+.git
+node_modules
+**/node_modules
+**/.next
+dist
+.vercel
+moove-prompts
+docs
