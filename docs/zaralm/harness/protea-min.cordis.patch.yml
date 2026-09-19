@@ -1,0 +1,38 @@
+# protea-min: the shipped headless profile, pointed at the Protea inference facade and composed from the
+# `minimal` agent preset (persona + one persistent bash tool). Applied after dsh-base and dsh-headless.
+
+# Route model calls to the Protea facade (OpenAI Chat Completions wire format, bearer token from the env).
+- id: llm-pi-ai
+  config:
+    providers:
+      protea:
+        displayName: Protea facade
+        apiKeyEnv: PROTEA_FACADE_TOKEN
+        api: openai-completions
+        baseURL: http://127.0.0.1:8080/v1
+        defaultContextWindow: 32768
+        defaultMaxTokens: 2048
+        models:
+          - id: protea-agent
+            name: Protea agent (facade)
+            contextWindow: 32768
+            maxTokens: 2048
+        retryPolicy:
+          mode: normal
+          maxRetries: 1
+
+- id: agent-default-model
+  config:
+    provider: protea
+    model: protea-agent
+
+# One fewer model round-trip per session on a CPU-bound backend.
+- id: session-title-llm
+  disabled: true
+
+# Compose sessions from the shipped `minimal` preset instead of the host's full tool roster.
+- insert:
+    - id: agent-presets
+      name: '@deepseek-ai/dsh-agent-presets'
+      config:
+        default: minimal

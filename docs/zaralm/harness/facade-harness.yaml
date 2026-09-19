@@ -1,0 +1,24 @@
+# Protea facade config for the DeepSeek Harness minimal-profile test (derived from configs/serve/facade.yaml).
+# Differences from the deployed config: backend is the in-process `local` provider (CPU, no GPU), the bind is
+# loopback only, the rate limit is off, and the Zara guardrail system prompt is not merged in — that prompt frames
+# the model as a marketplace customer-service agent, which is the wrong framing for a coding-agent harness test.
+# The tool-permission guard is kept exactly as deployed.
+backend: local
+served_model: protea-agent
+aliases: [protea, protea-agent-0.1]
+host: 127.0.0.1
+port: 8080
+require_token: true           # PROTEA_FACADE_TOKEN
+ready_ttl_s: 15
+drain_timeout_s: 30
+max_repairs: 1
+workers: 1
+
+tool_policy:
+  deny: ["delete_*", "*_delete", "transfer_*", "admin_*", "*_admin"]
+  limits:
+    issue_refund: {field: amount_zar, max: 100}
+  escalation_tool: handoff_to_human
+  refusal: "I can't do that from here. A colleague can help with that request."
+  unknown_tool_retries: 1
+  confidential_markers: ["[internal]", "[confidential]", "staff only"]
