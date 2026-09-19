@@ -173,6 +173,39 @@ $HARNESS_ROOT/facade.sh stop
 tool call and result) and leaves the raw session under `logs/`. The session log is zstd-framed JSONL; Node 22's
 `zlib.zstdDecompressSync` handles one frame, so `decode-session.js` splits on the frame magic first.
 
+## GPU run — status and how to resume (2026-09-19 evening)
+
+Step 1 of the next steps below is built and waiting for one launch. Everything needed is merged in `MalcolmGov/protea`:
+
+- PR #68 — `deployment/protea/entrypoint-harness.sh`, the `Run agent harness (RunPod)` workflow
+  (`.github/workflows/run-harness.yml`), the `PROTEA_HARNESS_*` launcher passthrough, and `PROTEA_INFERENCE_EXTRA_BODY`
+  (Qwen3 thinking off through vLLM). Documented in protea `docs/inference.md`.
+- PR #69 — the Node tarball is gzip (the runtime image has no `xz`) and the pod image is pinned by digest at launch.
+
+Two launches so far, neither produced results:
+
+1. 17:40 UTC, pod `fels6cmg5gynne` (L40S community): the container restarted every 16 s. The `.tar.xz` extraction
+   failing (no `xz` in the image) is the probable cause; a stale cached `latest` on the host was the other candidate.
+   Both closed by PR #69. Stopped by hand after about 10 minutes.
+2. 18:06 UTC, pod `uoa4swrlxezvyg` (L40S community), image `protea-train@sha256:a5befb90…` with both fixes: launched
+   cleanly and was stopped by hand a few minutes later to pause for the day. Whatever it streamed before the stop
+   is under `harness-reports/<run_id>/` and `logs/harness-<run_id>.log` on R2 (the run id is the pod name's
+   timestamp suffix).
+
+To run it tomorrow (about 2 minutes of clicking, 20–30 minutes of pod time, under USD 1):
+
+1. https://github.com/MalcolmGov/protea/actions/workflows/run-harness.yml → Run workflow on `main`. Only two fields
+   need typing: `endpoint` (the R2 endpoint used by the eval workflow) and `confirm = launch`. Defaults are
+   Qwen3-4B then Qwen3-8B at their pinned revisions, vLLM, minimal composition, thinking off.
+2. Watch the pod in RunPod: CPU/disk activity in the first 5 minutes (installs), GPU memory from about minute 8
+   (vLLM loading), and the pod exits on its own at the end. A pod restarting every few seconds is a crash loop:
+   stop it and read `logs/`.
+3. When the pod is gone: https://github.com/MalcolmGov/protea/actions/workflows/fetch-logs.yml → Run workflow with
+   `prefix = harness-reports/` (or `logs/` for the streamed log). The job output holds `summary.md` and every
+   per-task transcript summary; a Claude Code session can read that job log through the GitHub integration and
+   write the results into this document. The integration cannot dispatch workflows itself (403), so the two
+   clicks above stay manual unless the Claude GitHub App is granted Actions write permission on protea.
+
 ## Next steps
 
 1. Same profile, real facade: point `facade.sh` at the vLLM engine on a GPU host (Qwen3-4B or 8B at the pinned
