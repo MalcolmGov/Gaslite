@@ -1,0 +1,75 @@
+# protea-min: the shipped headless profile, pointed at the Protea inference facade and reduced to the shape of
+# the shipped `minimal` agent preset (one persona, one bash tool, no compaction). Applied after dsh-base and
+# dsh-headless. The preset plugin itself (dsh-agent-presets) does not compose headless sessions in 0.1.5-rc.2,
+# so the minimal composition is expressed directly here.
+
+# Route model calls to the Protea facade (OpenAI Chat Completions wire format, bearer token from the env).
+- id: llm-pi-ai
+  config:
+    providers:
+      protea:
+        displayName: Protea facade
+        apiKeyEnv: PROTEA_FACADE_TOKEN
+        api: openai-completions
+        baseURL: http://127.0.0.1:8080/v1
+        defaultContextWindow: 32768
+        defaultMaxTokens: 2048
+        models:
+          - id: protea-agent
+            name: Protea agent (facade)
+            contextWindow: 32768
+            maxTokens: 2048
+        retryPolicy:
+          mode: normal
+          maxRetries: 1
+
+- id: agent-default-model
+  config:
+    provider: protea
+    model: protea-agent
+
+# One fewer model round-trip per session on a CPU-bound backend.
+- id: session-title-llm
+  disabled: true
+
+# --- minimal composition: disable every host tool except bash --------------------------------------------
+- id: tool-jobs
+  disabled: true
+- id: tool-fs
+  disabled: true
+- id: tool-fs-search
+  disabled: true
+- id: tool-skill
+  disabled: true
+- id: tool-subagent
+  disabled: true
+- id: tool-subagent-fork
+  disabled: true
+- id: tool-subagent-control
+  disabled: true
+- id: tool-subagent-list-agents
+  disabled: true
+- id: tool-workflow
+  disabled: true
+- id: tool-todo
+  disabled: true
+- id: tool-goal
+  disabled: true
+- id: tool-ralph
+  disabled: true
+- id: tool-web
+  disabled: true
+- id: plan-mode
+  disabled: true
+- id: compaction-basic
+  disabled: true
+- id: command-compact
+  disabled: true
+- id: repeat-tool-reminder
+  disabled: true
+
+# The minimal preset's persona text, in place of the deployment identity + harness prefix.
+- id: system-prompt
+  config:
+    personaPrefix: You are a helpful software engineer assistant.
+    personaSuffix: ''
