@@ -438,6 +438,8 @@ Worth recording, because the failure modes repeat and the guards are what made t
 | 8 | engine image's entrypoint called `python`; the image ships only `python3` | a CPU-only validation job | £0 |
 | 9 | engine image's entrypoint called `protea-storage`, which is not installed in it | the same CPU job | £0 |
 | 10 | engine image had no `CMD`, so the launcher's entrypoint became an ignored argument → crashloop | **a human looking at the dashboard** | ~1 h of L40S, nothing produced |
+| 11 | launch-side guard refused `403` by Cloudflare — `urllib`'s default User-Agent is blocked | reading the guard's own log, an hour later | one runner-hour, no GPU |
+| 12 | engine image ships no AWS CLI, so every result push failed into `/dev/null` | auditing the observation channel itself | two attempts unreadable |
 
 A fourth smoke pod then served 4B and 8B in sequence with every check green, for ~6.5 minutes of H100. Total GPU
 spend on proving the pipeline correct after the fixes: under fifteen minutes, against four pods that each died on
@@ -471,3 +473,28 @@ Two things had to be true for that to happen, and both have been fixed:
 
 The generalisable lesson is narrower than "test more" and worth stating plainly: **a check that has never been
 seen to fail is not known to work.** Rows 4, 8, 9 and 10 were all, at some point, sitting behind something green.
+
+### The guard's own two failures
+
+Rows 11 and 12 are that launch-side guard failing on both of its first two live exercises. Worth recording
+rather than quietly fixing, because the pattern is the one rows 1–10 describe and the guard was written in full
+knowledge of it.
+
+**Row 11.** The guard polled RunPod 121 times in an hour and was refused every time. Not the key — the launcher
+had authenticated with it two seconds earlier in the same job — and not the query, which fails with `400` and a
+body. `urllib` announces itself as `Python-urllib/3.x`, and the endpoint answers Cloudflare error 1010, *the
+owner of this website has banned your browser*. The launcher has always used `httpx` and so never met it. What
+made this cost an hour rather than a minute was not the bug but the log: `poll failed` printed 121 times,
+without the status that named the cause.
+
+**Row 12** matters more. `protea.cli_storage` shells out to `aws s3 sync`; `Dockerfile.train` installs the AWS
+CLI and `Dockerfile.infer` never did; and the entrypoint's push ends in `>/dev/null 2>&1 || true`. So the engine
+image could not push anything, ever. Two attempts were unreadable from outside because of it — but the real
+damage is that **a validation that succeeded completely would still have produced nothing**, because the pod
+pushes and then terminates itself, and the push was failing silently.
+
+The specific mistake there is mine rather than the code's: an empty bucket was read as evidence that the pod had
+not run, when the channel carrying that evidence had never been verified. **Silence is only evidence when the
+thing that would break the silence is known to work.** The habit that follows is to prove the observation path
+before drawing conclusions from what it does not say — a negative control, applied to instrumentation rather
+than to a test.
