@@ -316,6 +316,19 @@ phase that runs the real `stop_pid` against a stand-in that forks the same way �
 rented. Two notes on the guard in #75, both worth keeping: it is what turned this from three wrong rows into one
 missing row, and a missing row is what made the cause findable.
 
+**Confirmed fixed** by the next smoke pod (`20260920T121242Z`), which served both models in sequence on one H100:
+
+```
+=== vllm-qwen3-4b-1cfa9a72 ===   vllm healthy after 95s
+SMOKE served-model: OK (Qwen/Qwen3-4B)
+=== vllm-qwen3-8b-b968826d ===   vllm healthy after 116s
+SMOKE served-model: OK (Qwen/Qwen3-8B)
+```
+
+No `engine still answering on :8000`, no skipped model. The handover is clean and the 8B is demonstrably the 8B —
+the first time that has been true in this document. A two-model run's second table can now be trusted, which is
+the precondition for every comparison the Runs section wants to make.
+
 ### Findings
 
 1. **The production engine changes the economics, not the outcome.** Step latency fell from 3–35 s on CPU to
@@ -415,6 +428,10 @@ Worth recording, because the failure modes repeat and the guards are what made t
 | 5 | `R2_ENDPOINT` set nowhere the workflow read | request validation, pre-launch | ~90 s of CI, no GPU |
 | 6 | community host's driver too old (again) | the pod's own preflight | ~2 min of L40S |
 | 7 | forked vLLM worker never released `:8000` | the smoke pod | ~6 min of H100, **no wrong rows** |
+
+A fourth smoke pod then served 4B and 8B in sequence with every check green, for ~6.5 minutes of H100. Total GPU
+spend on proving the pipeline correct after the fixes: under fifteen minutes, against four pods that each died on
+one problem.
 
 The first four each cost a pod and surfaced exactly one problem. The last three cost progressively less and, in
 the case of the two that mattered, produced a missing row rather than a wrong one. That is the whole argument for
