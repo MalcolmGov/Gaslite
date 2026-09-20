@@ -256,9 +256,22 @@ in both runs carries `[stderr] landlock-run: partial enforcement (older Landlock
 harness's sandbox wrapper emits on every command, which this model cites by name in `hello` and treats as evidence
 of obstruction in both `list` and `fix`.
 
-Note what is *not* established: whether the workspace is actually writable under that sandbox. No correctly-formed
-write was ever attempted in either run, so the question is open. The observed no-op is fully explained by the
-regex.
+Note what was *not* established at the time: whether the workspace is actually writable under that sandbox. No
+correctly-formed write was ever attempted in either run, so the observed no-op was fully explained by the regex —
+but that is an absence of evidence, not evidence of absence.
+
+**Settled on 2026-09-20 by a smoke pod** (protea PR #79, run `20260920T114836Z`), which writes a file in the seeded
+workspace and reads it back before any agent task runs:
+
+```
+protea-harness: SMOKE workspace-write: OK (the sandbox permits edits in /tmp/protea/harness/workspace)
+```
+
+The sandbox permits edits. The 8B's permissions story was false in every particular: it was not blocked, it
+misread its own no-op, and it spent four of its nine steps escalating against an obstruction that did not exist.
+That makes the second prompt line in Next steps — re-read your own command before blaming the environment — the
+intervention this run argues for, and it removes the caveat that previously hung over every reading of the `fix`
+task.
 
 ### The 8B rows are not the 8B
 
@@ -280,6 +293,28 @@ The transcripts make it plain in hindsight: `hello/session.jsonl` is 8213 bytes 
 `vllm-qwen3-8b-b968826d/vllm.log` contains no `Model loading took`, no `init engine` and no `Starting vLLM API
 server`. Fixed in protea PR #75 (liveness before probing; a bounded wait for the port to go quiet between models;
 and a refusal to start an engine while `:8000` still answers, skipping the model instead).
+
+**Why the 4B was still on the port — demonstrated, not inferred.** The reading above attributed the overlap to a
+58 GiB KV cache being slow to release. That was wrong in an interesting way: the engine was never going to release
+it. A smoke pod on 2026-09-20 (`20260920T114836Z`) ran the 4B, tore it down, and reported:
+
+```
+protea-harness: SMOKE done for vllm-qwen3-4b-1cfa9a72; stopping before the agent tasks
+protea-harness: engine still answering on :8000 after 180s
+protea-harness: :8000 is still serving a previous engine; skipping vllm-qwen3-8b-b968826d
+                rather than measuring the wrong model
+```
+
+`vllm serve` forks worker processes and a *worker* owns the listening socket. The teardown signalled only the pid
+the entrypoint had started, so the parent died and an orphaned worker kept `:8000` — indefinitely, not slowly.
+Three minutes was not short; no wait would have been long enough.
+
+This closes the loop on the contaminated rows: they are not the product of a race that a longer sleep would have
+avoided, but of a process that was never being killed. Fixed in protea PR #82, which signals the engine's process
+group (never the entrypoint's own), adds a backstop that frees the port and verifies it did, and adds a smoke
+phase that runs the real `stop_pid` against a stand-in that forks the same way — on the pod, before a GPU is
+rented. Two notes on the guard in #75, both worth keeping: it is what turned this from three wrong rows into one
+missing row, and a missing row is what made the cause findable.
 
 ### Findings
 
@@ -349,9 +384,10 @@ used for anything.
    turn the task green.
 2. **Suppress the `landlock-run` warning from tool results**, or move it somewhere the model does not read as
    signal (finding 4). It is one line and it demonstrably steered both `list` and `fix`.
-3. **Establish whether the workspace is writable under the harness sandbox at all** (see the note at the end of
-   the 8B section). A one-line task — `echo x > t.txt && cat t.txt` — settles it, and nothing else in this
-   document can be interpreted confidently until it is settled.
+3. ~~Establish whether the workspace is writable under the harness sandbox at all.~~ **Answered 2026-09-20: it
+   is.** A smoke pod writes and reads back a file in the seeded workspace before any task runs
+   (`SMOKE workspace-write: OK`). This was the caveat hanging over every reading of the `fix` task; it is gone,
+   and it makes step 1 the clear next experiment rather than a guess.
 4. Repeat with the Zara guardrail prompt merged in (set `system_prompt_file` to
    `configs/evaluation/guardrail-system-prompt.md`) to measure what the product framing costs on tool use.
 5. Port a handful of ZaraBench `tool_calling` and `failure_recovery` tasks to harness tasks, so the same model is
@@ -361,3 +397,26 @@ used for anything.
    codes from a shell tool (finding 3 above).
 7. Confirm whether the 2026-09-16 B0 eval scored on CPU (see "Loose end worth pulling"), and re-run it if so.
 8. Report the headless-preset gap upstream to `deepseek-ai/deepseek-harness`.
+9. **Run the smoke pod before any run whose numbers will be quoted.** `"smoke": true` in
+   `.ops/launch-harness.json` runs every setup and engine check for each model, reports them together, and stops
+   before the agent tasks. Given two models it also tests the engine handover, which is the failure that
+   invalidated this document's first 8B table. One cheap pod, and it has already earned its cost twice.
+
+## What this run cost, and what caught what
+
+Worth recording, because the failure modes repeat and the guards are what made the difference:
+
+| # | What went wrong | Caught by | Cost |
+|---|---|---|---|
+| 1 | `HF_HUB_ENABLE_HF_TRANSFER=1` honoured without `hf_transfer` | a rented pod | one pod |
+| 2 | community host's driver too old for cu128 | a rented pod | one pod |
+| 3 | no C compiler for Triton's extension | a rented pod | one pod |
+| 4 | dead engine reported healthy by a stale port | a rented pod, **and three wrong rows** | one pod + a retracted table |
+| 5 | `R2_ENDPOINT` set nowhere the workflow read | request validation, pre-launch | ~90 s of CI, no GPU |
+| 6 | community host's driver too old (again) | the pod's own preflight | ~2 min of L40S |
+| 7 | forked vLLM worker never released `:8000` | the smoke pod | ~6 min of H100, **no wrong rows** |
+
+The first four each cost a pod and surfaced exactly one problem. The last three cost progressively less and, in
+the case of the two that mattered, produced a missing row rather than a wrong one. That is the whole argument for
+the smoke pod and for the pre-start port guard: a run that refuses to answer is recoverable, a run that answers
+wrongly is not.
