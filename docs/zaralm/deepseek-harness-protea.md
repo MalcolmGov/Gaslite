@@ -173,40 +173,60 @@ $HARNESS_ROOT/facade.sh stop
 tool call and result) and leaves the raw session under `logs/`. The session log is zstd-framed JSONL; Node 22's
 `zlib.zstdDecompressSync` handles one frame, so `decode-session.js` splits on the frame magic first.
 
-## GPU run — status and how to resume (2026-09-19 evening)
+## GPU run — handover (2026-09-20 02:00 UTC)
 
-Step 1 of the next steps below is built and waiting for one launch. Everything needed is merged in `MalcolmGov/protea`:
+_Written for whoever continues this, in any session. Everything needed is in the two repositories; nothing lives
+only on a machine._
 
-- PR #68 — `deployment/protea/entrypoint-harness.sh`, the `Run agent harness (RunPod)` workflow
-  (`.github/workflows/run-harness.yml`), the `PROTEA_HARNESS_*` launcher passthrough, and `PROTEA_INFERENCE_EXTRA_BODY`
-  (Qwen3 thinking off through vLLM). Documented in protea `docs/inference.md`.
-- PR #69 — the Node tarball is gzip (the runtime image has no `xz`) and the pod image is pinned by digest at launch.
+**State**
 
-Two launches so far, neither produced results:
+- `MalcolmGov/protea` `main` carries the harness GPU path: PR #68 (entrypoint, `Run agent harness (RunPod)`
+  workflow, launcher passthrough, `PROTEA_INFERENCE_EXTRA_BODY`) and PR #69 (gzip Node tarball, image pinned by
+  digest) are merged. PR #70 (restart-safe entrypoint, opt-in pod self-termination) is open and green except the
+  training-smoke job that was still running at handover; it must be merged before the next launch.
+- `MalcolmGov/Gaslite` PR #30 (this document) is open, docs only.
+- Two GPU launches on 2026-09-19 produced no results (both diagnosed from R2 logs, both fixed): pod 1 died on a
+  missing `xz`; pod 2 was restarted by RunPod and its second pass tripped over the first pass's profile directory.
+- The Claude GitHub integration cannot dispatch workflows (403 on `workflow_dispatch`), so the launches below are
+  clicks for Malcolm. It can read workflow job logs, which is how results come back.
 
-1. 17:40 UTC, pod `fels6cmg5gynne` (L40S community): the container restarted every 16 s. The `.tar.xz` extraction
-   failing (no `xz` in the image) is the probable cause; a stale cached `latest` on the host was the other candidate.
-   Both closed by PR #69. Stopped by hand after about 10 minutes.
-2. 18:06 UTC, pod `uoa4swrlxezvyg` (L40S community), image `protea-train@sha256:a5befb90…` with both fixes. Its R2
-   log (read 2026-09-20) shows Node and the harness installed, then a container restart by RunPod whose second pass
-   failed at `dsh --from-default-profile` because the first pass's profile directory had survived on `/tmp`; the
-   first pass's own error was lost because each start truncated the log. Fixed in protea PR #70: append-mode log,
-   idempotent profile init, fail-soft exits, a done marker, and opt-in pod self-termination
-   (`PROTEA_POD_SELF_TERMINATE=1`, which the workflow now sets).
+**Run it (Malcolm clicks, about 2 minutes; the pod takes 20–30 minutes and under USD 1)**
 
-To run it tomorrow (about 2 minutes of clicking, 20–30 minutes of pod time, under USD 1):
+1. Merge protea PR #70. `Publish training image` runs on `main` automatically (about 5 minutes); confirm the
+   `latest` digest changed: `https://ghcr.io/v2/malcolmgov/protea-train/manifests/latest` (HEAD with an anonymous
+   token from `https://ghcr.io/token?scope=repository:malcolmgov/protea-train:pull`). Last known digest before
+   #70: `sha256:a5befb907bffb45b3ab8a70a3086450cf27cf821da7a533dfa12c9382b6b9988`.
+2. https://github.com/MalcolmGov/protea/actions/workflows/run-harness.yml → Run workflow on `main` with
+   `bucket = protea-runs`, `endpoint = https://dd87d2c6627b6a0934fc3d5807b947e1.r2.cloudflarestorage.com`,
+   `confirm = launch`, every other input default (Qwen3-4B then Qwen3-8B at pinned revisions, vLLM, minimal
+   composition, thinking off). The job log prints the pinned image and `launched runpod:<pod id>`.
+3. Healthy pod: CPU/disk activity in the first 5 minutes, GPU memory from about minute 8, and the pod terminates
+   itself at the end (PR #70). A container restarting every few seconds is a crash loop: stop it and read the log.
+4. When the pod is gone: https://github.com/MalcolmGov/protea/actions/workflows/fetch-logs.yml → Run workflow with
+   `prefix = harness-reports/` (results) or `prefix = logs/` (the streamed `harness-<run_id>.log`, all passes
+   appended). The job output contains every file: `summary.md` (one table: model, task, exit, wall, steps, tests
+   after, final message), per model `vllm.log`, `facade.log`, `smoke.json`, and per task `stdout.txt`,
+   `summary.txt` (tools offered, prompt size, per-step latency and tokens, every tool call and result),
+   `workspace.diff`, `tests.txt`.
 
-1. https://github.com/MalcolmGov/protea/actions/workflows/run-harness.yml → Run workflow on `main`. Only two fields
-   need typing: `endpoint` (the R2 endpoint used by the eval workflow) and `confirm = launch`. Defaults are
-   Qwen3-4B then Qwen3-8B at their pinned revisions, vLLM, minimal composition, thinking off.
-2. Watch the pod in RunPod: CPU/disk activity in the first 5 minutes (installs), GPU memory from about minute 8
-   (vLLM loading), and the pod exits on its own at the end. A pod restarting every few seconds is a crash loop:
-   stop it and read `logs/`.
-3. When the pod is gone: https://github.com/MalcolmGov/protea/actions/workflows/fetch-logs.yml → Run workflow with
-   `prefix = harness-reports/` (or `logs/` for the streamed log). The job output holds `summary.md` and every
-   per-task transcript summary; a Claude Code session can read that job log through the GitHub integration and
-   write the results into this document. The integration cannot dispatch workflows itself (403), so the two
-   clicks above stay manual unless the Claude GitHub App is granted Actions write permission on protea.
+**Write it up**
+
+Read the fetch-logs job log (GitHub `get_job_logs` with `return_content`, a large `tail_lines`). Add a "GPU run"
+section to this document with the same table as the CPU runs above (model, composition, task, steps, wall, input
+tokens per call, outcome) and a findings list answering: did either model fix the failing test; how do 4B and 8B
+step latencies compare with the CPU numbers; did any small-model failure mode from the CPU pilot recur (missing
+required argument, hallucinated tool, repeated interactive command); did the tool guard act. Commit on the Gaslite
+branch `claude/lucid-noether-razfev`, push, and update PR #30 (or open a new PR if #30 has merged). Then update
+"Next steps" below: step 1 is done, step 2 (guardrail prompt merged in: set `system_prompt_file` to
+`configs/evaluation/guardrail-system-prompt.md` on the next launch) is the natural follow-up.
+
+**If it fails again**
+
+`logs/harness-<run_id>.log` names the failing phase (`protea-harness: FAILED — …`) and the pod will have terminated
+itself. Entry points for fixes: `deployment/protea/entrypoint-harness.sh` and `.github/workflows/run-harness.yml`
+in protea; the launcher passthrough list in `protea/training/remote/runpod.py`. Repo conventions are in protea's
+`CLAUDE.md` (`ruff check .` and `pytest` before a PR; wheels-only pip installs; SonarCloud gates PRs; Codex reviews
+PRs and its findings are worth fixing).
 
 ## Next steps
 
