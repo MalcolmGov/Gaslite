@@ -1,7 +1,8 @@
 # DeepSeek Harness × Protea — minimal-profile test
 
-_2026-09-19. Read-only against `MalcolmGov/protea` at `556b0b5` (main, 2026-09-16). No Protea or Gaslite code
-was changed; everything needed to repeat this lives under `docs/zaralm/harness/`._
+_2026-09-19, CPU pilot: read-only against `MalcolmGov/protea` at `556b0b5` (main, 2026-09-16), no Protea code
+changed; everything needed to repeat it lives under `docs/zaralm/harness/`. 2026-09-20, GPU run: the same profile
+against vLLM on a rented H100, which did change Protea — five deployment fixes, listed in that section's finding 6._
 
 ## What was done
 
@@ -173,70 +174,124 @@ $HARNESS_ROOT/facade.sh stop
 tool call and result) and leaves the raw session under `logs/`. The session log is zstd-framed JSONL; Node 22's
 `zlib.zstdDecompressSync` handles one frame, so `decode-session.js` splits on the frame magic first.
 
-## GPU run — handover (2026-09-20 02:00 UTC)
+## GPU run (2026-09-20)
 
-_Written for whoever continues this, in any session. Everything needed is in the two repositories; nothing lives
-only on a machine._
+_Qwen3-4B served by vLLM on a rented H100, driven by the same `protea-min` profile as the CPU pilot. The 8B was
+launched in the same pod and **was not measured** — see "The 8B rows are not the 8B" below. Five blockers were
+found and fixed getting here; they are listed at the end because each one is a finding about the deployment path,
+not incidental noise._
 
-**State**
+### Setup differences from the CPU pilot
 
-- `MalcolmGov/protea` `main` carries the harness GPU path: PR #68 (entrypoint, `Run agent harness (RunPod)`
-  workflow, launcher passthrough, `PROTEA_INFERENCE_EXTRA_BODY`) and PR #69 (gzip Node tarball, image pinned by
-  digest) are merged. PR #70 (restart-safe entrypoint, opt-in pod self-termination) is open and green except the
-  training-smoke job that was still running at handover; it must be merged before the next launch.
-- `MalcolmGov/Gaslite` PR #30 (this document) is open, docs only.
-- Two GPU launches on 2026-09-19 produced no results (both diagnosed from R2 logs, both fixed): pod 1 died on a
-  missing `xz`; pod 2 was restarted by RunPod and its second pass tripped over the first pass's profile directory.
-- The Claude GitHub integration cannot dispatch workflows (403 on `workflow_dispatch`), so the launches below are
-  clicks for Malcolm. It can read workflow job logs, which is how results come back.
+| Piece | CPU pilot | This run |
+|---|---|---|
+| Host | 4 CPU cores, 16.9 GB RAM, no GPU | RunPod **h100-80gb**, secure cloud |
+| Engine | facade `local` backend (in-process transformers) | **vLLM 0.11.0**, the production path (ADR-009) |
+| Models | Qwen2.5-0.5B-Instruct, Qwen3-1.7B | **Qwen3-4B** @ `1cfa9a72` (8B attempted, not measured) |
+| Image | local venv | `ghcr.io/malcolmgov/protea-train@sha256:9e189379…` |
+| Everything else | — | unchanged: `minimal` composition, one `bash` tool, 190-char system prompt, thinking off, no guardrail overlay |
 
-**Run it (Malcolm clicks, about 2 minutes; the pod takes 20–30 minutes and under USD 1)**
+Engine startup on the H100, from `vllm.log`: weights downloaded in 21.7 s, model loading 23.3 s (7.56 GiB),
+`torch.compile` 24.3 s of which 19.2 s was the dynamic-shape graph, CUDA graph capture 5 s (0.83 GiB), 57.98 GiB
+left for KV cache at `gpu_memory_utilization 0.9`, maximum concurrency 51.5x for 8192-token requests. `init engine`
+reported 39.57 s in total; the API server was accepting traffic about 2.5 minutes after the container started. The
+facade came up in front of it unchanged, and its smoke call returned `ready` with `latency_ms: 70`.
 
-1. Merge protea PR #70. `Publish training image` runs on `main` automatically (about 5 minutes); confirm the
-   `latest` digest changed: `https://ghcr.io/v2/malcolmgov/protea-train/manifests/latest` (HEAD with an anonymous
-   token from `https://ghcr.io/token?scope=repository:malcolmgov/protea-train:pull`). Last known digest before
-   #70: `sha256:a5befb907bffb45b3ab8a70a3086450cf27cf821da7a533dfa12c9382b6b9988`.
-2. https://github.com/MalcolmGov/protea/actions/workflows/run-harness.yml → Run workflow on `main` with
-   `bucket = protea-runs`, `endpoint = https://dd87d2c6627b6a0934fc3d5807b947e1.r2.cloudflarestorage.com`,
-   `confirm = launch`, every other input default (Qwen3-4B then Qwen3-8B at pinned revisions, vLLM, minimal
-   composition, thinking off). The job log prints the pinned image and `launched runpod:<pod id>`.
-3. Healthy pod: CPU/disk activity in the first 5 minutes, GPU memory from about minute 8, and the pod terminates
-   itself at the end (PR #70). A container restarting every few seconds is a crash loop: stop it and read the log.
-4. When the pod is gone: https://github.com/MalcolmGov/protea/actions/workflows/fetch-logs.yml → Run workflow with
-   `prefix = harness-reports/` (results) or `prefix = logs/` (the streamed `harness-<run_id>.log`, all passes
-   appended). The job output contains every file: `summary.md` (one table: model, task, exit, wall, steps, tests
-   after, final message), per model `vllm.log`, `facade.log`, `smoke.json`, and per task `stdout.txt`,
-   `summary.txt` (tools offered, prompt size, per-step latency and tokens, every tool call and result),
-   `workspace.diff`, `tests.txt`.
+### Runs
 
-**Write it up**
+Run `20260920T070103Z`. The same three task texts and the same seeded workspace as the CPU pilot. Wall time is the
+whole `dsh` process; step latency is model time per assistant message; input tokens are per model call.
 
-Read the fetch-logs job log (GitHub `get_job_logs` with `return_content`, a large `tail_lines`). Add a "GPU run"
-section to this document with the same table as the CPU runs above (model, composition, task, steps, wall, input
-tokens per call, outcome) and a findings list answering: did either model fix the failing test; how do 4B and 8B
-step latencies compare with the CPU numbers; did any small-model failure mode from the CPU pilot recur (missing
-required argument, hallucinated tool, repeated interactive command); did the tool guard act. Commit on the Gaslite
-branch `claude/lucid-noether-razfev`, push, and update PR #30 (or open a new PR if #30 has merged). Then update
-"Next steps" below: step 1 is done, step 2 (guardrail prompt merged in: set `system_prompt_file` to
-`configs/evaluation/guardrail-system-prompt.md` on the next launch) is the natural follow-up.
+| Model | Composition | Task | Steps | Wall | Step latency | Input tokens / call | Outcome |
+|---|---|---|---|---|---|---|---|
+| 4B | minimal (bash) | reply "harness online" | 1 | 1 s | 0.2 s | 963 | Replied `<harness online>` — correct words, angle brackets nobody asked for. |
+| 4B | minimal (bash) | list files, name the failing test | 2 | 1 s | 0.4 s | 969 → 1048 | Ran `ls`, listed all three files correctly, then declined the second half: "I cannot determine which test fails because there is no output or error information provided." |
+| 4B | minimal (bash) | fix the failing test | 2 | 2 s | 0.5 s | 996 → 1201 | Ran `python -m pytest -q`, read the failure, diagnosed it exactly — then stopped without acting. No file changed. |
 
-**If it fails again**
+The `fix` run in full is two steps. Step 1 is a correct, well-formed call — `bash` with `command`,
+`description`, `timeoutMs` and `workdir` all present. Step 2 reads the pytest output and ends the turn with text:
 
-`logs/harness-<run_id>.log` names the failing phase (`protea-harness: FAILED — …`) and the pod will have terminated
-itself. Entry points for fixes: `deployment/protea/entrypoint-harness.sh` and `.github/workflows/run-harness.yml`
-in protea; the launcher passthrough list in `protea/training/remote/runpod.py`. Repo conventions are in protea's
-`CLAUDE.md` (`ruff check .` and `pytest` before a PR; wheels-only pip installs; SonarCloud gates PRs; Codex reviews
-PRs and its findings are worth fixing).
+> "The test `test_subtract` is failing because the `subtract` function is returning 8 instead of 2. This indicates
+> that the function is not correctly implementing subtraction. Let's fix the `subtract` function in `calc.py` …
+> I will now edit `calc.py` to fix the `subtract` function. **Let me check if I have permission to do so.**"
+
+There is no step 3. `workspace.diff` is empty and `tests.txt` still reads `1 failed, 2 passed`.
+
+### The 8B rows are not the 8B
+
+`summary.md` for this run carries three `vllm-qwen3-8b-b968826d` rows. They were produced by the 4B, and the run
+does not say so anywhere. The 8B engine never loaded a model:
+
+```
+ValueError: Free memory on device (5.73/79.18 GiB) on startup is less than desired GPU memory
+utilization (0.9, 71.26 GiB). Decrease GPU memory utilization or reduce GPU memory used by other processes.
+```
+
+The 4B was still resident, and still answering on `:8000`. `wait_http` probed the URL before checking whether the
+process it had just launched was alive, so the dead engine was reported healthy, the facade started in front of the
+4B, the smoke test passed, and all three tasks were scored against the wrong model. The teardown between models
+was `stop_pid` + `wait` + `sleep 5`; a vLLM instance holding a 58 GiB KV cache does not release in five seconds.
+
+The transcripts make it plain in hindsight: `hello/session.jsonl` is 8213 bytes for both models, `list/session.jsonl`
+11904 bytes for both, `list/stdout.txt` 259 bytes for both, and the `list` answers are word-for-word identical.
+`vllm-qwen3-8b-b968826d/vllm.log` contains no `Model loading took`, no `init engine` and no `Starting vLLM API
+server`. Fixed in protea PR #75 (liveness before probing; a bounded wait for the port to go quiet between models;
+and a refusal to start an engine while `:8000` still answers, skipping the model instead).
+
+### Findings
+
+1. **The production engine changes the economics, not the outcome.** Step latency fell from 3–35 s on CPU to
+   **0.2–0.5 s** on the H100, and a whole task now costs 1–2 s of wall time against the CPU pilot's 2–374 s on the
+   same composition. Input tokens per call are unchanged at about 1k, because the composition is unchanged. Nothing
+   about the *quality* of the agent loop improved: the 4B still did not fix a one-line bug. Speed was never the
+   binding constraint.
+2. **The failure mode moved from thrashing to stopping.** The CPU pilot's 1.7B diagnosed the bug correctly and then
+   called `vim` four times in a row, eating a 60 s timeout each time. The 4B here diagnoses the bug correctly in one
+   tool call and then *narrates its intention and ends the turn* — "Let me check if I have permission to do so."
+   Same net result, opposite mechanism, and the second is harder to catch: there is no loop to break, no timeout to
+   trip, and the final message reads like progress. A repeated-call breaker would not have helped. What would: a
+   prompt line that says the agent already has permission to edit files in the workspace and should act without
+   asking, and a completion check that treats "tests still failing" as the signal rather than the model's prose.
+3. **Schema adherence was clean, and the two CPU tool-calling failures did not recur.** Every `bash` call carried
+   `description` (the 0.5B omitted it on CPU and the harness rejected the call) and most carried `workdir` as well.
+   No hallucinated tool names — on the minimal composition the only tool offered is `bash`, which is exactly the
+   "send only the relevant tools" argument from the CPU pilot's finding 2, now with a second data point.
+4. **The guard had nothing to do, and that is the correct result.** Every facade request returned 200; there were no
+   unknown-tool retries, no refusals, no escalations. The tool-permission guard is exercised by tool *catalogues*,
+   and this composition offers one tool that is always permitted. Exercising the guard needs the standard
+   composition or a task that reaches for a denied tool — worth doing deliberately rather than expecting it here.
+5. **Partial completion survived the hardware change.** On both `list` runs the model listed the files correctly and
+   then refused the second half of the question, in the same words the 1.7B used on CPU: "I cannot determine which
+   test fails." The `hello` task also came back as `<harness online>` rather than the exact string requested. These
+   are `instruction_following` failures in ZaraBench's terms and they are not latency-bound.
+6. **Five deployment blockers, each invisible until it cost a pod.** In order: the runtime image had no `xz` for the
+   Node tarball (#69); a container restart tripped over the previous pass's `dsh` profile directory (#70); the
+   harness's runtime `transformers>=4.56,<5` install downgraded `huggingface_hub` into a version that honours the
+   image's `HF_HUB_ENABLE_HF_TRANSFER=1` and hard-fails without `hf_transfer` (#72); a RunPod *community* host had a
+   driver too old for the image's CUDA 12.8, which `torch.cuda.is_available()` silently swallows (#73 adds a
+   preflight); and the `-runtime` base image ships no C compiler, so Triton could not build its extension and vLLM
+   died in `torch.compile` after the weights were already on the GPU (#74). None of these are model findings, but
+   together they are the honest cost of the first real GPU run, and each is now either fixed or detected early.
+
+### Loose end worth pulling
+
+`logs/eval-20260916T141350Z.log` carries the same `CUDA unknown error` warning that finding 6 describes, and then
+runs at roughly ten minutes per task, reaching 2 of 206 — against about 21 s per task in `eval-20260915T085509Z`.
+That reads like the 2026-09-16 B0 baseline scoring on CPU without saying so. Worth confirming before that number is
+used for anything.
 
 ## Next steps
 
-1. Same profile, real facade: point `facade.sh` at the vLLM engine on a GPU host (Qwen3-4B or 8B at the pinned
-   revisions) and rerun the two tasks; that is the number that says whether a Protea model can drive a coding agent
-   at all.
-2. Repeat with the Zara guardrail prompt merged in (drop the `system_prompt_file` omission from
-   `facade-harness.yaml`) to measure what the product framing costs on tool use.
+1. **Measure the 8B.** It has still never run on a GPU. Once protea PR #75 is merged the two-model pod is safe to
+   use again; until then, launch `Run agent harness (RunPod)` with `models` set to the 8B entry alone, which
+   sidesteps the handover entirely.
+2. Repeat with the Zara guardrail prompt merged in (set `system_prompt_file` to
+   `configs/evaluation/guardrail-system-prompt.md`) to measure what the product framing costs on tool use.
 3. Port a handful of ZaraBench `tool_calling` and `failure_recovery` tasks to harness tasks, so the same model is
    scored by ZaraBench and exercised by an independent agent loop on the same inputs.
-4. Add a required-argument check to the guard or to the `tool_calling` scorer (finding 3), and a "no interactive
-   editors" line to the guardrail prompt (finding 5).
-5. Report the headless-preset gap upstream to `deepseek-ai/deepseek-harness`.
+4. Prompt and scorer changes the runs have now earned: a required-argument check in the guard or the `tool_calling`
+   scorer (CPU finding 3); "no interactive editors — edit files with sed, python or heredocs" (CPU finding 5); and
+   "you already have permission to edit files in the workspace, act without asking" (GPU finding 2). The third is
+   the one that would most likely have turned this run's `fix` task green.
+5. Confirm whether the 2026-09-16 B0 eval scored on CPU (see "Loose end worth pulling"), and re-run it if so.
+6. Report the headless-preset gap upstream to `deepseek-ai/deepseek-harness`.
