@@ -176,10 +176,10 @@ tool call and result) and leaves the raw session under `logs/`. The session log 
 
 ## GPU run (2026-09-20)
 
-_Qwen3-4B served by vLLM on a rented H100, driven by the same `protea-min` profile as the CPU pilot. The 8B was
-launched in the same pod and **was not measured** — see "The 8B rows are not the 8B" below. Five blockers were
-found and fixed getting here; they are listed at the end because each one is a finding about the deployment path,
-not incidental noise._
+_Qwen3-4B and Qwen3-8B served by vLLM on rented H100s, driven by the same `protea-min` profile as the CPU pilot.
+Two runs: the 4B and a first 8B attempt together (`20260920T070103Z`, whose 8B rows turned out to be the 4B
+answering twice — see below), then the 8B alone (`20260920T073935Z`). Six blockers were found and fixed getting
+here; they are listed at the end because each is a finding about the deployment path, not incidental noise._
 
 ### Setup differences from the CPU pilot
 
@@ -217,6 +217,49 @@ The `fix` run in full is two steps. Step 1 is a correct, well-formed call — `b
 
 There is no step 3. `workspace.diff` is empty and `tests.txt` still reads `1 failed, 2 passed`.
 
+Run `20260920T073935Z`, the 8B alone on its own pod. Engine startup: weights 53.3 s, model loading 65.7 s
+(15.27 GiB), `torch.compile` 24.5 s, 50.24 GiB KV cache, `init engine` 40.5 s — API server accepting traffic about
+3.6 minutes after the container started, against 2.5 for the 4B.
+
+| Model | Composition | Task | Steps | Wall | Step latency | Input tokens / call | Outcome |
+|---|---|---|---|---|---|---|---|
+| 8B | minimal (bash) | reply "harness online" | 2 | 2 s | 0.5–0.6 s | 963 → 1029 | Shelled out to `echo "harness online"` rather than just replying. Correct output, then a paragraph explaining the `landlock-run` line it saw on stderr. |
+| 8B | minimal (bash) | list files, name the failing test | 3 | 3 s | 0.5–1.1 s | 969 → 1152 | Ran `ls` correctly, then `grep -n 'FAIL' test_calc.py` — grepping the test *source* for the word FAIL instead of running it. Exit 1, which it read as "a sandboxing issue or the absence of failing tests", then asked whether to try something else. |
+| 8B | minimal (bash) | fix the failing test | 9 | 14 s | 0.6–1.8 s | 996 → 2785 | Diagnosed it, read `calc.py`, wrote a `sed` that silently matched nothing, verified and saw no change — then blamed the sandbox and spent four steps escalating permissions. No file changed. |
+
+### The 8B's fix run, and the trap in it
+
+Steps 1–3 are good agent behaviour: run the tests, read `calc.py`, attempt a targeted edit.
+
+```
+sed -i 's/return a \\+ b/return a - b/' calc.py
+```
+
+That pattern over-escapes the `+`. sed reads `\\` as a literal backslash and `+` as a literal plus, so it hunts
+for `return a \+ b`, which is not in the file. **It matched nothing, changed nothing, printed nothing, and exited
+0** — reproduced directly against a copy of the seeded `calc.py`.
+
+Step 4 re-runs pytest, step 5 `cat`s the file: the model checks its own work and correctly notices the edit did
+not land. That is the right instinct. What it does with it is the failure. From step 6 it attributes the no-op to
+the sandbox and never revisits the regex:
+
+- step 6 — escalate: `Error: sandbox escalation to "workspace-write" is not strictly wider than this call's
+  current "workspace-write" mode`
+- step 7 — retry the same `sed` unescalated; silent no-op again
+- step 8 — escalate harder: `Error: sandbox escalation to "danger-full-access" requires approval, but no approval
+  channel is available`
+- step 9 — gives up on that ground
+
+So the 8B's run ends on a permissions story that was never true. Two things fed it. `sed -i` exits 0 when its
+pattern matches nothing, so the only evidence the edit failed was the unchanged file. And every single tool result
+in both runs carries `[stderr] landlock-run: partial enforcement (older Landlock ABI)` — a benign warning the
+harness's sandbox wrapper emits on every command, which this model cites by name in `hello` and treats as evidence
+of obstruction in both `list` and `fix`.
+
+Note what is *not* established: whether the workspace is actually writable under that sandbox. No correctly-formed
+write was ever attempted in either run, so the question is open. The observed no-op is fully explained by the
+regex.
+
 ### The 8B rows are not the 8B
 
 `summary.md` for this run carries three `vllm-qwen3-8b-b968826d` rows. They were produced by the 4B, and the run
@@ -241,37 +284,54 @@ and a refusal to start an engine while `:8000` still answers, skipping the model
 ### Findings
 
 1. **The production engine changes the economics, not the outcome.** Step latency fell from 3–35 s on CPU to
-   **0.2–0.5 s** on the H100, and a whole task now costs 1–2 s of wall time against the CPU pilot's 2–374 s on the
-   same composition. Input tokens per call are unchanged at about 1k, because the composition is unchanged. Nothing
-   about the *quality* of the agent loop improved: the 4B still did not fix a one-line bug. Speed was never the
-   binding constraint.
-2. **The failure mode moved from thrashing to stopping.** The CPU pilot's 1.7B diagnosed the bug correctly and then
-   called `vim` four times in a row, eating a 60 s timeout each time. The 4B here diagnoses the bug correctly in one
-   tool call and then *narrates its intention and ends the turn* — "Let me check if I have permission to do so."
-   Same net result, opposite mechanism, and the second is harder to catch: there is no loop to break, no timeout to
-   trip, and the final message reads like progress. A repeated-call breaker would not have helped. What would: a
-   prompt line that says the agent already has permission to edit files in the workspace and should act without
-   asking, and a completion check that treats "tests still failing" as the signal rather than the model's prose.
-3. **Schema adherence was clean, and the two CPU tool-calling failures did not recur.** Every `bash` call carried
-   `description` (the 0.5B omitted it on CPU and the harness rejected the call) and most carried `workdir` as well.
-   No hallucinated tool names — on the minimal composition the only tool offered is `bash`, which is exactly the
-   "send only the relevant tools" argument from the CPU pilot's finding 2, now with a second data point.
-4. **The guard had nothing to do, and that is the correct result.** Every facade request returned 200; there were no
-   unknown-tool retries, no refusals, no escalations. The tool-permission guard is exercised by tool *catalogues*,
-   and this composition offers one tool that is always permitted. Exercising the guard needs the standard
+   0.2–1.8 s on the H100, and a whole task now costs 1–14 s of wall time against the CPU pilot's 2–374 s on the
+   same composition. Input tokens per call are unchanged at about 1k. Neither model fixed a one-line bug. Speed
+   was never the binding constraint, and neither was model size: 4B and 8B failed at the same task in different
+   ways.
+2. **The 8B is meaningfully more agentic than the 4B, and still does not finish.** The 4B diagnosed the bug and
+   stopped, ending its turn with "Let me check if I have permission to do so" — it never attempted the edit. The
+   8B attempted it, then re-ran the tests, then re-read the file to check its own work. That self-verification is
+   the single best behaviour either model showed. It is also what makes the ending worse: having correctly
+   established the edit had not landed, it reached for the wrong explanation and spent four of its nine steps on
+   permissions rather than on the command it had just written.
+3. **`sed -i` exiting 0 on a no-match is a trap for a small model.** The 8B's one real edit over-escaped a `+` in
+   the regex; sed matched nothing, wrote nothing, printed nothing and returned success. The only signal available
+   was the unchanged file — which the model did check, and did read correctly. A shell tool that reported "0
+   substitutions" or an executor that surfaced "file unchanged" would have redirected it. This is a concrete
+   argument for aria's runtime returning *effects* from a shell tool, not just exit codes.
+4. **The harness's own sandbox warning is actively misleading.** Every tool result in both runs ends with
+   `[stderr] landlock-run: partial enforcement (older Landlock ABI)`. It is benign and constant. The 8B quotes it
+   in its `hello` answer, offers "a sandboxing issue" as the explanation for a `grep` that exited 1 in `list`, and
+   builds its entire `fix` failure narrative on it. Constant benign noise on stderr is not free — it is a standing
+   invitation to misattribute. Worth suppressing, or moving off the tool result.
+5. **The approval seam fails closed, exactly as the CPU pilot predicted, and now we have seen it.** CPU finding 6
+   noted that a `sandbox_permissions` escalation can never succeed in headless mode. The 8B walked into it twice:
+   `escalation to "workspace-write" is not strictly wider than this call's current "workspace-write" mode`, then
+   `escalation to "danger-full-access" requires approval, but no approval channel is available`. Correct
+   behaviour from the harness. It also means an unattended agent that talks itself into needing permissions has
+   no way back, and will burn its remaining steps discovering that.
+6. **Schema adherence was clean and no tool was hallucinated, in either model.** Every `bash` call carried
+   `description`, most carried `workdir` and `timeoutMs`. The CPU pilot's two `tool_calling` failures — a missing
+   required argument and an invented `pytest` tool — did not recur on either model. With one tool offered and a
+   190-character prompt there is little room to get it wrong, which is the "send only the relevant tools" argument
+   from CPU finding 2 with a second and third data point.
+7. **The guard had nothing to do, and that is the correct result.** Every facade request returned 200 across both
+   runs; no unknown-tool retries, no refusals, no escalations. Protea's tool-permission guard is exercised by tool
+   *catalogues*, and this composition offers one always-permitted tool. Exercising it needs the standard
    composition or a task that reaches for a denied tool — worth doing deliberately rather than expecting it here.
-5. **Partial completion survived the hardware change.** On both `list` runs the model listed the files correctly and
-   then refused the second half of the question, in the same words the 1.7B used on CPU: "I cannot determine which
-   test fails." The `hello` task also came back as `<harness online>` rather than the exact string requested. These
-   are `instruction_following` failures in ZaraBench's terms and they are not latency-bound.
-6. **Five deployment blockers, each invisible until it cost a pod.** In order: the runtime image had no `xz` for the
-   Node tarball (#69); a container restart tripped over the previous pass's `dsh` profile directory (#70); the
-   harness's runtime `transformers>=4.56,<5` install downgraded `huggingface_hub` into a version that honours the
-   image's `HF_HUB_ENABLE_HF_TRANSFER=1` and hard-fails without `hf_transfer` (#72); a RunPod *community* host had a
+8. **Partial completion and instruction-following slips survived the hardware change.** Both models listed the
+   files correctly and then failed the second half of the `list` question. The 4B replied `<harness online>`
+   instead of the exact string; the 8B shelled out to `echo` to produce it and then explained a stderr line nobody
+   asked about. These are `instruction_following` failures in ZaraBench's terms and they are not latency-bound.
+9. **Six deployment blockers, each invisible until it cost a pod.** In order: no `xz` in the runtime image for the
+   Node tarball (#69); a container restart tripping over the previous pass's `dsh` profile directory (#70); the
+   runtime `transformers>=4.56,<5` install downgrading `huggingface_hub` into a version that honours the image's
+   `HF_HUB_ENABLE_HF_TRANSFER=1` and hard-fails without `hf_transfer` (#72); a RunPod *community* host with a
    driver too old for the image's CUDA 12.8, which `torch.cuda.is_available()` silently swallows (#73 adds a
-   preflight); and the `-runtime` base image ships no C compiler, so Triton could not build its extension and vLLM
-   died in `torch.compile` after the weights were already on the GPU (#74). None of these are model findings, but
-   together they are the honest cost of the first real GPU run, and each is now either fixed or detected early.
+   preflight); the `-runtime` base image shipping no C compiler, so Triton could not build its extension and vLLM
+   died in `torch.compile` with the weights already on the GPU (#74); and the engine handover that scored one
+   model's tasks against another's server (#75). None are model findings, but together they are the honest cost of
+   the first real GPU runs, and each is now either fixed or detected early.
 
 ### Loose end worth pulling
 
@@ -282,16 +342,22 @@ used for anything.
 
 ## Next steps
 
-1. **Measure the 8B.** It has still never run on a GPU. Once protea PR #75 is merged the two-model pod is safe to
-   use again; until then, launch `Run agent harness (RunPod)` with `models` set to the 8B entry alone, which
-   sidesteps the handover entirely.
-2. Repeat with the Zara guardrail prompt merged in (set `system_prompt_file` to
+1. **Re-run `fix` with the two prompt lines the runs have earned**, before reaching for a bigger model. Add "you
+   already have permission to edit files in this workspace; act without asking" (which is what stopped the 4B) and
+   "if an edit appears not to have taken effect, re-read your own command before assuming the environment blocked
+   it" (which is what cost the 8B four steps). This is the cheapest experiment on the list and the most likely to
+   turn the task green.
+2. **Suppress the `landlock-run` warning from tool results**, or move it somewhere the model does not read as
+   signal (finding 4). It is one line and it demonstrably steered both `list` and `fix`.
+3. **Establish whether the workspace is writable under the harness sandbox at all** (see the note at the end of
+   the 8B section). A one-line task — `echo x > t.txt && cat t.txt` — settles it, and nothing else in this
+   document can be interpreted confidently until it is settled.
+4. Repeat with the Zara guardrail prompt merged in (set `system_prompt_file` to
    `configs/evaluation/guardrail-system-prompt.md`) to measure what the product framing costs on tool use.
-3. Port a handful of ZaraBench `tool_calling` and `failure_recovery` tasks to harness tasks, so the same model is
+5. Port a handful of ZaraBench `tool_calling` and `failure_recovery` tasks to harness tasks, so the same model is
    scored by ZaraBench and exercised by an independent agent loop on the same inputs.
-4. Prompt and scorer changes the runs have now earned: a required-argument check in the guard or the `tool_calling`
-   scorer (CPU finding 3); "no interactive editors — edit files with sed, python or heredocs" (CPU finding 5); and
-   "you already have permission to edit files in the workspace, act without asking" (GPU finding 2). The third is
-   the one that would most likely have turned this run's `fix` task green.
-5. Confirm whether the 2026-09-16 B0 eval scored on CPU (see "Loose end worth pulling"), and re-run it if so.
-6. Report the headless-preset gap upstream to `deepseek-ai/deepseek-harness`.
+6. Scorer and executor changes: a required-argument check in the guard or the `tool_calling` scorer (CPU finding
+   3); "no interactive editors" in the guardrail prompt (CPU finding 5); and returning *effects* rather than exit
+   codes from a shell tool (finding 3 above).
+7. Confirm whether the 2026-09-16 B0 eval scored on CPU (see "Loose end worth pulling"), and re-run it if so.
+8. Report the headless-preset gap upstream to `deepseek-ai/deepseek-harness`.
