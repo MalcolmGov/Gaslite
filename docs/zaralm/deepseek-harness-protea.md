@@ -414,6 +414,13 @@ used for anything.
    `.ops/launch-harness.json` runs every setup and engine check for each model, reports them together, and stops
    before the agent tasks. Given two models it also tests the engine handover, which is the failure that
    invalidated this document's first 8B table. One cheap pod, and it has already earned its cost twice.
+10. **Assert the published engine image's startup contract at publish time.** The contract check runs against an
+    image built from the branch — deliberately, so the PR that fixes a Dockerfile is not red on itself — but that
+    leaves the artefact actually pushed to the registry ungated: on `main` the check races the publish and only
+    echoes what it finds. The sequence "merge a Dockerfile fix → publish → launch a pod" therefore has no step
+    proving the pushed image starts correctly. It belongs in `publish-serve-images.yml`, which knows exactly
+    which image it just pushed. Verify it by breaking a Dockerfile on purpose and watching the publish fail;
+    see the lesson at the end of this document.
 
 ## What this run cost, and what caught what
 
@@ -428,12 +435,39 @@ Worth recording, because the failure modes repeat and the guards are what made t
 | 5 | `R2_ENDPOINT` set nowhere the workflow read | request validation, pre-launch | ~90 s of CI, no GPU |
 | 6 | community host's driver too old (again) | the pod's own preflight | ~2 min of L40S |
 | 7 | forked vLLM worker never released `:8000` | the smoke pod | ~6 min of H100, **no wrong rows** |
+| 8 | engine image's entrypoint called `python`; the image ships only `python3` | a CPU-only validation job | £0 |
+| 9 | engine image's entrypoint called `protea-storage`, which is not installed in it | the same CPU job | £0 |
+| 10 | engine image had no `CMD`, so the launcher's entrypoint became an ignored argument → crashloop | **a human looking at the dashboard** | ~1 h of L40S, nothing produced |
 
 A fourth smoke pod then served 4B and 8B in sequence with every check green, for ~6.5 minutes of H100. Total GPU
 spend on proving the pipeline correct after the fixes: under fifteen minutes, against four pods that each died on
 one problem.
 
-The first four each cost a pod and surfaced exactly one problem. The last three cost progressively less and, in
+The first four each cost a pod and surfaced exactly one problem. The middle three cost progressively less and, in
 the case of the two that mattered, produced a missing row rather than a wrong one. That is the whole argument for
 the smoke pod and for the pre-start port guard: a run that refuses to answer is recoverable, a run that answers
 wrongly is not.
+
+Rows 8 and 9 are the same argument again, one rung cheaper: a CPU-only job that starts the real engine image and
+runs its real entrypoint found two defects that would each have cost a pod, for nothing.
+
+Row 10 is the one to sit with, because it broke the pattern. Every other entry was caught by a guard or by a
+cheap rehearsal. This one was caught by a person opening a dashboard and asking whether the thing was running. It
+is also the only entry so far whose failure mode was *silent*: the launch reported success, the workflow went
+green, and the pod restarted every seventeen seconds for an hour behind it.
+
+Two things had to be true for that to happen, and both have been fixed:
+
+- **The validation tested the wrong thing.** Every check in the CPU job ran the image with `--entrypoint`,
+  which replaces the exact mechanism that was broken. It proved the image's *contents* and never its *startup
+  contract*. The job now hands the image a command the way the launcher does and asserts that the command
+  actually ran — a marker, not an exit status.
+- **Every teardown lived inside the pod.** Both entrypoints terminate the pod when they finish or fail, which
+  is worth nothing when the pod never reaches its entrypoint. There is now a launch-side guard
+  (`.github/ops/pod-watchdog.py`) that watches from the workflow that rented the GPU and terminates on a
+  crashloop or at a cap, depending on nothing inside the pod. Writing its tests found that the first version
+  missed the exact seventeen-second loop it was written for: sampled every thirty seconds, that loop's reported
+  uptime falls by only four each poll, under the jitter threshold. It now uses two independent signals.
+
+The generalisable lesson is narrower than "test more" and worth stating plainly: **a check that has never been
+seen to fail is not known to work.** Rows 4, 8, 9 and 10 were all, at some point, sitting behind something green.
