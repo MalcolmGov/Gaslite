@@ -187,10 +187,12 @@ Two launches so far, neither produced results:
 1. 17:40 UTC, pod `fels6cmg5gynne` (L40S community): the container restarted every 16 s. The `.tar.xz` extraction
    failing (no `xz` in the image) is the probable cause; a stale cached `latest` on the host was the other candidate.
    Both closed by PR #69. Stopped by hand after about 10 minutes.
-2. 18:06 UTC, pod `uoa4swrlxezvyg` (L40S community), image `protea-train@sha256:a5befb90…` with both fixes: launched
-   cleanly and was stopped by hand a few minutes later to pause for the day. Whatever it streamed before the stop
-   is under `harness-reports/<run_id>/` and `logs/harness-<run_id>.log` on R2 (the run id is the pod name's
-   timestamp suffix).
+2. 18:06 UTC, pod `uoa4swrlxezvyg` (L40S community), image `protea-train@sha256:a5befb90…` with both fixes. Its R2
+   log (read 2026-09-20) shows Node and the harness installed, then a container restart by RunPod whose second pass
+   failed at `dsh --from-default-profile` because the first pass's profile directory had survived on `/tmp`; the
+   first pass's own error was lost because each start truncated the log. Fixed in protea PR #70: append-mode log,
+   idempotent profile init, fail-soft exits, a done marker, and opt-in pod self-termination
+   (`PROTEA_POD_SELF_TERMINATE=1`, which the workflow now sets).
 
 To run it tomorrow (about 2 minutes of clicking, 20–30 minutes of pod time, under USD 1):
 
