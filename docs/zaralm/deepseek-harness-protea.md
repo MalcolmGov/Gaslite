@@ -390,11 +390,11 @@ used for anything.
 
 ## Next steps
 
-1. **Re-run `fix` with the two prompt lines the runs have earned**, before reaching for a bigger model. Add "you
-   already have permission to edit files in this workspace; act without asking" (which is what stopped the 4B) and
-   "if an edit appears not to have taken effect, re-read your own command before assuming the environment blocked
-   it" (which is what cost the 8B four steps). This is the cheapest experiment on the list and the most likely to
-   turn the task green.
+1. ~~**Re-run `fix` with the two prompt lines the runs have earned**, before reaching for a bigger model.~~
+   **Run twice on 2026-09-20 and 2026-09-21; see "The permission overlay, replicated and not confirmed" below.**
+   It was the cheapest experiment on the list and it was worth running, but it did not turn the task reliably
+   green: the 8B stops after diagnosing in both runs, and the 4B fixed the bug once and broke the module once.
+   The follow-up work is in that section rather than here.
 2. **Suppress the `landlock-run` warning from tool results**, or move it somewhere the model does not read as
    signal (finding 4). It is one line and it demonstrably steered both `list` and `fix`.
 3. ~~Establish whether the workspace is writable under the harness sandbox at all.~~ **Answered 2026-09-20: it
@@ -473,6 +473,68 @@ unavailable` directly beneath it. `head -12` closes the pipe, `nvidia-smi` dies 
 `set -o pipefail` turns that into a failed pipeline, so the fallback fired on every run that had a working
 GPU. The check worked and reported the opposite of what it found.
 
+## The permission overlay, replicated and not confirmed
+
+The prompt overlay at `configs/evaluation/harness-permission-prompt.md` adds two lines the earlier runs had
+earned: that the model already has permission to edit files, and that an edit which appears not to have taken
+effect should send it back to re-read its own command rather than concluding the sandbox blocked it. It was
+step 1 of these Next steps, and the cheapest experiment available.
+
+It was run twice, identically — same two models, same pinned revisions, same overlay, same H100 target, nothing
+else varied — so the only thing that differs between them is sampling.
+
+| Model | `fix` run 1 (2026-09-20T12:55) | `fix` run 2 (2026-09-21T03:03) |
+|---|---|---|
+| Qwen3-4B | 12 steps, 12s, **`3 passed in 0.45s`** | 9 steps, 9s, **`1 error in 0.53s`** |
+| Qwen3-8B | 2 steps, 3s, `1 failed, 2 passed` | 2 steps, 3s, `1 failed, 2 passed` |
+
+### The 8B's failure is a behaviour, not a sample
+
+Both runs: two steps, three seconds, and a final message diagnosing the bug correctly — *"the `subtract`
+function in `calc.py` is returning 8 instead of the expected 2 when called with `subtract(5, 3)`"* — and then
+the turn ends with nothing edited. Same step count, same wall time, same substance. Whatever the overlay's two
+lines do, they do not move the 8B off stopping once it has an explanation.
+
+This is worth stating carefully, because it is the opposite of the intuition that drove the experiment. The
+overlay was written from the 4B's pre-overlay failure, where the model asked for permission it already had. The
+8B does not ask for permission. It diagnoses, explains, and treats the explanation as the deliverable. Telling
+it that it has permission answers a question it was not asking.
+
+### The 4B acts, but not reliably, and the second run was worse than a miss
+
+Run 1 is the first verified fix this project has produced: the model edited `calc.py` and the harness ran the
+suite itself to `3 passed`. Run 2 is not merely a failure to fix — `1 error in 0.53s` is a collection error from
+an `ImportError` on `add`, so the file the model edited no longer imports. It broke the module.
+
+One fix and one regression in two attempts is not a working configuration, and a regression is worse than the
+pre-overlay behaviour of asking and stopping. Where the overlay removed the hesitation it aimed at, it did not
+supply the care that hesitation was standing in for.
+
+### What this does and does not establish
+
+It establishes that the 8B's stop-after-diagnosis reproduces, which makes it addressable: it is a property of
+how that model reads the task, not noise. It establishes that the overlay alone does not turn `fix` green.
+
+It does not establish much about the 4B beyond variance, at n=2. Four of the six model-task cells are unchanged
+across the two runs, so the harness itself is behaving consistently — the variance is in the models, not the
+pipeline, which is the one reassuring thing here.
+
+The caution worth carrying forward is not about prompts. **A single agent run is one sample of a stochastic
+process, and this document quoted one as a result.** The `3 passed` from run 1 was real and was reported as the
+overlay working; the replicate is what showed that reading to be premature. Any future row in these tables that
+is going to be quoted needs at least a second run behind it, and the two that matter most — `fix` for each model
+— are cheap enough that there is no excuse.
+
+### Where to go instead
+
+- The 8B needs the task framed so that an explanation is not a terminal state — an explicit "the task is not
+  complete until the test suite passes" is a narrower instruction than the permission lines, and aimed at the
+  failure actually observed.
+- The 4B needs the opposite: not more licence to act, but verification after acting. It already re-runs the
+  suite; run 2 shows it can leave the module broken and still narrate progress.
+- Both point at the same missing piece — a task definition with a machine-checkable completion condition rather
+  than a model's own account of what it did.
+
 ## What this run cost, and what caught what
 
 Worth recording, because the failure modes repeat and the guards are what made the difference:
@@ -492,6 +554,7 @@ Worth recording, because the failure modes repeat and the guards are what made t
 | 11 | launch-side guard refused `403` by Cloudflare — `urllib`'s default User-Agent is blocked | reading the guard's own log, an hour later | one runner-hour, no GPU |
 | 12 | engine image ships no AWS CLI, so every result push failed into `/dev/null` | auditing the observation channel itself | two attempts unreadable |
 | 13 | `nvidia-smi \| head -12` + `pipefail` → SIGPIPE → the log denied the GPU it had just printed | reading the first passing log | nothing, but a self-contradicting record |
+| 14 | an overlay result quoted from one run; the replicate contradicted it | running it a second time | ~11 min of H100, and the right conclusion |
 
 A fourth smoke pod then served 4B and 8B in sequence with every check green, for ~6.5 minutes of H100. Total GPU
 spend on proving the pipeline correct after the fixes: under fifteen minutes, against four pods that each died on
