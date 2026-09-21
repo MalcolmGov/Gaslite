@@ -422,6 +422,57 @@ used for anything.
     which image it just pushed. Verify it by breaking a Dockerfile on purpose and watching the publish fail;
     see the lesson at the end of this document.
 
+## The v0 serving deployment, validated (2026-09-21)
+
+The serving stack has been exercised end to end on a rented L40S, running the production engine image
+rather than the training one. This is the first time any of it has been checked on the artefact that would
+actually be deployed. **9 checks, 9 passed**, in about six and a half minutes of GPU time.
+
+| check | result |
+|---|---|
+| engine healthy from the production image | ok, after 131s |
+| facade ready on `:8080` in front of it | ok |
+| `--check` reports reasoning off | ok |
+| the deployed prompt is the repo's guardrail prompt | ok |
+| the deployment answers a completion | ok |
+| an unauthenticated call is refused | ok (401) |
+| reasoning off on the deployment, present on an unset control | ok |
+| a denied tool call comes back as the refusal | ok |
+| an over-limit refund escalates instead of executing | ok |
+
+Three of these could not have been established any other way, and they are the reason the run was worth
+renting a GPU for.
+
+**The production engine image serves the 8B.** Every previous GPU run used `protea-train`. The serving
+image had never served anything, and when it was finally exercised it turned out not to start at all
+(row 10) and not to be able to save its own output (row 12). It now does both.
+
+**Reasoning-off is measured, not self-reported.** The facade's `--check` says reasoning is off, but that is
+the facade describing its own configuration — it would say the same if the setting did nothing. The run
+therefore serves a second facade with the setting unset and asks both the same question: 272 characters
+from the deployment, 1172 from the control. The difference is the suppressed reasoning, and it is the first
+evidence that ADR-017's setting does any work at the serving layer rather than merely being present.
+
+**The tool-permission guard refuses a real model's real tool call.** Previously exercised only against
+canned requests in unit tests. On the deployment, a denied call came back as the refusal and an over-limit
+refund escalated rather than executing.
+
+### What this does and does not say
+
+It says the v0 serving path is sound: the image starts as the launcher drives it, the engine loads the
+pinned 8B revision, the facade fronts it with auth and the guardrail prompt, reasoning is genuinely off,
+and the tool guard holds. That is the deployment question answered.
+
+It says nothing about **quality** — whether the 8B is good at the agent tasks, which is what the harness
+runs above measure and where the interesting numbers still are. A serving path that works is a
+precondition for trusting those numbers, not a substitute for them.
+
+One defect in the run's own output, worth recording because it is the same shape as everything else in the
+cost table: the log printed the full `nvidia-smi` table for the L40S and then declared `nvidia-smi
+unavailable` directly beneath it. `head -12` closes the pipe, `nvidia-smi` dies of SIGPIPE, and
+`set -o pipefail` turns that into a failed pipeline, so the fallback fired on every run that had a working
+GPU. The check worked and reported the opposite of what it found.
+
 ## What this run cost, and what caught what
 
 Worth recording, because the failure modes repeat and the guards are what made the difference:
@@ -440,6 +491,7 @@ Worth recording, because the failure modes repeat and the guards are what made t
 | 10 | engine image had no `CMD`, so the launcher's entrypoint became an ignored argument → crashloop | **a human looking at the dashboard** | ~1 h of L40S, nothing produced |
 | 11 | launch-side guard refused `403` by Cloudflare — `urllib`'s default User-Agent is blocked | reading the guard's own log, an hour later | one runner-hour, no GPU |
 | 12 | engine image ships no AWS CLI, so every result push failed into `/dev/null` | auditing the observation channel itself | two attempts unreadable |
+| 13 | `nvidia-smi \| head -12` + `pipefail` → SIGPIPE → the log denied the GPU it had just printed | reading the first passing log | nothing, but a self-contradicting record |
 
 A fourth smoke pod then served 4B and 8B in sequence with every check green, for ~6.5 minutes of H100. Total GPU
 spend on proving the pipeline correct after the fixes: under fifteen minutes, against four pods that each died on
