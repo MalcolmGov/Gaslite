@@ -64,9 +64,17 @@ facade's `mock` backend: the harness booted, called `/v1/models` and `/v1/chat/c
 The harness ships `minimal` under `@deepseek-ai/dsh-agent-presets/presets/minimal/agent.cordis.yml` (a `dsh-persona`
 row plus a persistent-shell group). Mounting `dsh-agent-presets` with `default: minimal` in the headless profile
 composes nothing: in 0.1.5-rc.2 the preset plugin only joins agents that a caller mounts through
-`AgentPresets.mount()`, which the Web session controller does and the headless runner does not. The plugin's own
-`agent/created` listener just logs a warning that the agent "was published without joining an agent preset", and
-the session then runs on the host's full tool roster. The first two runs below went through exactly that and were
+`AgentPresets.mount()`, which the Web session controller does and the headless runner does not, and the session
+then runs on the host's full tool roster.
+
+**Corrected 2026-09-21.** This paragraph used to say the plugin's `agent/created` listener "just logs a warning
+that the agent was published without joining an agent preset". That warning string is in the package, but a
+reproduction against a clean 0.1.5-rc.2 install shows it never reaches the operator on the headless path — not
+on stdout, not on stderr, not at debug level, where the word "preset" appears zero times. The failure is
+entirely silent, which is worse than the paragraph claimed and is the point of the upstream report in
+`harness/upstream-headless-preset-report.md`. The reproduction also puts a number on "full tool roster": a
+profile mounting the plugin with `default: minimal` sent **25 tools** — the host's complete set — where the
+preset composes one persistent shell. The first two runs below went through exactly that and were
 kept as the "standard composition" baseline. The `protea-min` patch therefore expresses the minimal shape directly:
 it disables every host tool row except `tool-bash`, disables plan mode, compaction and the tool-repeat reminder,
 and replaces the persona with the preset's one line. What the model then sees is one `bash` tool and a 190-character
@@ -444,7 +452,11 @@ is cheaper than implying otherwise.
    score on CPU, and so did `eval-20260914T092830Z` — but both stalled after a handful of tasks and produced no
    numbers, so no baseline needs re-running.** See "Loose end worth pulling" above. What does need a run, if it
    is ever wanted, is a 4B B0 on zarabench-0.2: no complete one exists.
-8. Report the headless-preset gap upstream to `deepseek-ai/deepseek-harness`.
+8. **Report the headless-preset gap upstream to `deepseek-ai/deepseek-harness`.** Written up with a minimal
+   reproduction in `harness/upstream-headless-preset-report.md` and **not filed**: it is a public issue on
+   someone else's project, so whether and when to open it is the maintainer's call. Reproducing it corrected
+   this document — see "Why the shipped `minimal` preset is not used as-is" — because the failure turns out to
+   be silent rather than warned.
 9. **Run the smoke pod before any run whose numbers will be quoted.** `"smoke": true` in
    `.ops/launch-harness.json` runs every setup and engine check for each model, reports them together, and stops
    before the agent tasks. Given two models it also tests the engine handover, which is the failure that
