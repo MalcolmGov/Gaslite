@@ -381,12 +381,44 @@ the precondition for every comparison the Runs section wants to make.
    model's tasks against another's server (#75). None are model findings, but together they are the honest cost of
    the first real GPU runs, and each is now either fixed or detected early.
 
-### Loose end worth pulling
+### ~~Loose end worth pulling~~ — pulled 2026-09-21: the baselines are clean
 
-`logs/eval-20260916T141350Z.log` carries the same `CUDA unknown error` warning that finding 6 describes, and then
-runs at roughly ten minutes per task, reaching 2 of 206 — against about 21 s per task in `eval-20260915T085509Z`.
-That reads like the 2026-09-16 B0 baseline scoring on CPU without saying so. Worth confirming before that number is
-used for anything.
+The worry was that `logs/eval-20260916T141350Z.log` carries the same `CUDA unknown error` warning finding 6
+describes, runs at roughly ten minutes per task, and reaches 2 of 206 — so a B0 baseline might have been scored
+on CPU without saying so. Every eval log in R2 was swept for that signature:
+
+| run | device | completed | scored |
+|---|---|---|---|
+| `eval-20260912T034248Z` | GPU | **205/206** | **8B bare base — B0, zarabench-0.1** |
+| `eval-20260912T220419Z` | GPU | 199/206 | 8B + 0.2 adapter |
+| `eval-20260914T030131Z` | GPU | 205/206 | 8B + 0.2.1 adapter |
+| `eval-20260915T085509Z` | GPU | 200/206 | 8B + 0.2.2 adapter |
+| `eval-20260911T032847Z` / `061452Z` | GPU | 19/20 | 8B B0, per_category=2 |
+| `eval-20260910T*` (×3) | GPU | 8–19/20 | 8B + 0.1 adapter |
+| `eval-20260915T033606Z` | GPU | 39/50 | 8B B0 |
+| `eval-20260914T092830Z` | **CPU** | **4/50** | 8B B0 |
+| `eval-20260916T141350Z` | **CPU** | **2/206** | 4B B0, zarabench-0.2 |
+
+**Two runs were contaminated, and neither produced a number.** That is not luck. CPU inference here is roughly
+two orders of magnitude slower — the 09-16 run's first task took 56 minutes and its own ETA for the set was 193
+hours — so a contaminated run stalls after a handful of tasks instead of quietly finishing with wrong scores. The
+failure mode is loud by accident, which is the opposite of most entries in this document's cost table.
+
+So **the 8B B0 baseline in use (`eval-20260912T034248Z`, 205/206, GPU) is sound**, and nothing downstream rests on
+a CPU-scored number.
+
+Two things fell out of the sweep that matter more than the original worry:
+
+- **This section's own comparison was wrong.** It read the 09-16 and 09-15 runs as the same experiment differing
+  only in speed. They differ in nearly everything: 4B bare base against 8B-plus-adapter, zarabench-0.2 against
+  0.1, `thinking=false` against the chat template's default. The "about 21 s per task" quoted as the healthy
+  comparator is from an 8B adapter run on the older benchmark, so it was never the right yardstick.
+- **There is no complete 4B B0 on zarabench-0.2.** The only attempt is the one that died at 2 of 206. Any
+  comparison needing a 4B baseline on the current benchmark needs a run first; the number does not exist.
+
+One run was not swept: `eval-20260913T171808Z.log` is 902 KB and exceeded the fetch's text cap. It is a 0.2.1
+adapter run rather than a baseline, so it does not bear on the B0 question — but it is unchecked, and saying so
+is cheaper than implying otherwise.
 
 ## Next steps
 
@@ -408,13 +440,18 @@ used for anything.
 6. Scorer and executor changes: a required-argument check in the guard or the `tool_calling` scorer (CPU finding
    3); "no interactive editors" in the guardrail prompt (CPU finding 5); and returning *effects* rather than exit
    codes from a shell tool (finding 3 above).
-7. Confirm whether the 2026-09-16 B0 eval scored on CPU (see "Loose end worth pulling"), and re-run it if so.
+7. ~~Confirm whether the 2026-09-16 B0 eval scored on CPU, and re-run it if so.~~ **Answered 2026-09-21: it did
+   score on CPU, and so did `eval-20260914T092830Z` — but both stalled after a handful of tasks and produced no
+   numbers, so no baseline needs re-running.** See "Loose end worth pulling" above. What does need a run, if it
+   is ever wanted, is a 4B B0 on zarabench-0.2: no complete one exists.
 8. Report the headless-preset gap upstream to `deepseek-ai/deepseek-harness`.
 9. **Run the smoke pod before any run whose numbers will be quoted.** `"smoke": true` in
    `.ops/launch-harness.json` runs every setup and engine check for each model, reports them together, and stops
    before the agent tasks. Given two models it also tests the engine handover, which is the failure that
    invalidated this document's first 8B table. One cheap pod, and it has already earned its cost twice.
-10. **Assert the published engine image's startup contract at publish time.** The contract check runs against an
+10. ~~**Assert the published engine image's startup contract at publish time.**~~ **Done 2026-09-21 in
+    MalcolmGov/protea#98, and verified the way this list asked: a deliberately broken Dockerfile was built and
+    pushed on a throwaway branch, and the gate failed naming the entrypoint. Original description follows.** The contract check runs against an
     image built from the branch — deliberately, so the PR that fixes a Dockerfile is not red on itself — but that
     leaves the artefact actually pushed to the registry ungated: on `main` the check races the publish and only
     echoes what it finds. The sequence "merge a Dockerfile fix → publish → launch a pod" therefore has no step
@@ -555,6 +592,7 @@ Worth recording, because the failure modes repeat and the guards are what made t
 | 12 | engine image ships no AWS CLI, so every result push failed into `/dev/null` | auditing the observation channel itself | two attempts unreadable |
 | 13 | `nvidia-smi \| head -12` + `pipefail` → SIGPIPE → the log denied the GPU it had just printed | reading the first passing log | nothing, but a self-contradicting record |
 | 14 | an overlay result quoted from one run; the replicate contradicted it | running it a second time | ~11 min of H100, and the right conclusion |
+| 15 | two evals silently scored on CPU | sweeping every eval log for the signature | nothing — both stalled before producing a number |
 
 A fourth smoke pod then served 4B and 8B in sequence with every check green, for ~6.5 minutes of H100. Total GPU
 spend on proving the pipeline correct after the fixes: under fifteen minutes, against four pods that each died on
