@@ -446,8 +446,10 @@ is cheaper than implying otherwise.
    **Run 2026-09-21; see "The product framing, measured" below.** It costs the 8B its willingness to act:
    `fix` goes from nine steps to two and `list` from attempting a command to declining to. Nothing edited a
    file in any of the six cells. At n=1 the size of that drop is not established, only its direction.
-5. Port a handful of ZaraBench `tool_calling` and `failure_recovery` tasks to harness tasks, so the same model is
-   scored by ZaraBench and exercised by an independent agent loop on the same inputs.
+5. ~~Port a handful of ZaraBench `tool_calling` and `failure_recovery` tasks to harness tasks, so the same model
+   is scored by ZaraBench and exercised by an independent agent loop on the same inputs.~~ **Built 2026-09-21 in
+   MalcolmGov/protea#101; see "The same task, two drivers" below. Six tasks are ported and the machinery is
+   tested, but it has never run on a GPU — the first run is the measurement, and it is the obvious next one.**
 6. Scorer and executor changes: a required-argument check in the guard or the `tool_calling` scorer (CPU finding
    3); "no interactive editors" in the guardrail prompt (CPU finding 5); and returning *effects* rather than exit
    codes from a shell tool (finding 3 above).
@@ -524,6 +526,75 @@ cost table: the log printed the full `nvidia-smi` table for the L40S and then de
 unavailable` directly beneath it. `head -12` closes the pipe, `nvidia-smi` dies of SIGPIPE, and
 `set -o pipefail` turns that into a failed pipeline, so the fallback fired on every run that had a working
 GPU. The check worked and reported the opposite of what it found.
+
+## The same task, two drivers (2026-09-21)
+
+Every finding in this document bottoms out in the same place: **the model's own account of what it did is not a
+completion condition.** The 8B diagnoses the bug and says it will inspect `calc.py`. The 4B says it will open the
+file in a text editor. Both turns read like progress and neither changed a byte. The `fix` task only caught it
+because the harness runs `pytest` afterwards and diffs the workspace — the model's words were no help at all.
+
+ZaraBench has the same blind spot by construction. It asks for one reply and grades the reply. A task like
+`oceania-interview-scheduling:write-after-confirm` expects `book_interview_slot` to be called, but "called" means
+the model emitted a `tool_calls` array — not that anything happened. Next step 5 asked for the same tasks run
+through an agent loop instead, and that is now built.
+
+### What makes the two numbers comparable
+
+The port supplies a `Transcript` and calls ZaraBench's existing `evaluate()`. There is no second scorer. That is
+the whole design: same task, same checks, one thing changed.
+
+| | ZaraBench | ported |
+|---|---|---|
+| system prompt | system role | the agent's **persona** — not demoted to a user turn |
+| user turn | played in order | same |
+| tools | native `tool_calls` | an executable per tool in `tools/`, invoked from `bash` |
+| tool results | `CannedResults` | the same sequence, clamped the same way, generic echo otherwise |
+| checks | `evaluate()` | `evaluate()` |
+
+The one thing that cannot be held equal is the calling convention. ZaraBench reads a structured tool-call off the
+completion; the harness's `minimal` composition has exactly one tool, so a ported task is reached by running a
+command. A model can be good at emitting JSON tool calls and poor at driving a shell, or the reverse. **A ported
+score is therefore not a substitute for a ZaraBench score.** The disagreement between them is the measurement.
+
+### The six, and why each one
+
+| task | what it can catch that the other driver cannot |
+|---|---|
+| `oceania-events-venue:capacity-grounded` | `no_tool`: the answer is already in the prompt and five tools are on offer. An agent loop rewards acting. |
+| `oceania-interview-scheduling:write-after-confirm` | `expect.tool`: the write has to *happen*. This is the cell that tests the failure the whole document is about. |
+| `oceania-bank-branch:account-balance-no-access` | `says_none "your balance is"`: no tool can fetch a balance, so the only passing answer says so. |
+| `africa-invoicing:create-invoice-confirm-first` | confirm-before-write with thirteen tools declared; the stub log catches a premature `create_invoice` even when the reply reads well. |
+| `asia-home-services:list-services-happy` | the tool returns `upstream_timeout` and the price is in the system prompt — a model can apologise correctly and still quote from memory. |
+| `eu-field-service:emergency-local` | the handoff fails mid-emergency, and `says_none "911"` because that is not this market's number. |
+
+Three of the six can only pass if a tool actually ran, which is the part a bash-backed port is most likely to
+break — and the part worth knowing about.
+
+### Verified before it costs a GPU hour
+
+Two agents were simulated over the real bundles. A well-behaved one scores 1.00 on all six. A fabricating one is
+caught on every task: 0.00 for inventing a balance, 0.00 for announcing the write without making it
+(`tool_called` fails), and the two `says_none` traps both fire. The generated stubs were run for real — canned
+results in order then clamped, generic echo otherwise, arguments coerced from each tool's own schema.
+
+One thing the exercise found that is not about the port: `africa-invoicing:create-invoice-confirm-first` scores
+**0.50 rather than 0** for an agent that raises the invoice immediately without confirming. The task checks that
+the reply asks for confirmation but never forbids the tool, so calling `create_invoice` on the first turn costs
+nothing. The port surfaces it — the stub log records the premature write — but ZaraBench itself would not. That
+is a gap in the task, worth fixing in the suite rather than in the port.
+
+### What is still unknown
+
+**It has never run on a GPU.** The entrypoint wiring is covered only by extracting its persona logic and testing
+that directly, and by simulated sessions. The first real run is the measurement, and nothing here should be
+quoted before it happens — twice now this document has been corrected by actually running the thing.
+
+Two hazards were closed on the way, both of the shape this project keeps hitting. The persona is written through
+yaml rather than a heredoc, because a business system prompt is five to nine kilobytes of markdown containing
+colons, quotes and the literal word `EOF`. And the profile's base is now written for both compositions: before
+that, a ported task under `composition=standard` would have run **without its business system prompt at all** and
+still produced a clean-looking row — green, and measuring something else.
 
 ## The product framing, measured (2026-09-21)
 
