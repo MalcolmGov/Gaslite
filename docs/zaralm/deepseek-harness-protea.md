@@ -1,7 +1,8 @@
 # DeepSeek Harness × Protea — minimal-profile test
 
-_2026-09-19. Read-only against `MalcolmGov/protea` at `556b0b5` (main, 2026-09-16). No Protea or Gaslite code
-was changed; everything needed to repeat this lives under `docs/zaralm/harness/`._
+_2026-09-19, CPU pilot: read-only against `MalcolmGov/protea` at `556b0b5` (main, 2026-09-16), no Protea code
+changed; everything needed to repeat it lives under `docs/zaralm/harness/`. 2026-09-20, GPU run: the same profile
+against vLLM on a rented H100, which did change Protea — five deployment fixes, listed in that section's finding 6._
 
 ## What was done
 
@@ -173,15 +174,379 @@ $HARNESS_ROOT/facade.sh stop
 tool call and result) and leaves the raw session under `logs/`. The session log is zstd-framed JSONL; Node 22's
 `zlib.zstdDecompressSync` handles one frame, so `decode-session.js` splits on the frame magic first.
 
+## GPU run (2026-09-20)
+
+_Qwen3-4B and Qwen3-8B served by vLLM on rented H100s, driven by the same `protea-min` profile as the CPU pilot.
+Two runs: the 4B and a first 8B attempt together (`20260920T070103Z`, whose 8B rows turned out to be the 4B
+answering twice — see below), then the 8B alone (`20260920T073935Z`). Six blockers were found and fixed getting
+here; they are listed at the end because each is a finding about the deployment path, not incidental noise._
+
+### Setup differences from the CPU pilot
+
+| Piece | CPU pilot | This run |
+|---|---|---|
+| Host | 4 CPU cores, 16.9 GB RAM, no GPU | RunPod **h100-80gb**, secure cloud |
+| Engine | facade `local` backend (in-process transformers) | **vLLM 0.11.0**, the production path (ADR-009) |
+| Models | Qwen2.5-0.5B-Instruct, Qwen3-1.7B | **Qwen3-4B** @ `1cfa9a72` (8B attempted, not measured) |
+| Image | local venv | `ghcr.io/malcolmgov/protea-train@sha256:9e189379…` |
+| Everything else | — | unchanged: `minimal` composition, one `bash` tool, 190-char system prompt, thinking off, no guardrail overlay |
+
+Engine startup on the H100, from `vllm.log`: weights downloaded in 21.7 s, model loading 23.3 s (7.56 GiB),
+`torch.compile` 24.3 s of which 19.2 s was the dynamic-shape graph, CUDA graph capture 5 s (0.83 GiB), 57.98 GiB
+left for KV cache at `gpu_memory_utilization 0.9`, maximum concurrency 51.5x for 8192-token requests. `init engine`
+reported 39.57 s in total; the API server was accepting traffic about 2.5 minutes after the container started. The
+facade came up in front of it unchanged, and its smoke call returned `ready` with `latency_ms: 70`.
+
+### Runs
+
+Run `20260920T070103Z`. The same three task texts and the same seeded workspace as the CPU pilot. Wall time is the
+whole `dsh` process; step latency is model time per assistant message; input tokens are per model call.
+
+| Model | Composition | Task | Steps | Wall | Step latency | Input tokens / call | Outcome |
+|---|---|---|---|---|---|---|---|
+| 4B | minimal (bash) | reply "harness online" | 1 | 1 s | 0.2 s | 963 | Replied `<harness online>` — correct words, angle brackets nobody asked for. |
+| 4B | minimal (bash) | list files, name the failing test | 2 | 1 s | 0.4 s | 969 → 1048 | Ran `ls`, listed all three files correctly, then declined the second half: "I cannot determine which test fails because there is no output or error information provided." |
+| 4B | minimal (bash) | fix the failing test | 2 | 2 s | 0.5 s | 996 → 1201 | Ran `python -m pytest -q`, read the failure, diagnosed it exactly — then stopped without acting. No file changed. |
+
+The `fix` run in full is two steps. Step 1 is a correct, well-formed call — `bash` with `command`,
+`description`, `timeoutMs` and `workdir` all present. Step 2 reads the pytest output and ends the turn with text:
+
+> "The test `test_subtract` is failing because the `subtract` function is returning 8 instead of 2. This indicates
+> that the function is not correctly implementing subtraction. Let's fix the `subtract` function in `calc.py` …
+> I will now edit `calc.py` to fix the `subtract` function. **Let me check if I have permission to do so.**"
+
+There is no step 3. `workspace.diff` is empty and `tests.txt` still reads `1 failed, 2 passed`.
+
+Run `20260920T073935Z`, the 8B alone on its own pod. Engine startup: weights 53.3 s, model loading 65.7 s
+(15.27 GiB), `torch.compile` 24.5 s, 50.24 GiB KV cache, `init engine` 40.5 s — API server accepting traffic about
+3.6 minutes after the container started, against 2.5 for the 4B.
+
+| Model | Composition | Task | Steps | Wall | Step latency | Input tokens / call | Outcome |
+|---|---|---|---|---|---|---|---|
+| 8B | minimal (bash) | reply "harness online" | 2 | 2 s | 0.5–0.6 s | 963 → 1029 | Shelled out to `echo "harness online"` rather than just replying. Correct output, then a paragraph explaining the `landlock-run` line it saw on stderr. |
+| 8B | minimal (bash) | list files, name the failing test | 3 | 3 s | 0.5–1.1 s | 969 → 1152 | Ran `ls` correctly, then `grep -n 'FAIL' test_calc.py` — grepping the test *source* for the word FAIL instead of running it. Exit 1, which it read as "a sandboxing issue or the absence of failing tests", then asked whether to try something else. |
+| 8B | minimal (bash) | fix the failing test | 9 | 14 s | 0.6–1.8 s | 996 → 2785 | Diagnosed it, read `calc.py`, wrote a `sed` that silently matched nothing, verified and saw no change — then blamed the sandbox and spent four steps escalating permissions. No file changed. |
+
+### The 8B's fix run, and the trap in it
+
+Steps 1–3 are good agent behaviour: run the tests, read `calc.py`, attempt a targeted edit.
+
+```
+sed -i 's/return a \\+ b/return a - b/' calc.py
+```
+
+That pattern over-escapes the `+`. sed reads `\\` as a literal backslash and `+` as a literal plus, so it hunts
+for `return a \+ b`, which is not in the file. **It matched nothing, changed nothing, printed nothing, and exited
+0** — reproduced directly against a copy of the seeded `calc.py`.
+
+Step 4 re-runs pytest, step 5 `cat`s the file: the model checks its own work and correctly notices the edit did
+not land. That is the right instinct. What it does with it is the failure. From step 6 it attributes the no-op to
+the sandbox and never revisits the regex:
+
+- step 6 — escalate: `Error: sandbox escalation to "workspace-write" is not strictly wider than this call's
+  current "workspace-write" mode`
+- step 7 — retry the same `sed` unescalated; silent no-op again
+- step 8 — escalate harder: `Error: sandbox escalation to "danger-full-access" requires approval, but no approval
+  channel is available`
+- step 9 — gives up on that ground
+
+So the 8B's run ends on a permissions story that was never true. Two things fed it. `sed -i` exits 0 when its
+pattern matches nothing, so the only evidence the edit failed was the unchanged file. And every single tool result
+in both runs carries `[stderr] landlock-run: partial enforcement (older Landlock ABI)` — a benign warning the
+harness's sandbox wrapper emits on every command, which this model cites by name in `hello` and treats as evidence
+of obstruction in both `list` and `fix`.
+
+Note what was *not* established at the time: whether the workspace is actually writable under that sandbox. No
+correctly-formed write was ever attempted in either run, so the observed no-op was fully explained by the regex —
+but that is an absence of evidence, not evidence of absence.
+
+**Settled on 2026-09-20 by a smoke pod** (protea PR #79, run `20260920T114836Z`), which writes a file in the seeded
+workspace and reads it back before any agent task runs:
+
+```
+protea-harness: SMOKE workspace-write: OK (the sandbox permits edits in /tmp/protea/harness/workspace)
+```
+
+The sandbox permits edits. The 8B's permissions story was false in every particular: it was not blocked, it
+misread its own no-op, and it spent four of its nine steps escalating against an obstruction that did not exist.
+That makes the second prompt line in Next steps — re-read your own command before blaming the environment — the
+intervention this run argues for, and it removes the caveat that previously hung over every reading of the `fix`
+task.
+
+### The 8B rows are not the 8B
+
+`summary.md` for this run carries three `vllm-qwen3-8b-b968826d` rows. They were produced by the 4B, and the run
+does not say so anywhere. The 8B engine never loaded a model:
+
+```
+ValueError: Free memory on device (5.73/79.18 GiB) on startup is less than desired GPU memory
+utilization (0.9, 71.26 GiB). Decrease GPU memory utilization or reduce GPU memory used by other processes.
+```
+
+The 4B was still resident, and still answering on `:8000`. `wait_http` probed the URL before checking whether the
+process it had just launched was alive, so the dead engine was reported healthy, the facade started in front of the
+4B, the smoke test passed, and all three tasks were scored against the wrong model. The teardown between models
+was `stop_pid` + `wait` + `sleep 5`; a vLLM instance holding a 58 GiB KV cache does not release in five seconds.
+
+The transcripts make it plain in hindsight: `hello/session.jsonl` is 8213 bytes for both models, `list/session.jsonl`
+11904 bytes for both, `list/stdout.txt` 259 bytes for both, and the `list` answers are word-for-word identical.
+`vllm-qwen3-8b-b968826d/vllm.log` contains no `Model loading took`, no `init engine` and no `Starting vLLM API
+server`. Fixed in protea PR #75 (liveness before probing; a bounded wait for the port to go quiet between models;
+and a refusal to start an engine while `:8000` still answers, skipping the model instead).
+
+**Why the 4B was still on the port — demonstrated, not inferred.** The reading above attributed the overlap to a
+58 GiB KV cache being slow to release. That was wrong in an interesting way: the engine was never going to release
+it. A smoke pod on 2026-09-20 (`20260920T114836Z`) ran the 4B, tore it down, and reported:
+
+```
+protea-harness: SMOKE done for vllm-qwen3-4b-1cfa9a72; stopping before the agent tasks
+protea-harness: engine still answering on :8000 after 180s
+protea-harness: :8000 is still serving a previous engine; skipping vllm-qwen3-8b-b968826d
+                rather than measuring the wrong model
+```
+
+`vllm serve` forks worker processes and a *worker* owns the listening socket. The teardown signalled only the pid
+the entrypoint had started, so the parent died and an orphaned worker kept `:8000` — indefinitely, not slowly.
+Three minutes was not short; no wait would have been long enough.
+
+This closes the loop on the contaminated rows: they are not the product of a race that a longer sleep would have
+avoided, but of a process that was never being killed. Fixed in protea PR #82, which signals the engine's process
+group (never the entrypoint's own), adds a backstop that frees the port and verifies it did, and adds a smoke
+phase that runs the real `stop_pid` against a stand-in that forks the same way — on the pod, before a GPU is
+rented. Two notes on the guard in #75, both worth keeping: it is what turned this from three wrong rows into one
+missing row, and a missing row is what made the cause findable.
+
+**Confirmed fixed** by the next smoke pod (`20260920T121242Z`), which served both models in sequence on one H100:
+
+```
+=== vllm-qwen3-4b-1cfa9a72 ===   vllm healthy after 95s
+SMOKE served-model: OK (Qwen/Qwen3-4B)
+=== vllm-qwen3-8b-b968826d ===   vllm healthy after 116s
+SMOKE served-model: OK (Qwen/Qwen3-8B)
+```
+
+No `engine still answering on :8000`, no skipped model. The handover is clean and the 8B is demonstrably the 8B —
+the first time that has been true in this document. A two-model run's second table can now be trusted, which is
+the precondition for every comparison the Runs section wants to make.
+
+### Findings
+
+1. **The production engine changes the economics, not the outcome.** Step latency fell from 3–35 s on CPU to
+   0.2–1.8 s on the H100, and a whole task now costs 1–14 s of wall time against the CPU pilot's 2–374 s on the
+   same composition. Input tokens per call are unchanged at about 1k. Neither model fixed a one-line bug. Speed
+   was never the binding constraint, and neither was model size: 4B and 8B failed at the same task in different
+   ways.
+2. **The 8B is meaningfully more agentic than the 4B, and still does not finish.** The 4B diagnosed the bug and
+   stopped, ending its turn with "Let me check if I have permission to do so" — it never attempted the edit. The
+   8B attempted it, then re-ran the tests, then re-read the file to check its own work. That self-verification is
+   the single best behaviour either model showed. It is also what makes the ending worse: having correctly
+   established the edit had not landed, it reached for the wrong explanation and spent four of its nine steps on
+   permissions rather than on the command it had just written.
+3. **`sed -i` exiting 0 on a no-match is a trap for a small model.** The 8B's one real edit over-escaped a `+` in
+   the regex; sed matched nothing, wrote nothing, printed nothing and returned success. The only signal available
+   was the unchanged file — which the model did check, and did read correctly. A shell tool that reported "0
+   substitutions" or an executor that surfaced "file unchanged" would have redirected it. This is a concrete
+   argument for aria's runtime returning *effects* from a shell tool, not just exit codes.
+4. **The harness's own sandbox warning is actively misleading.** Every tool result in both runs ends with
+   `[stderr] landlock-run: partial enforcement (older Landlock ABI)`. It is benign and constant. The 8B quotes it
+   in its `hello` answer, offers "a sandboxing issue" as the explanation for a `grep` that exited 1 in `list`, and
+   builds its entire `fix` failure narrative on it. Constant benign noise on stderr is not free — it is a standing
+   invitation to misattribute. Worth suppressing, or moving off the tool result.
+5. **The approval seam fails closed, exactly as the CPU pilot predicted, and now we have seen it.** CPU finding 6
+   noted that a `sandbox_permissions` escalation can never succeed in headless mode. The 8B walked into it twice:
+   `escalation to "workspace-write" is not strictly wider than this call's current "workspace-write" mode`, then
+   `escalation to "danger-full-access" requires approval, but no approval channel is available`. Correct
+   behaviour from the harness. It also means an unattended agent that talks itself into needing permissions has
+   no way back, and will burn its remaining steps discovering that.
+6. **Schema adherence was clean and no tool was hallucinated, in either model.** Every `bash` call carried
+   `description`, most carried `workdir` and `timeoutMs`. The CPU pilot's two `tool_calling` failures — a missing
+   required argument and an invented `pytest` tool — did not recur on either model. With one tool offered and a
+   190-character prompt there is little room to get it wrong, which is the "send only the relevant tools" argument
+   from CPU finding 2 with a second and third data point.
+7. **The guard had nothing to do, and that is the correct result.** Every facade request returned 200 across both
+   runs; no unknown-tool retries, no refusals, no escalations. Protea's tool-permission guard is exercised by tool
+   *catalogues*, and this composition offers one always-permitted tool. Exercising it needs the standard
+   composition or a task that reaches for a denied tool — worth doing deliberately rather than expecting it here.
+8. **Partial completion and instruction-following slips survived the hardware change.** Both models listed the
+   files correctly and then failed the second half of the `list` question. The 4B replied `<harness online>`
+   instead of the exact string; the 8B shelled out to `echo` to produce it and then explained a stderr line nobody
+   asked about. These are `instruction_following` failures in ZaraBench's terms and they are not latency-bound.
+9. **Six deployment blockers, each invisible until it cost a pod.** In order: no `xz` in the runtime image for the
+   Node tarball (#69); a container restart tripping over the previous pass's `dsh` profile directory (#70); the
+   runtime `transformers>=4.56,<5` install downgrading `huggingface_hub` into a version that honours the image's
+   `HF_HUB_ENABLE_HF_TRANSFER=1` and hard-fails without `hf_transfer` (#72); a RunPod *community* host with a
+   driver too old for the image's CUDA 12.8, which `torch.cuda.is_available()` silently swallows (#73 adds a
+   preflight); the `-runtime` base image shipping no C compiler, so Triton could not build its extension and vLLM
+   died in `torch.compile` with the weights already on the GPU (#74); and the engine handover that scored one
+   model's tasks against another's server (#75). None are model findings, but together they are the honest cost of
+   the first real GPU runs, and each is now either fixed or detected early.
+
+### Loose end worth pulling
+
+`logs/eval-20260916T141350Z.log` carries the same `CUDA unknown error` warning that finding 6 describes, and then
+runs at roughly ten minutes per task, reaching 2 of 206 — against about 21 s per task in `eval-20260915T085509Z`.
+That reads like the 2026-09-16 B0 baseline scoring on CPU without saying so. Worth confirming before that number is
+used for anything.
+
 ## Next steps
 
-1. Same profile, real facade: point `facade.sh` at the vLLM engine on a GPU host (Qwen3-4B or 8B at the pinned
-   revisions) and rerun the two tasks; that is the number that says whether a Protea model can drive a coding agent
-   at all.
-2. Repeat with the Zara guardrail prompt merged in (drop the `system_prompt_file` omission from
-   `facade-harness.yaml`) to measure what the product framing costs on tool use.
-3. Port a handful of ZaraBench `tool_calling` and `failure_recovery` tasks to harness tasks, so the same model is
+1. **Re-run `fix` with the two prompt lines the runs have earned**, before reaching for a bigger model. Add "you
+   already have permission to edit files in this workspace; act without asking" (which is what stopped the 4B) and
+   "if an edit appears not to have taken effect, re-read your own command before assuming the environment blocked
+   it" (which is what cost the 8B four steps). This is the cheapest experiment on the list and the most likely to
+   turn the task green.
+2. **Suppress the `landlock-run` warning from tool results**, or move it somewhere the model does not read as
+   signal (finding 4). It is one line and it demonstrably steered both `list` and `fix`.
+3. ~~Establish whether the workspace is writable under the harness sandbox at all.~~ **Answered 2026-09-20: it
+   is.** A smoke pod writes and reads back a file in the seeded workspace before any task runs
+   (`SMOKE workspace-write: OK`). This was the caveat hanging over every reading of the `fix` task; it is gone,
+   and it makes step 1 the clear next experiment rather than a guess.
+4. Repeat with the Zara guardrail prompt merged in (set `system_prompt_file` to
+   `configs/evaluation/guardrail-system-prompt.md`) to measure what the product framing costs on tool use.
+5. Port a handful of ZaraBench `tool_calling` and `failure_recovery` tasks to harness tasks, so the same model is
    scored by ZaraBench and exercised by an independent agent loop on the same inputs.
-4. Add a required-argument check to the guard or to the `tool_calling` scorer (finding 3), and a "no interactive
-   editors" line to the guardrail prompt (finding 5).
-5. Report the headless-preset gap upstream to `deepseek-ai/deepseek-harness`.
+6. Scorer and executor changes: a required-argument check in the guard or the `tool_calling` scorer (CPU finding
+   3); "no interactive editors" in the guardrail prompt (CPU finding 5); and returning *effects* rather than exit
+   codes from a shell tool (finding 3 above).
+7. Confirm whether the 2026-09-16 B0 eval scored on CPU (see "Loose end worth pulling"), and re-run it if so.
+8. Report the headless-preset gap upstream to `deepseek-ai/deepseek-harness`.
+9. **Run the smoke pod before any run whose numbers will be quoted.** `"smoke": true` in
+   `.ops/launch-harness.json` runs every setup and engine check for each model, reports them together, and stops
+   before the agent tasks. Given two models it also tests the engine handover, which is the failure that
+   invalidated this document's first 8B table. One cheap pod, and it has already earned its cost twice.
+10. **Assert the published engine image's startup contract at publish time.** The contract check runs against an
+    image built from the branch — deliberately, so the PR that fixes a Dockerfile is not red on itself — but that
+    leaves the artefact actually pushed to the registry ungated: on `main` the check races the publish and only
+    echoes what it finds. The sequence "merge a Dockerfile fix → publish → launch a pod" therefore has no step
+    proving the pushed image starts correctly. It belongs in `publish-serve-images.yml`, which knows exactly
+    which image it just pushed. Verify it by breaking a Dockerfile on purpose and watching the publish fail;
+    see the lesson at the end of this document.
+
+## The v0 serving deployment, validated (2026-09-21)
+
+The serving stack has been exercised end to end on a rented L40S, running the production engine image
+rather than the training one. This is the first time any of it has been checked on the artefact that would
+actually be deployed. **9 checks, 9 passed**, in about six and a half minutes of GPU time.
+
+| check | result |
+|---|---|
+| engine healthy from the production image | ok, after 131s |
+| facade ready on `:8080` in front of it | ok |
+| `--check` reports reasoning off | ok |
+| the deployed prompt is the repo's guardrail prompt | ok |
+| the deployment answers a completion | ok |
+| an unauthenticated call is refused | ok (401) |
+| reasoning off on the deployment, present on an unset control | ok |
+| a denied tool call comes back as the refusal | ok |
+| an over-limit refund escalates instead of executing | ok |
+
+Three of these could not have been established any other way, and they are the reason the run was worth
+renting a GPU for.
+
+**The production engine image serves the 8B.** Every previous GPU run used `protea-train`. The serving
+image had never served anything, and when it was finally exercised it turned out not to start at all
+(row 10) and not to be able to save its own output (row 12). It now does both.
+
+**Reasoning-off is measured, not self-reported.** The facade's `--check` says reasoning is off, but that is
+the facade describing its own configuration — it would say the same if the setting did nothing. The run
+therefore serves a second facade with the setting unset and asks both the same question: 272 characters
+from the deployment, 1172 from the control. The difference is the suppressed reasoning, and it is the first
+evidence that ADR-017's setting does any work at the serving layer rather than merely being present.
+
+**The tool-permission guard refuses a real model's real tool call.** Previously exercised only against
+canned requests in unit tests. On the deployment, a denied call came back as the refusal and an over-limit
+refund escalated rather than executing.
+
+### What this does and does not say
+
+It says the v0 serving path is sound: the image starts as the launcher drives it, the engine loads the
+pinned 8B revision, the facade fronts it with auth and the guardrail prompt, reasoning is genuinely off,
+and the tool guard holds. That is the deployment question answered.
+
+It says nothing about **quality** — whether the 8B is good at the agent tasks, which is what the harness
+runs above measure and where the interesting numbers still are. A serving path that works is a
+precondition for trusting those numbers, not a substitute for them.
+
+One defect in the run's own output, worth recording because it is the same shape as everything else in the
+cost table: the log printed the full `nvidia-smi` table for the L40S and then declared `nvidia-smi
+unavailable` directly beneath it. `head -12` closes the pipe, `nvidia-smi` dies of SIGPIPE, and
+`set -o pipefail` turns that into a failed pipeline, so the fallback fired on every run that had a working
+GPU. The check worked and reported the opposite of what it found.
+
+## What this run cost, and what caught what
+
+Worth recording, because the failure modes repeat and the guards are what made the difference:
+
+| # | What went wrong | Caught by | Cost |
+|---|---|---|---|
+| 1 | `HF_HUB_ENABLE_HF_TRANSFER=1` honoured without `hf_transfer` | a rented pod | one pod |
+| 2 | community host's driver too old for cu128 | a rented pod | one pod |
+| 3 | no C compiler for Triton's extension | a rented pod | one pod |
+| 4 | dead engine reported healthy by a stale port | a rented pod, **and three wrong rows** | one pod + a retracted table |
+| 5 | `R2_ENDPOINT` set nowhere the workflow read | request validation, pre-launch | ~90 s of CI, no GPU |
+| 6 | community host's driver too old (again) | the pod's own preflight | ~2 min of L40S |
+| 7 | forked vLLM worker never released `:8000` | the smoke pod | ~6 min of H100, **no wrong rows** |
+| 8 | engine image's entrypoint called `python`; the image ships only `python3` | a CPU-only validation job | £0 |
+| 9 | engine image's entrypoint called `protea-storage`, which is not installed in it | the same CPU job | £0 |
+| 10 | engine image had no `CMD`, so the launcher's entrypoint became an ignored argument → crashloop | **a human looking at the dashboard** | ~1 h of L40S, nothing produced |
+| 11 | launch-side guard refused `403` by Cloudflare — `urllib`'s default User-Agent is blocked | reading the guard's own log, an hour later | one runner-hour, no GPU |
+| 12 | engine image ships no AWS CLI, so every result push failed into `/dev/null` | auditing the observation channel itself | two attempts unreadable |
+| 13 | `nvidia-smi \| head -12` + `pipefail` → SIGPIPE → the log denied the GPU it had just printed | reading the first passing log | nothing, but a self-contradicting record |
+
+A fourth smoke pod then served 4B and 8B in sequence with every check green, for ~6.5 minutes of H100. Total GPU
+spend on proving the pipeline correct after the fixes: under fifteen minutes, against four pods that each died on
+one problem.
+
+The first four each cost a pod and surfaced exactly one problem. The middle three cost progressively less and, in
+the case of the two that mattered, produced a missing row rather than a wrong one. That is the whole argument for
+the smoke pod and for the pre-start port guard: a run that refuses to answer is recoverable, a run that answers
+wrongly is not.
+
+Rows 8 and 9 are the same argument again, one rung cheaper: a CPU-only job that starts the real engine image and
+runs its real entrypoint found two defects that would each have cost a pod, for nothing.
+
+Row 10 is the one to sit with, because it broke the pattern. Every other entry was caught by a guard or by a
+cheap rehearsal. This one was caught by a person opening a dashboard and asking whether the thing was running. It
+is also the only entry so far whose failure mode was *silent*: the launch reported success, the workflow went
+green, and the pod restarted every seventeen seconds for an hour behind it.
+
+Two things had to be true for that to happen, and both have been fixed:
+
+- **The validation tested the wrong thing.** Every check in the CPU job ran the image with `--entrypoint`,
+  which replaces the exact mechanism that was broken. It proved the image's *contents* and never its *startup
+  contract*. The job now hands the image a command the way the launcher does and asserts that the command
+  actually ran — a marker, not an exit status.
+- **Every teardown lived inside the pod.** Both entrypoints terminate the pod when they finish or fail, which
+  is worth nothing when the pod never reaches its entrypoint. There is now a launch-side guard
+  (`.github/ops/pod-watchdog.py`) that watches from the workflow that rented the GPU and terminates on a
+  crashloop or at a cap, depending on nothing inside the pod. Writing its tests found that the first version
+  missed the exact seventeen-second loop it was written for: sampled every thirty seconds, that loop's reported
+  uptime falls by only four each poll, under the jitter threshold. It now uses two independent signals.
+
+The generalisable lesson is narrower than "test more" and worth stating plainly: **a check that has never been
+seen to fail is not known to work.** Rows 4, 8, 9 and 10 were all, at some point, sitting behind something green.
+
+### The guard's own two failures
+
+Rows 11 and 12 are that launch-side guard failing on both of its first two live exercises. Worth recording
+rather than quietly fixing, because the pattern is the one rows 1–10 describe and the guard was written in full
+knowledge of it.
+
+**Row 11.** The guard polled RunPod 121 times in an hour and was refused every time. Not the key — the launcher
+had authenticated with it two seconds earlier in the same job — and not the query, which fails with `400` and a
+body. `urllib` announces itself as `Python-urllib/3.x`, and the endpoint answers Cloudflare error 1010, *the
+owner of this website has banned your browser*. The launcher has always used `httpx` and so never met it. What
+made this cost an hour rather than a minute was not the bug but the log: `poll failed` printed 121 times,
+without the status that named the cause.
+
+**Row 12** matters more. `protea.cli_storage` shells out to `aws s3 sync`; `Dockerfile.train` installs the AWS
+CLI and `Dockerfile.infer` never did; and the entrypoint's push ends in `>/dev/null 2>&1 || true`. So the engine
+image could not push anything, ever. Two attempts were unreadable from outside because of it — but the real
+damage is that **a validation that succeeded completely would still have produced nothing**, because the pod
+pushes and then terminates itself, and the push was failing silently.
+
+The specific mistake there is mine rather than the code's: an empty bucket was read as evidence that the pod had
+not run, when the channel carrying that evidence had never been verified. **Silence is only evidence when the
+thing that would break the silence is known to work.** The habit that follows is to prove the observation path
+before drawing conclusions from what it does not say — a negative control, applied to instrumentation rather
+than to a test.
