@@ -441,8 +441,11 @@ is cheaper than implying otherwise.
    is.** A smoke pod writes and reads back a file in the seeded workspace before any task runs
    (`SMOKE workspace-write: OK`). This was the caveat hanging over every reading of the `fix` task; it is gone,
    and it makes step 1 the clear next experiment rather than a guess.
-4. Repeat with the Zara guardrail prompt merged in (set `system_prompt_file` to
-   `configs/evaluation/guardrail-system-prompt.md`) to measure what the product framing costs on tool use.
+4. ~~Repeat with the Zara guardrail prompt merged in (set `system_prompt_file` to
+   `configs/evaluation/guardrail-system-prompt.md`) to measure what the product framing costs on tool use.~~
+   **Run 2026-09-21; see "The product framing, measured" below.** It costs the 8B its willingness to act:
+   `fix` goes from nine steps to two and `list` from attempting a command to declining to. Nothing edited a
+   file in any of the six cells. At n=1 the size of that drop is not established, only its direction.
 5. Port a handful of ZaraBench `tool_calling` and `failure_recovery` tasks to harness tasks, so the same model is
    scored by ZaraBench and exercised by an independent agent loop on the same inputs.
 6. Scorer and executor changes: a required-argument check in the guard or the `tool_calling` scorer (CPU finding
@@ -521,6 +524,92 @@ cost table: the log printed the full `nvidia-smi` table for the L40S and then de
 unavailable` directly beneath it. `head -12` closes the pipe, `nvidia-smi` dies of SIGPIPE, and
 `set -o pipefail` turns that into a failed pipeline, so the fallback fired on every run that had a working
 GPU. The check worked and reported the opposite of what it found.
+
+## The product framing, measured (2026-09-21)
+
+Next step 4 asked what the Zara guardrail prompt costs on tool use. Run `20260921T121116Z` answers it: the same
+two pinned models, the same H100, the same `minimal` composition, the same three tasks and seeded workspace as
+the two permission-overlay runs, with `system_prompt_file` set to `configs/evaluation/guardrail-system-prompt.md`
+— the prompt the deployed facade config (`configs/serve/facade.yaml`) actually carries.
+
+The overlay is *prepended* to the harness's own 190-character system message, never replacing it
+(`protea/serving/prompt.py`), so the only thing that differs from the baselines is roughly 308 tokens of product
+framing in front of an otherwise identical agent. That it arrived is checkable three ways and was checked all
+three: `run.json` and the report header name the file, and input tokens per call go from 963 in the no-overlay
+run to 1271 here. The per-task `summary.txt` still reads `system prompt chars: 190`, which is dsh's own prompt —
+the facade merges the overlay server-side, after dsh has logged what it sent, so that line cannot see it.
+
+| Model | Task | Steps | Final message | Edited |
+|---|---|---|---|---|
+| 4B | hello | 1 | `<harness>\nonline\n</harness>` — no tool call | — |
+| 4B | list | 2 | `ls`, then "I cannot determine which test fails without running the tests. Would you like me to run the tests…?" | no |
+| 4B | fix | 2 | ran pytest, diagnosed exactly, then "I'll run a command to open the file in a text editor." — and stopped | **no** |
+| 8B | hello | 2 | `echo 'harness online'`, then replied correctly | — |
+| 8B | list | 2 | `ls`, then "you would need to run the test suite… Let me know if you'd like guidance on how to run the tests." | no |
+| 8B | fix | 2 | ran pytest, diagnosed exactly, announced it would inspect `calc.py`, stopped | **no** |
+
+Nothing edited a file. All six `workspace.diff` are 0 bytes and all six `tests.txt` still read
+`1 failed, 2 passed`. Every task finished in one to three seconds at one or two steps; the pod's eighteen
+minutes were almost entirely image pull and two engine starts.
+
+### The cost is real, and it is concentrated in the 8B
+
+Against each model's own no-overlay baseline:
+
+| | no overlay | guardrail | change |
+|---|---|---|---|
+| 8B `fix` | 9 steps | 2 steps | read `calc.py`, wrote a `sed`, spent four steps escalating → diagnoses and stops |
+| 8B `list` | 3 steps | 2 steps | attempted a command and misread it → declines to attempt one |
+| 4B `fix` | 2 steps | 2 steps | unchanged; both diagnose and stop |
+| 4B `list` | 2 steps | 2 steps | unchanged in shape; "I cannot determine" becomes "would you like me to" |
+
+The 8B is where the framing bites. Without it the model *acts* — badly, but it acts, and its nine steps include
+reading the file and attempting an edit. With it the model stops at the diagnosis on `fix` and, on `list`,
+offers to explain how the user could run the tests rather than running them. That is not the model getting
+worse at bash. It is the guardrail prompt's hand-off clause — *"hand off to a human when the request needs
+judgement, when you're unsure"* — and its tool clause — *"use tools only when they're justified"* — doing
+exactly what they say, in a context where they are wrong.
+
+### What this does not establish
+
+**One run is one sample**, and this document has already been burned once by forgetting that (row 14). The
+8B's 9 → 2 could be the prompt or could be the sampling; nothing here separates them. The number that would
+need a replicate before being quoted is precisely that one.
+
+It also does not establish that the guardrail prompt *caused* the 4B to stop editing. The 4B's no-overlay
+baseline also diagnosed and stopped; the permission overlay is the only thing that has ever moved it, and only
+once in two tries. On the 4B the guardrail prompt costs nothing measurable here because there was nothing left
+to lose.
+
+What it does establish is that the two prompts are not interchangeable and not additive-by-assumption. The
+deployed product prompt and the prompt that produced this project's only verified fix pull in opposite
+directions on the same task.
+
+### A hazard surfaced as stated intent
+
+The 4B's `fix` turn ends: *"I'll run a command to open the file in a text editor."* It did not run it — the
+turn ended first — but that is CPU finding 5 appearing unprompted on the production path. An interactive editor
+would hang until the command timeout, and the timeout is the only thing that ends it.
+`configs/evaluation/harness-shell-prompt.md` exists to forbid exactly this and has still never been run. It now
+has a live motivating example rather than a CPU-pilot one.
+
+### The landlock noise is gone from tool results — the shim is not yet confirmed as the reason
+
+Finding 4 was that the `landlock-run: partial enforcement (older Landlock ABI)` line reached the model inside
+tool results and demonstrably steered it: in the no-overlay 8B baseline the model followed a correct
+`echo harness online` with a paragraph explaining the warning it had seen on stderr. A filter for that line was
+merged on 2026-09-21 (MalcolmGov/protea#99) and this was its first live run.
+
+Across all six task transcripts in this run there is no landlock text in any tool result, and every
+`stderr.txt` is 0 bytes. No model mentioned it. That is the outcome the filter was written for.
+
+It is not proof the filter did it. A warning that was suppressed and a warning that was never emitted look
+identical from the transcripts, and only the entrypoint log's probe line distinguishes them. That log exists
+(`logs/harness-20260921T121116Z.log`, 6656 bytes) but was not read: the fetch workflow's `aws s3 cp --recursive`
+needs a directory-like prefix, so an exact key lists but downloads nothing. What can be said is that the
+baseline which produced the warning ran against the same `configs/remote/runpod-h100.yaml` target, so the
+hardware class does emit it — but RunPod assigns whatever host is free, and kernel version is per-rental, so
+that is an inference and not a measurement. **Treat the shim as working-in-one-run and unconfirmed.**
 
 ## The permission overlay, replicated and not confirmed
 
@@ -605,6 +694,7 @@ Worth recording, because the failure modes repeat and the guards are what made t
 | 13 | `nvidia-smi \| head -12` + `pipefail` → SIGPIPE → the log denied the GPU it had just printed | reading the first passing log | nothing, but a self-contradicting record |
 | 14 | an overlay result quoted from one run; the replicate contradicted it | running it a second time | ~11 min of H100, and the right conclusion |
 | 15 | two evals silently scored on CPU | sweeping every eval log for the signature | nothing — both stalled before producing a number |
+| 16 | `aws s3 cp --recursive` on an exact key lists the file and downloads nothing | the fetch printing "nothing to show" under a listing that named the file | one round trip; the probe line still unread |
 
 A fourth smoke pod then served 4B and 8B in sequence with every check green, for ~6.5 minutes of H100. Total GPU
 spend on proving the pipeline correct after the fixes: under fifteen minutes, against four pods that each died on
