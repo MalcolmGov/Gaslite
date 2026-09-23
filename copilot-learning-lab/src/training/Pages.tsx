@@ -232,6 +232,11 @@ export function CompletionPage() {
   );
 }
 
+const PRACTICE_GROUPS = [
+  { id: 'core' as const, title: 'Core skills', sub: 'Practise the basics from the main journey on new data.' },
+  { id: 'workplace' as const, title: 'Agents your teams will use', sub: 'Agents and Cowork tasks that take repetitive work off staff: policy questions, compliance, onboarding, meeting follow-up, weekly reporting and case triage.' },
+];
+
 export function PracticeHub() {
   const completed = useLab((s) => s.session.completedPractice);
   return (
@@ -239,22 +244,28 @@ export function PracticeHub() {
       <div className="tpage-inner">
         <span className="tpill"><BeakerRegular /> {settings.shortName} · practice</span>
         <h1>Practice exercises</h1>
-        <p className="lede">Three short exercises that reuse the same Copilot, agent and Cowork screens with new sample data. Each takes about three minutes.</p>
-        <div className="grid3" style={{ marginTop: 20 }}>
-          {practiceExercises.map((p) => (
-            <div key={p.id} className="card stack" style={{ gap: 8 }}>
-              <div className="row-between">
-                <span className="tpill">{p.surface}</span>
-                {completed.includes(p.id) && <span className="small" style={{ color: 'var(--success)', display: 'flex', gap: 4, alignItems: 'center' }}><CheckmarkCircleRegular /> Completed</span>}
-              </div>
-              <h3 style={{ fontSize: 17 }}>{p.title}</h3>
-              <p className="small" style={{ margin: 0 }}>{p.objective}</p>
-              <div style={{ marginTop: 'auto' }}>
-                <button className="tbutton" onClick={() => startPractice(p.id)}>{completed.includes(p.id) ? 'Practise again' : 'Start'}</button>
-              </div>
+        <p className="lede">Short exercises that reuse the same Copilot, agent and Cowork screens with new sample data. Start with the core skills, then try the agents and tasks your teams can build for their own work.</p>
+        {PRACTICE_GROUPS.map((g) => (
+          <section key={g.id} aria-labelledby={`pg-${g.id}`} style={{ marginTop: 24 }}>
+            <h2 id={`pg-${g.id}`} style={{ fontSize: 18, margin: '0 0 4px' }}>{g.title}</h2>
+            <p className="small muted" style={{ margin: '0 0 12px' }}>{g.sub}</p>
+            <div className="grid3">
+              {practiceExercises.filter((p) => p.group === g.id).map((p) => (
+                <div key={p.id} className="card stack" style={{ gap: 8 }}>
+                  <div className="row-between">
+                    <span className="tpill">{p.surface} · {p.minutes} min</span>
+                    {completed.includes(p.id) && <span className="small" style={{ color: 'var(--success)', display: 'flex', gap: 4, alignItems: 'center' }}><CheckmarkCircleRegular /> Completed</span>}
+                  </div>
+                  <h3 style={{ fontSize: 17 }}>{p.title}</h3>
+                  <p className="small" style={{ margin: 0 }}>{p.objective}</p>
+                  <div style={{ marginTop: 'auto' }}>
+                    <button className="tbutton" onClick={() => startPractice(p.id)} aria-label={`${completed.includes(p.id) ? 'Practise again' : 'Start'}: ${p.title}`}>{completed.includes(p.id) ? 'Practise again' : 'Start'}</button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </section>
+        ))}
         <div style={{ marginTop: 24 }}>
           <button className="tbutton secondary" onClick={() => navigate({ name: 'welcome' })}>Back to the Learning Lab home</button>
         </div>
@@ -298,6 +309,7 @@ export function PracticePanel() {
           <div className="hint">
             <strong>Expected results</strong>
             <ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>{p.expected.map((e) => <li key={e}>{e}</li>)}</ul>
+            {p.buildTip && <p style={{ margin: '6px 0 0' }}><strong>Building it for real:</strong> {p.buildTip}</p>}
           </div>
         )}
       </div>

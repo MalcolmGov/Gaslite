@@ -4,9 +4,16 @@ import { stripCitations } from '../../lib/markdown';
 import { newId } from '../../lib/util';
 import { policyPack } from './policy';
 import { programmePack } from './programme';
+import { compliancePack, onboardingPack, proceduresPack } from './workplace';
 import type { KnowledgePack } from './types';
 
-const packs: Record<string, KnowledgePack> = { programme: programmePack, policy: policyPack };
+const packs: Record<string, KnowledgePack> = {
+  programme: programmePack,
+  policy: policyPack,
+  procedures: proceduresPack,
+  compliance: compliancePack,
+  onboarding: onboardingPack,
+};
 
 export const readySources = (agent: Agent) => agent.knowledge.filter((k) => k.status === 'ready').map((k) => k.docId);
 

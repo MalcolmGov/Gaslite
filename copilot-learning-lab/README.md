@@ -4,6 +4,8 @@ An interactive training simulation for **Microsoft 365 Copilot Chat, Agent Build
 
 Learners build an AI Programme Knowledge Agent, give it approved knowledge, test its answers, share it with a training cohort, use it, and then delegate a realistic multi-step task to Cowork. They review the outputs and approve each simulated action themselves.
 
+The **Practice exercises** page adds nine shorter exercises. Three repeat the core skills on new data. Six model agents and Cowork tasks staff can build for their own work: a policy and procedures navigator, a compliance and KYC Q&A agent, a new joiner onboarding buddy, meeting-to-actions follow-up, a weekly KPI status report, and customer case triage.
+
 > **Training simulation · Sample data.** This is an internal training experience, not a live Microsoft service. It needs no Microsoft sign-in, API keys, tenant access or AI service. Every person, document, figure and date is synthetic. No email, Teams message or meeting is ever sent or created.
 
 ## Quick start
@@ -27,7 +29,7 @@ Requires Node.js 18 or later. The app works offline once built.
 
 ```bash
 npm run typecheck  # TypeScript
-npm test           # 41 unit and state tests (Vitest)
+npm test           # 53 unit and state tests (Vitest)
 npm run e2e        # Playwright journeys; builds and serves the app itself
 ```
 
