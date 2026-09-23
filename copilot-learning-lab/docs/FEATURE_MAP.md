@@ -36,6 +36,9 @@ Every interaction falls into one of three categories:
 | **Test checklist** (A/B/C), coaching cards, "Compare with config vN" | Training addition | Feedback covers evidence, clarity and uncertainty. No confidence percentages. |
 | "How the simulator reads your instructions" panel | Training addition | Explains the deterministic simulator honestly. |
 | Instructions change answers (citations, gaps, conflicts, concision, estimates) | Training approximation | A real model is steered by instructions, but less predictably. |
+| **Model** card: "Managed by Microsoft", with **Choose a model in Copilot Studio** | Verified (principle) / Training addition (UI) | Agent Builder has no model picker; Copilot Studio sets a primary model per agent on its Overview page. The lab shows the choice in a dialog labelled *Copilot Studio · simulated*. |
+| Model list (General / Auto / Deep), release tags, external and cross-geo flags | Verified (text, South Africa availability as of 18 Sep 2026) / Approximated (visual) | From *Select a primary AI model for your agent*. Choosing a model does not change simulated answers, and the dialog says so. |
+| Monthly cost estimate in Copilot Credits | Training addition | Uses the published rates: 2 per generated answer, 10 for tenant graph grounding, 10 per 1,000 reasoning tokens (1,500 assumed). Licensed users are shown as included. |
 
 ## Using the agent
 

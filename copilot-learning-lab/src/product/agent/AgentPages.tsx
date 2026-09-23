@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, Menu, MenuItem, MenuList, MenuPopover, MenuTrigger } from '@fluentui/react-components';
-import { EditRegular, MoreHorizontalRegular, PeopleRegular, LockClosedRegular, InfoRegular } from '@fluentui/react-icons';
+import { EditRegular, MoreHorizontalRegular, PeopleRegular, LockClosedRegular, InfoRegular, BrainCircuitRegular } from '@fluentui/react-icons';
 import { useLab } from '../../state/store';
 import { handoffToCowork, startNewAgent } from '../../state/agentActions';
 import { navigate } from '../../state/router';
@@ -10,12 +10,15 @@ import { getDoc } from '../../scenario/registry';
 import { AgentIcon, Banner, StatusBadge, afterDialogClose } from '../common';
 import { AgentConversation } from './AgentConversation';
 import { toPlainText } from '../../lib/markdown';
+import { ModelDialog, modelLabel } from '../builder/ModelDialog';
+import { logEvent, mutate } from '../../state/store';
 
 /** Full conversation with a created agent (the learner's own, or a practice agent). */
 export function AgentChatPage({ agentId }: { agentId: string }) {
   const agent = useLab((s) => s.agents[agentId]);
   const [handoffId, setHandoffId] = useState<string | null>(null);
   const [about, setAbout] = useState(false);
+  const [modelOpen, setModelOpen] = useState(false);
 
   if (!agent) {
     return (
@@ -44,6 +47,10 @@ export function AgentChatPage({ agentId }: { agentId: string }) {
           <strong style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{agent.name}</strong>
           {audience.length ? <StatusBadge tone="brand" icon={<PeopleRegular />}>Shared with {audience.join(', ')}</StatusBadge> : <StatusBadge tone="neutral" icon={<LockClosedRegular />}>Only you</StatusBadge>}
         </div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        <Button appearance="subtle" size="small" icon={<BrainCircuitRegular />} data-tour="agent-model" onClick={() => { mutate((s) => logEvent(s, 'model_picker_opened', { agentId })); setModelOpen(true); }} aria-label={`Model: ${modelLabel(agent)}. Change model`}>
+          {modelLabel(agent)}
+        </Button>
         <Menu>
           <MenuTrigger disableButtonEnhancement><Button appearance="subtle" icon={<MoreHorizontalRegular />} aria-label="Agent options" /></MenuTrigger>
           <MenuPopover>
@@ -53,7 +60,9 @@ export function AgentChatPage({ agentId }: { agentId: string }) {
             </MenuList>
           </MenuPopover>
         </Menu>
+        </div>
       </div>
+      {modelOpen && <ModelDialog agent={agent} onClose={() => setModelOpen(false)} />}
       <div style={{ flex: 1, minHeight: 0 }}>
         <AgentConversation agent={agent} conv="chat" onHandoff={agent.packId === 'programme' ? setHandoffId : undefined} />
       </div>
@@ -67,6 +76,7 @@ export function AgentChatPage({ agentId }: { agentId: string }) {
                 <p>{agent.description}</p>
                 <p className="small"><strong>Knowledge:</strong> {agent.knowledge.filter((k) => k.status === 'ready').map((k) => getDoc(k.docId)?.title).join(', ') || 'none'}</p>
                 <p className="small"><strong>Audience:</strong> {audience.join(', ') || 'Only you'}</p>
+                <p className="small"><strong>Model:</strong> {modelLabel(agent)}</p>
               </DialogContent>
               <DialogActions><Button appearance="primary" onClick={() => setAbout(false)}>Close</Button></DialogActions>
             </DialogBody>

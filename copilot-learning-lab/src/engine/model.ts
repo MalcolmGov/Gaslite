@@ -60,6 +60,8 @@ export interface Agent {
   chat: ChatMessage[];
   /** Pre-built practice agents are not editable in Agent Builder. */
   prebuilt?: boolean;
+  /** Model chosen in Copilot Studio (simulated). Unset = managed by Microsoft, as in Agent Builder. */
+  model?: string;
 }
 
 // ───────────────────────── Conversations ─────────────────────────
@@ -271,6 +273,9 @@ export interface CreatedEvent {
 
 export type LearningEventType =
   | 'chat_asked'
+  | 'model_picker_opened'
+  | 'model_selected'
+  | 'cost_estimated'
   | 'builder_started'
   | 'builder_answered'
   | 'purpose_defined'

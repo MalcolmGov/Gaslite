@@ -247,7 +247,7 @@ export function startPractice(id: PracticeId) {
       mutate((s) => { s.agents[a.id] = a; s.agentOrder.push(a.id); });
     } else {
       const a = agent;
-      mutate((s) => { s.agents[a.id].chat = []; });
+      mutate((s) => { s.agents[a.id].chat = []; s.agents[a.id].model = undefined; });
     }
     return navigate({ name: 'agent', agentId: agent.id });
   }

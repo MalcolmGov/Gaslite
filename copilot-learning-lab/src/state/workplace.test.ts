@@ -134,3 +134,35 @@ describe('workplace Cowork scenarios', () => {
     expect(detectScenario('Draft the weekly leadership update from the tracker', ['doc_tracker35'])).toBe('main');
   });
 });
+
+describe('model choice and cost', () => {
+  it('General models cost the same per answer; Deep adds reasoning tokens', async () => {
+    const { estimateCredits } = await import('../engine/models');
+    const base = { licensedUsers: 20, unlicensedUsers: 100, questionsPerDay: 3, grounding: true };
+    const general = estimateCredits({ ...base, tier: 'General' });
+    expect(general.perAnswer).toEqual([12, 12]);
+    expect(general.monthly).toEqual([12 * 100 * 3 * 22, 12 * 100 * 3 * 22]);
+    expect(general.includedAnswers).toBe(20 * 3 * 22);
+    expect(estimateCredits({ ...base, tier: 'Deep' }).perAnswer).toEqual([27, 27]);
+    expect(estimateCredits({ ...base, tier: 'Auto' }).perAnswer).toEqual([12, 27]);
+    expect(estimateCredits({ ...base, tier: 'General', grounding: false }).perAnswer).toEqual([2, 2]);
+    expect(estimateCredits({ ...base, tier: 'General', unlicensedUsers: 0 }).monthly).toEqual([0, 0]);
+  });
+
+  it('the model exercise completes only for a GA General model, and restarting clears it', async () => {
+    const { setAgentModel } = await import('./agentActions');
+    const { practiceById } = await import('../training/practice');
+    const p = practiceById('models')!;
+    startPractice('models');
+    const agent = Object.values(lab().agents).find((a) => a.packId === 'procedures')!;
+    const modelCheck = p.checks[2];
+    setAgentModel(agent.id, 'gpt-5-reasoning');
+    expect(modelCheck.done(lab())).toBe(false);
+    setAgentModel(agent.id, 'gpt-5-auto');
+    expect(modelCheck.done(lab())).toBe(false);
+    setAgentModel(agent.id, 'gpt-5.5-chat');
+    expect(modelCheck.done(lab())).toBe(true);
+    startPractice('models');
+    expect(lab().agents[agent.id].model).toBeUndefined();
+  });
+});

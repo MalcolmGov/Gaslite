@@ -206,6 +206,26 @@ test('practice: case triage keeps the PIN out and escalates P1 cases', async ({ 
   await shot(page, 'practice-triage');
 });
 
+test('practice: choose a model and estimate its cost', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.goto('/#/practice');
+  await page.locator('.card', { hasText: 'Choose the right model' }).getByRole('button', { name: /Start/ }).click();
+  await page.getByRole('button', { name: /Model: Managed by Microsoft/ }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText("Agent Builder doesn't offer a model choice.");
+  await dialog.getByLabel('Staff without the licence').fill('200');
+  await expect(dialog.locator('.cost-out')).toContainText('158,400 credits');
+  await dialog.getByRole('radio', { name: /Claude Opus 4.7/ }).check();
+  await expect(dialog).toContainText('Needs admin approval.');
+  await expect(dialog.locator('.cost-out')).toContainText('27 per answer');
+  await dialog.getByRole('radio', { name: /GPT-5.5 Chat/ }).check();
+  await shot(page, 'practice-models');
+  await dialog.getByRole('button', { name: 'Use this model' }).click();
+  await expect(page.getByRole('button', { name: /Model: GPT-5.5 Chat · General/ })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Practice exercise' }).getByText('— done')).toHaveCount(3);
+});
+
 test('keyboard: Cowork questions work with arrows, Space and Submit', async ({ page }) => {
   await loadLesson(page, 'Delegate with Cowork');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
