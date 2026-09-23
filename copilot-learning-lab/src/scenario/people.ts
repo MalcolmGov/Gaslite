@@ -5,7 +5,7 @@ import type { CalendarEvent, Group, Person } from './types';
 const d = settings.organisation.emailDomain;
 
 export const people: Person[] = [
-  { id: 'usr_learner', name: settings.learner.displayName, email: `alex.mokoena@${d}`, title: settings.learner.jobTitle, initials: settings.learner.initials },
+  { id: 'usr_learner', name: settings.learner.displayName, email: `${settings.learner.emailUser}@${d}`, title: settings.learner.jobTitle, initials: settings.learner.initials },
   { id: 'usr_thandi', name: 'Thandi Nkosi', email: `thandi.nkosi@${d}`, title: 'Programme Director', initials: 'TN' },
   { id: 'usr_johan', name: 'Johan van Wyk', email: `johan.vanwyk@${d}`, title: 'Delivery Lead', initials: 'JW' },
   { id: 'usr_lerato', name: 'Lerato Dlamini', email: `lerato.dlamini@${d}`, title: 'Head of Data & AI Platforms', initials: 'LD' },

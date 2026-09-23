@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Textarea } from '@fluentui/react-components';
 import {
   BeakerRegular,
+  SparkleFilled,
   CheckmarkCircleRegular,
   CircleRegular,
   ArrowDownloadRegular,
@@ -9,6 +10,9 @@ import {
   StarFilled,
   StarRegular,
   PlayRegular,
+  LightbulbRegular,
+  TargetArrowRegular,
+  PersonBoardRegular,
 } from '@fluentui/react-icons';
 import { useShallow } from 'zustand/react/shallow';
 import { settings } from '../config/settings';
@@ -22,6 +26,8 @@ import { evaluateSkills, type SkillResult } from './feedback';
 import { practiceById, practiceExercises } from './practice';
 import { fmtDate } from '../lib/util';
 import { useDock } from './dock';
+
+const MODE_ICONS: Record<Mode, React.ReactNode> = { guided: <LightbulbRegular fontSize={20} />, practice: <TargetArrowRegular fontSize={20} />, facilitator: <PersonBoardRegular fontSize={20} /> };
 
 const MODES: { id: Mode; title: string; text: string }[] = [
   { id: 'guided', title: 'Guided', text: 'Step-by-step instructions with a spotlight on the right control. You do each action yourself before moving on.' },
@@ -39,23 +45,52 @@ export function WelcomePage() {
   return (
     <div className="tpage">
       <div className="tpage-inner">
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span className="tpill"><BeakerRegular /> {settings.shortName}</span>
-          <span className="tpill" style={{ background: '#fff' }}><span style={{ width: 8, height: 8, borderRadius: 4, background: settings.organisation.accentColor, display: 'inline-block' }} /> {settings.organisation.name}</span>
-          <span className="tpill" style={{ background: '#fff' }}>{settings.labels.persistent}</span>
+        <div className="welcome-hero">
+          <div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span className="tpill"><BeakerRegular /> {settings.shortName}</span>
+              <span className="tpill" style={{ background: '#fff' }}><span style={{ width: 8, height: 8, borderRadius: 4, background: settings.organisation.accentColor, display: 'inline-block' }} /> {settings.organisation.name}</span>
+              <span className="tpill" style={{ background: '#fff' }}>{settings.labels.persistent}</span>
+            </div>
+            <h1>Copilot &amp; Cowork<br /><span className="grad-text">Interactive Learning Lab</span></h1>
+            <p className="lede">
+              Learn by doing. Build an AI Programme Knowledge Agent, give it approved documents, test its answers and share it with your cohort —
+              then delegate the weekly programme update to Cowork, reviewing every output and approving each action yourself.
+            </p>
+            <div className="stat-row">
+              <div className="stat"><b>{lessons.length}</b><span>hands-on lessons</span></div>
+              <div className="stat"><b>45 min</b><span>with discussion</span></div>
+              <div className="stat"><b>{practiceExercises.length}</b><span>practice exercises</span></div>
+            </div>
+            <p className="small muted" style={{ marginTop: 12 }}>{settings.labels.infoPanel} You use a sample profile ({settings.learner.displayName}) — no Microsoft sign-in is needed.</p>
+          </div>
+          <div className="preview-stack" aria-hidden>
+            <div className="preview-card" style={{ top: 0, left: 0, transform: 'rotate(-2deg)' }}>
+              <div className="pv-head"><span className="agent-icon">AP</span> AI Programme Knowledge Agent</div>
+              <div className="small muted">What are the main programme risks this week?</div>
+              <div className="pv-line" style={{ width: '92%' }} /><div className="pv-line" style={{ width: '76%' }} /><div className="pv-line" style={{ width: '84%' }} />
+            </div>
+            <div className="preview-card" style={{ top: 110, right: 0, transform: 'rotate(1.5deg)' }}>
+              <div className="pv-head"><span className="ai-avatar"><SparkleFilled fontSize={12} /></span> Cowork · Needs approval</div>
+              <div className="small"><b>Send email</b> to Programme Leadership Group</div>
+              <div className="pv-line" style={{ width: '88%' }} /><div className="pv-line" style={{ width: '64%' }} />
+              <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', marginTop: 8 }}>
+                <span className="status neutral">Edit</span><span className="status brand">Send</span>
+              </div>
+            </div>
+            <div className="preview-card" style={{ top: 214, left: 24, width: '62%', transform: 'rotate(-1deg)' }}>
+              <div className="pv-head" style={{ marginBottom: 4 }}><CheckmarkCircleRegular color="var(--success)" /> Test B: good behaviour</div>
+              <div className="xsmall muted">Missing information handled honestly</div>
+            </div>
+          </div>
         </div>
-        <h1>{settings.appName}</h1>
-        <p className="lede">
-          Learn by doing. You'll build an AI Programme Knowledge Agent, give it approved documents, test its answers, share it with your training cohort,
-          then use Cowork to prepare the weekly AI programme update — reviewing every output and approving each action yourself.
-        </p>
-        <p className="small muted">{settings.labels.infoPanel} You use a sample profile ({settings.learner.displayName}) — no Microsoft sign-in is needed.</p>
 
         <h2 style={{ fontSize: 18, marginTop: 28 }}>Choose how you want to learn</h2>
         <div className="grid3" role="group" aria-label="Learning mode">
           {MODES.map((m) => (
             <button key={m.id} className="mode-card" aria-pressed={mode === m.id} onClick={() => setModeLocal(m.id)}>
-              <h3>{mode === m.id ? <CheckmarkCircleRegular color="var(--train)" aria-hidden /> : <CircleRegular aria-hidden />} {m.title}</h3>
+              <span className="row-between"><span className="mode-icon" aria-hidden>{MODE_ICONS[m.id]}</span>{mode === m.id ? <CheckmarkCircleRegular color="var(--train)" fontSize={20} aria-hidden /> : <CircleRegular color="var(--text-3)" fontSize={20} aria-hidden />}</span>
+              <h3>{m.title}</h3>
               <span>{m.text}</span>
             </button>
           ))}
@@ -74,7 +109,7 @@ export function WelcomePage() {
             const done = session.completedLessons.includes(l.id);
             return (
               <div key={l.id} className="lesson-row">
-                <span>{done ? <CheckmarkCircleRegular color="var(--success)" aria-label="Complete" /> : <span className="muted">{i + 1}</span>}</span>
+                <span>{done ? <CheckmarkCircleRegular color="var(--success)" fontSize={24} aria-label="Complete" /> : <span className="lesson-num">{i + 1}</span>}</span>
                 <span>
                   <strong className="small">{l.title}</strong>
                   <div className="xsmall muted">{l.objectives[0]}</div>

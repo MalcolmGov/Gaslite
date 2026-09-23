@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { AiAvatar } from '../ChatPage';
 import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, Menu, MenuItem, MenuList, MenuPopover, MenuTrigger, Spinner, Tooltip } from '@fluentui/react-components';
 import {
   CheckmarkRegular,
@@ -7,7 +8,6 @@ import {
   PanelRightRegular,
   PauseRegular,
   PlayRegular,
-  SparkleRegular,
   StopRegular,
   WarningRegular,
   DocumentTextRegular,
@@ -208,7 +208,7 @@ function TranscriptView({ i, task, stream, onOpenArtifact }: { i: TranscriptItem
     case 'assistant':
       return (
         <div className="msg assistant">
-          <div className="msg-meta"><SparkleRegular fontSize={16} color="var(--copilot-a)" /> Cowork</div>
+          <div className="msg-meta"><AiAvatar /> Cowork</div>
           <div className="body"><Markdown text={i.text} stream={stream} onCite={onCite} /></div>
         </div>
       );

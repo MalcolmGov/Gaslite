@@ -1,3 +1,4 @@
+import { settings } from '../../config/settings';
 import type { SampleDocument } from '../types';
 
 /**
@@ -322,7 +323,7 @@ export const mainDocuments: SampleDocument[] = [
     fileName: 'AI Programme Overview (1).docx',
     kind: 'docx',
     version: '2.0',
-    owner: 'Alex Mokoena',
+    owner: settings.learner.displayName,
     modified: '2026-08-05',
     location: 'OneDrive › Downloads',
     classification: 'Internal',

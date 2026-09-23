@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { AiAvatar } from '../ChatPage';
 import { Button } from '@fluentui/react-components';
-import { ArrowRightRegular, CheckmarkRegular, SparkleRegular } from '@fluentui/react-icons';
+import { ArrowRightRegular, CheckmarkRegular } from '@fluentui/react-icons';
 import type { Agent, ChatMessage } from '../../engine/model';
 import { useLab } from '../../state/store';
 import { builderReply, builderSend, setBuilderTab, skipToConfigure } from '../../state/agentActions';
@@ -57,7 +58,7 @@ export function DescribeTab({ agent }: { agent: Agent }) {
           {msgs.map((m) => <BuilderMessage key={m.id} m={m} agent={agent} latest={m === lastBuilder} busy={busy} />)}
           {busy && <div className="msg"><Thinking label="Updating your agent" /></div>}
         </div>
-        <div style={{ position: 'sticky', bottom: 0, paddingTop: 10, background: 'var(--bg)' }}>
+        <div style={{ position: 'sticky', bottom: 0, paddingTop: 16, paddingBottom: 8, background: 'linear-gradient(180deg, rgba(250,250,250,0) 0%, var(--bg) 35%)' }}>
           <Composer
             tour="builder-composer"
             label="Message Agent Builder"
@@ -110,7 +111,7 @@ function BuilderMessage({ m, agent, latest, busy }: { m: ChatMessage; agent: Age
   const active = latest && !busy;
   return (
     <div className="msg assistant">
-      <div className="msg-meta"><SparkleRegular fontSize={16} color="var(--copilot-a)" /> Agent Builder</div>
+      <div className="msg-meta"><AiAvatar /> Agent Builder</div>
       <div className="body"><Markdown text={m.text} /></div>
       {m.quickReplies && active && !m.multiSelect && (
         <div className="chips" data-tour="builder-replies" role="group" aria-label="Suggested answers">

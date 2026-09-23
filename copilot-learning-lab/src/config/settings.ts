@@ -21,9 +21,11 @@ export const settings = {
 
   learner: {
     id: 'usr_learner',
-    displayName: 'Alex Mokoena',
+    displayName: 'Malcolm Govender',
+    /** Local part of the learner's simulated email address. */
+    emailUser: 'malcolm.govender',
     jobTitle: 'Programme Analyst',
-    initials: 'AM',
+    initials: 'MG',
   },
 
   scenario: {

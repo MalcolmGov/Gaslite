@@ -71,7 +71,7 @@ export function CoworkHome() {
   return (
     <div className="conv-wrap" style={{ maxWidth: 880 }}>
       <div className="hero" style={{ marginTop: '6vh' }}>
-        <h1>What should Cowork take on?</h1>
+        <h1>What should <span className="grad-text">Cowork</span> take on?</h1>
         <p>Describe the outcome you need. Cowork works through the steps and asks before it sends or schedules anything.</p>
       </div>
       <Composer

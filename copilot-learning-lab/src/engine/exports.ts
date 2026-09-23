@@ -148,7 +148,7 @@ export function emailToEml(e: EmailPayload, attachmentNames: string[]): string {
   const addr = (rs: EmailPayload['to']) => rs.map((r) => `"${r.name}" <${r.email}>`).join(', ');
   const d = settings.organisation.emailDomain;
   return [
-    `From: "${settings.learner.displayName}" <alex.mokoena@${d}>`,
+    `From: "${settings.learner.displayName}" <${settings.learner.emailUser}@${d}>`,
     `To: ${addr(e.to)}`,
     e.cc.length ? `Cc: ${addr(e.cc)}` : '',
     `Subject: ${e.subject}`,
