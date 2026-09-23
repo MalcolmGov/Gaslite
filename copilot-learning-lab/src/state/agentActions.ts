@@ -1,6 +1,6 @@
 import { answerAsAgent } from '../engine/packs';
 import { answerQuestion, refine, startFromDescription, starterPrompts } from '../engine/builder';
-import type { Agent, ChatMessage, KnowledgeRef, ShareEntry, StarterPrompt } from '../engine/model';
+import type { Agent, ChatMessage, KnowledgeRef, ScenarioId, ShareEntry, StarterPrompt } from '../engine/model';
 import { copilotChatReply } from '../engine/copilotChat';
 import { MAIN_PROMPT } from '../engine/cowork/scenarios';
 import { getDoc } from '../scenario/registry';
@@ -380,7 +380,7 @@ export function handoffToCowork(agentId: string, messageId: string): string | nu
 
 /** Filled in by coworkActions to break the import cycle. */
 export const createReadyTaskRef: {
-  current?: (scenario: 'main' | 'meeting' | 'delivery', prompt: string, files: string[], brief?: { text: string; agentName: string; at: number }) => string;
+  current?: (scenario: ScenarioId, prompt: string, files: string[], brief?: { text: string; agentName: string; at: number }) => string;
 } = {};
 
 // ───────────── Copilot Chat ─────────────

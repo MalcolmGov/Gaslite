@@ -1,4 +1,5 @@
 import type { SampleDocument } from '../types';
+import { workplaceDocuments } from './workplaceDocuments';
 
 /** Synthetic documents for the three shorter practice exercises. */
 
@@ -85,4 +86,4 @@ export const deliveryTracker: SampleDocument = {
   ],
 };
 
-export const practiceDocuments: SampleDocument[] = [policyDocument, workingGroupNotes, deliveryTracker];
+export const practiceDocuments: SampleDocument[] = [policyDocument, workingGroupNotes, deliveryTracker, ...workplaceDocuments];

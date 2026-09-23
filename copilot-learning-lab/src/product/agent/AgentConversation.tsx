@@ -44,7 +44,7 @@ export function AgentConversation({ agent, conv, coaching, onHandoff, header }: 
           {header}
           {!list.length && (
             <div style={{ textAlign: 'center', margin: '6vh 0 20px' }}>
-              <AgentIcon name={agent.name || 'Agent'} size="lg" policy={agent.packId === 'policy'} />
+              <AgentIcon name={agent.name || 'Agent'} size="lg" policy={agent.packId !== 'programme'} />
               <h2 style={{ margin: '12px 0 4px', fontSize: 22 }}>{agent.name || 'New Agent'}</h2>
               <p className="muted small" style={{ maxWidth: 520, margin: '0 auto' }}>{agent.description}</p>
             </div>
@@ -113,7 +113,7 @@ function AnswerView({
   return (
     <div className="msg assistant">
       <div className="msg-meta">
-        <AgentIcon name={agent.name || 'Agent'} policy={agent.packId === 'policy'} /> {agent.name || 'Agent'}
+        <AgentIcon name={agent.name || 'Agent'} policy={agent.packId !== 'programme'} /> {agent.name || 'Agent'}
         {conv === 'try' && m.configVersion !== undefined && <span className="xsmall muted" style={{ fontWeight: 400 }}>· config v{m.configVersion}</span>}
       </div>
       <div className="body">

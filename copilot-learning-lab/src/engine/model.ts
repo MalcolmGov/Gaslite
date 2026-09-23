@@ -22,7 +22,7 @@ export interface StarterPrompt {
   message: string;
 }
 
-export type PackId = 'programme' | 'policy';
+export type PackId = 'programme' | 'policy' | 'procedures' | 'compliance' | 'onboarding';
 
 export interface ShareEntry {
   principalId: string;
@@ -115,7 +115,7 @@ export type TaskStatus =
   | 'failed'
   | 'cancelled';
 
-export type ScenarioId = 'main' | 'meeting' | 'delivery';
+export type ScenarioId = 'main' | 'meeting' | 'delivery' | 'actions' | 'status' | 'triage';
 
 export interface Recipient {
   id: string;
@@ -185,7 +185,7 @@ export type ArtifactFormat = 'md' | 'csv' | 'eml' | 'ics';
 export interface Artifact {
   id: string;
   taskId: string;
-  key: 'update' | 'table' | 'email' | 'invite' | 'summary' | 'agenda' | 'overdue' | 'escalation';
+  key: 'update' | 'table' | 'email' | 'invite' | 'summary' | 'agenda' | 'overdue' | 'escalation' | 'actions' | 'status' | 'triage' | 'reply';
   title: string;
   baseName: string;
   format: ArtifactFormat;

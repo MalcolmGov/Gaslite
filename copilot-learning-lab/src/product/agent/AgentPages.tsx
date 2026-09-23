@@ -40,7 +40,7 @@ export function AgentChatPage({ agentId }: { agentId: string }) {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div className="row-between" style={{ padding: '8px 20px', borderBottom: '1px solid var(--stroke)', background: '#fff', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', minWidth: 0 }}>
-          <AgentIcon name={agent.name} policy={agent.packId === 'policy'} />
+          <AgentIcon name={agent.name} policy={agent.packId !== 'programme'} />
           <strong style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{agent.name}</strong>
           {audience.length ? <StatusBadge tone="brand" icon={<PeopleRegular />}>Shared with {audience.join(', ')}</StatusBadge> : <StatusBadge tone="neutral" icon={<LockClosedRegular />}>Only you</StatusBadge>}
         </div>
@@ -113,7 +113,7 @@ export function AgentsListPage() {
         {agents.map((a) => (
           <button key={a.id} className="task-list-row" onClick={() => navigate(a.status === 'created' ? { name: 'agent', agentId: a.id } : { name: 'builder', agentId: a.id, tab: a.builder.stage === 'intro' ? 'describe' : 'configure' })}>
             <span style={{ display: 'flex', gap: 10, alignItems: 'center', minWidth: 0 }}>
-              <AgentIcon name={a.name || 'New Agent'} policy={a.packId === 'policy'} />
+              <AgentIcon name={a.name || 'New Agent'} policy={a.packId !== 'programme'} />
               <span style={{ minWidth: 0 }}>
                 <strong>{a.name || 'Untitled draft'}</strong>
                 <div className="xsmall muted" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.description || 'No description'}</div>

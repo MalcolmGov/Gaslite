@@ -177,7 +177,7 @@ export function EmailApproval({ action, onOpenArtifact }: { action: OutboundActi
   const e = action.email!;
   useEffect(() => { if (!editing) setDraft(action.email!); }, [action.email, editing]);
   const viewRef = useViewed(action.id);
-  const allArtifacts = useLab(useShallow((s) => s.tasks[action.taskId].artifactIds.map((id) => s.artifacts[id]).filter((x) => x.key === 'update' || x.key === 'table' || x.key === 'overdue')));
+  const allArtifacts = useLab(useShallow((s) => s.tasks[action.taskId].artifactIds.map((id) => s.artifacts[id]).filter((x) => ['update', 'table', 'overdue', 'actions', 'status', 'triage'].includes(x.key))));
 
   const people = expandRecipients(e.to).length + expandRecipients(e.cc).length;
 

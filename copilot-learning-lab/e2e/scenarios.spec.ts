@@ -164,6 +164,48 @@ test('practice: policy agent admits missing information', async ({ page }) => {
   await expect(page.locator('#main-content').getByText(/at least two days per week/)).toBeVisible();
 });
 
+test('practice hub groups the workplace agents', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.goto('/#/practice');
+  const group = page.getByRole('region', { name: 'Agents your teams will use' });
+  for (const title of ['Policy & Procedures Navigator', 'Compliance & KYC Q&A', 'New Joiner Onboarding Buddy', 'Meeting to actions', 'Weekly status report', 'Customer case triage']) {
+    await expect(group.locator('.card', { hasText: title })).toBeVisible();
+  }
+  await shot(page, 'practice-hub');
+});
+
+test('practice: compliance agent escalates what the procedure does not cover', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.goto('/#/practice');
+  await page.locator('.card', { hasText: 'Compliance & KYC Q&A' }).getByRole('button', { name: /Start/ }).click();
+  await page.getByRole('button', { name: 'Complaint timelines' }).click();
+  await expect(page.locator('#main-content').getByText(/resolve it within/)).toBeVisible();
+  await page.getByRole('textbox', { name: /Message Compliance Q&A/ }).fill('Can we onboard a customer with an expired passport?');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#main-content').getByText(/doesn't cover that customer situation/)).toBeVisible();
+  await shot(page, 'practice-compliance');
+});
+
+test('practice: case triage keeps the PIN out and escalates P1 cases', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.goto('/#/practice');
+  await page.locator('.card', { hasText: 'Customer case triage' }).getByRole('button', { name: /Start/ }).click();
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
+  await page.getByRole('radio', { name: /Yes — to Aisha Patel/ }).click();
+  await page.getByRole('button', { name: 'Submit' }).click();
+  await page.locator('.task-scroll .file-chip', { hasText: 'Case triage sheet' }).first().click();
+  const preview = page.locator('[data-tour="artifact-preview"]');
+  for (const id of ['C-2201', 'C-2204', 'C-2205']) await expect(preview.locator('tr', { hasText: id })).toContainText('P1');
+  await expect(preview).not.toContainText('4821');
+  await page.getByRole('button', { name: 'Close preview' }).click();
+  await expect(emailCard(page)).toContainText('Aisha Patel');
+  await expect(emailCard(page)).not.toContainText('4821');
+  await shot(page, 'practice-triage');
+});
+
 test('keyboard: Cowork questions work with arrows, Space and Submit', async ({ page }) => {
   await loadLesson(page, 'Delegate with Cowork');
   await page.getByRole('button', { name: 'Send', exact: true }).click();

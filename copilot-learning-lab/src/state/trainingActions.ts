@@ -7,7 +7,7 @@ import type { Agent, ChatMessage } from '../engine/model';
 import { cancelAll, runSynchronously, setSpeed, type Speed } from '../lib/scheduler';
 import { newId } from '../lib/util';
 import { lessons, allSteps } from '../training/lessons';
-import { practiceExercises } from '../training/practice';
+import { practiceById, practiceExercises, type PracticeId } from '../training/practice';
 import { newAgent } from './agentActions';
 import { acceptPlan, answerTaskQuestion, createReadyTask, recoverAfterReload, startTask } from './coworkActions';
 import { announce, initialState, lab, logEvent, mutate, useLab, type Mode } from './store';
@@ -203,7 +203,7 @@ export function loadLessonState(lessonId: string) {
 
 export function restartExercise() {
   const s = lab();
-  if (s.session.practiceId) return startPractice(s.session.practiceId as 'meeting' | 'policy' | 'delivery');
+  if (s.session.practiceId) return startPractice(s.session.practiceId as PracticeId);
   loadLessonState(s.session.lessonId);
 }
 
@@ -217,33 +217,30 @@ export function resetAll() {
 
 // ───────────── practice ─────────────
 
-export function startPractice(id: 'meeting' | 'policy' | 'delivery') {
+export function startPractice(id: PracticeId) {
+  const p = practiceById(id);
+  if (!p) return;
   cancelAll();
   mutate((s) => {
     s.session.started = true;
     s.session.practiceId = id;
     s.ui.drawer = null;
   });
-  if (id === 'policy') {
-    let agent = Object.values(lab().agents).find((a) => a.packId === 'policy');
+  if (p.agent) {
+    const t = p.agent;
+    let agent = Object.values(lab().agents).find((a) => a.packId === t.packId);
     if (!agent) {
       agent = newAgent({
-        packId: 'policy',
-        name: 'Workplace Policy Helper',
-        description: 'Answers employee questions about the Hybrid Work and Travel Policy (training sample).',
-        instructions:
-          'You help employees understand the Hybrid Work and Travel Policy. Answer only from the policy document and cite the section. If the policy does not cover a question, say the information is missing and suggest who to ask. Do not invent amounts or rules.',
-        knowledge: [{ docId: 'doc_policy', status: 'ready', addedAt: Date.now() }],
-        starterPrompts: [
-          { id: newId('sp'), title: 'Office days', message: 'How many days must I be in the office?' },
-          { id: newId('sp'), title: 'Home internet', message: 'Can I claim for home internet?' },
-          { id: newId('sp'), title: 'Travel booking', message: 'How far ahead must I book international travel?' },
-          { id: newId('sp'), title: 'Lagos per diem', message: 'What is the per diem for a trip to Lagos?' },
-        ],
+        packId: t.packId,
+        name: t.name,
+        description: t.description,
+        instructions: t.instructions,
+        knowledge: [{ docId: t.docId, status: 'ready', addedAt: Date.now() }],
+        starterPrompts: t.starterPrompts.map((sp) => ({ id: newId('sp'), ...sp })),
         status: 'created',
         createdAt: Date.now(),
         prebuilt: true,
-        owner: 'usr_zanele',
+        owner: t.owner,
         sharing: { entries: [{ principalId: 'grp_cohort', kind: 'group', role: 'chat' }], sharedAt: Date.now() },
       });
       const a = agent;
@@ -254,8 +251,8 @@ export function startPractice(id: 'meeting' | 'policy' | 'delivery') {
     }
     return navigate({ name: 'agent', agentId: agent.id });
   }
-  const sc = scenarios[id];
-  const taskId = createReadyTask(id, sc.defaultPrompt, sc.defaultFiles);
+  const sc = scenarios[p.scenario!];
+  const taskId = createReadyTask(sc.id, sc.defaultPrompt, sc.defaultFiles);
   navigate({ name: 'task', taskId });
 }
 

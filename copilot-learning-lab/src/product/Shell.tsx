@@ -74,7 +74,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 <div className="nav-section">Agents</div>
                 {agents.filter((a) => a.status === 'created').map((a) => (
                   <button key={a.id} className="nav-item" aria-current={current('agent', a.id)} onClick={go(() => navigate({ name: 'agent', agentId: a.id }))}>
-                    <AgentIcon name={a.name} policy={a.packId === 'policy'} />
+                    <AgentIcon name={a.name} policy={a.packId !== 'programme'} />
                     <span className="grow">{a.name}</span>
                   </button>
                 ))}

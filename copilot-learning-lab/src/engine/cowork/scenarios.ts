@@ -3,6 +3,7 @@ import { getDoc, sectionText, tableRows, BRIEF_SOURCE_ID } from '../../scenario/
 import { fmtDate, fmtDateLong, fmtDateShort, normalise } from '../../lib/util';
 import type { Artifact, EmailPayload, MeetingPayload, Recipient, ScenarioId, Task, TaskQuestion } from '../model';
 import { firstFreeSlot, recipientFor } from './common';
+import { actionsScenario, CASES, KPI, statusScenario, SYNC, triageScenario } from './workplace';
 
 /**
  * Cowork scenario definitions: the scripted steps a task runs through, the
@@ -645,11 +646,21 @@ function escalationBody(): string {
   ].join('\n');
 }
 
-export const scenarios: Record<ScenarioId, CoworkScenario> = { main: mainScenario, meeting: meetingScenario, delivery: deliveryScenario };
+export const scenarios: Record<ScenarioId, CoworkScenario> = {
+  main: mainScenario,
+  meeting: meetingScenario,
+  delivery: deliveryScenario,
+  actions: actionsScenario,
+  status: statusScenario,
+  triage: triageScenario,
+};
 
 /** Detect which scenario a free-text Cowork request belongs to. */
 export function detectScenario(prompt: string, files: string[]): ScenarioId | null {
   const p = normalise(prompt);
+  if (files.includes(SYNC) || /(transcript|action items)/.test(p)) return 'actions';
+  if (files.includes(KPI) || /(kpi|scorecard)/.test(p)) return 'status';
+  if (files.includes(CASES) || /(case queue|triage|support cases)/.test(p)) return 'triage';
   if (files.includes(WG) || /(working group|agenda)/.test(p)) return 'meeting';
   if (files.includes(PAY) || /(payments|overdue|escalat)/.test(p)) return 'delivery';
   if (/(leadership|programme|program|weekly update|briefing|tracker)/.test(p) || files.some((f) => f.startsWith('doc_tracker'))) return 'main';

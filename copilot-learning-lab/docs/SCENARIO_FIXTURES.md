@@ -6,7 +6,8 @@ All scenario content is plain TypeScript data. Edit it, then run `npm test` to c
 |---|---|
 | `src/config/settings.ts` | Organisation name, learner profile, email domain (always `*.example`), scenario date (`2026-09-22`), time zone (Africa/Johannesburg, SAST), labels, storage key |
 | `src/scenario/main/documents.ts` | The main scenario's documents: sections, tables, owners, versions, dates, classifications, access |
-| `src/scenario/practice/documents.ts` | Policy document, working-group notes, delivery tracker |
+| `src/scenario/practice/documents.ts` | Core practice documents: policy, working-group notes, delivery tracker |
+| `src/scenario/practice/workplaceDocuments.ts` | Workplace practice documents: expenses and IT procedure, complaints and KYC procedure, new joiner guide, meeting transcript, KPI scorecard, support case queue |
 | `src/scenario/people.ts` | Fictional people, distribution groups and sample calendar events |
 | `src/training/lessons.ts` | Lessons, objectives, speaker notes and guided steps, with their completion predicates |
 | `src/training/practice.ts` | Practice exercises, expected results and checks |
@@ -43,8 +44,21 @@ Each `SampleDocument` has:
 
 If you rename a section id, search for `[[c:<old id>]]` and update it. The unit test *"every citation in answers resolves to a real excerpt"* catches missed references.
 
+### Workplace practice set ("Agents your teams will use")
+
+| Exercise | Surface | Source | What it tests |
+|---|---|---|---|
+| Policy & Procedures Navigator | Agent | `doc_procedures` | Cited answers; gym membership and late-claim *exceptions* are routed to Finance, not answered |
+| Compliance & KYC Q&A | Agent | `doc_compliance` | Cited timelines and KYC tiers; expired passport and legal questions go to the Compliance mailbox |
+| New Joiner Onboarding Buddy | Agent | `doc_onboarding` | First-week answers; pay and leave go to People & Culture |
+| Meeting to actions | Cowork | `doc_sync_transcript` | Comms plan reassigned from Sipho to Lerato mid-meeting; WhatsApp chatbot is parked, not an action |
+| Weekly status report | Cowork | `doc_kpi_scorecard` | Complaint resolution is lower-is-better; app rating data is stale (6 Sep); fraud losses are provisional |
+| Customer case triage | Cowork | `doc_case_queue` | P1s are C-2201, C-2204 (14 of 15 days) and C-2205; the PIN in C-2206 never appears in any output |
+
+Agent answers for this set come from rule tables in `src/engine/packs/workplace.ts`; Cowork outputs come from `src/engine/cowork/workplace.ts`, which reads the fixture tables, so editing a row changes the output.
+
 ## Adding a practice exercise
 
-1. Add documents to `src/scenario/practice/documents.ts`.
-2. Add either a `CoworkScenario` in `src/engine/cowork/scenarios.ts` (steps, questions, generators, actions) or a `KnowledgePack` in `src/engine/packs/`.
-3. Register the exercise in `src/training/practice.ts` with its expected results and checks, and start it from `startPractice` in `src/state/trainingActions.ts`.
+1. Add documents to `src/scenario/practice/documents.ts` or `workplaceDocuments.ts`.
+2. Add either a `CoworkScenario` (see `src/engine/cowork/workplace.ts`) and register it in `scenarios` and `detectScenario` in `src/engine/cowork/scenarios.ts`, or a `KnowledgePack` (see `makePack` in `src/engine/packs/workplace.ts`) and register it in `src/engine/packs/index.ts`.
+3. Register the exercise in `src/training/practice.ts` with its expected results and checks. Set `agent` (a pre-built agent template) or `scenario`; `startPractice` uses whichever is set.
