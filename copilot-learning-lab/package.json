@@ -1,0 +1,33 @@
+{
+  "name": "copilot-learning-lab",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Copilot & Cowork — Interactive Learning Lab (training simulation, sample data)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "test": "vitest run",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@fluentui/react-components": "^9.74.8",
+    "@fluentui/react-icons": "^2.0.341",
+    "immer": "^11.1.18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "jsdom": "^30.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  }
+}
