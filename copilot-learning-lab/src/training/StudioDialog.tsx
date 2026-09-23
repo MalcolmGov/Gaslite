@@ -4,7 +4,7 @@ export const EXPERIENCES = [
   { name: 'Copilot Chat', use: 'Ask questions, analyse information you attach, and draft content in one conversation.', example: '"Summarise this tracker."' },
   { name: 'Agent Builder agent', use: 'A reusable assistant with standing instructions and chosen knowledge, shared with colleagues.', example: '"What changed in the programme this week?" — answered from approved documents.' },
   { name: 'Cowork', use: 'Delegate a multi-step task. Cowork produces files and asks for approval before actions such as sending email.', example: '"Prepare the update, draft the email, propose a meeting."' },
-  { name: 'Copilot Studio (optional)', use: 'Advanced agents: actions that call other systems, automated flows, multiple channels and formal publishing.', example: 'A merchant-support agent that looks up cases in a service system.' },
+  { name: 'Copilot Studio (optional)', use: 'Advanced agents: choose the AI model, add actions that call other systems, automated flows, multiple channels and formal publishing.', example: 'A merchant-support agent that looks up cases in a service system.' },
 ];
 
 /** Training explanation of where Copilot Studio fits. Not a product surface. */

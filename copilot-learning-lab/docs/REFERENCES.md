@@ -11,6 +11,8 @@ All pages were fetched and read on **23 September 2026**. The "Page last updated
 | Share and manage agents built with Agent Builder (linked page) | https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/agent-builder-share-manage-agents | (fetched 23 Sep 2026) | None used |
 | Build your own agent with Microsoft 365 Copilot (support article) | https://support.microsoft.com/en-us/microsoft-365-copilot/build-your-own-agent-with-microsoft-365-copilot | 18 Dec 2025 | Templates and starter prompts (small) |
 | Microsoft Copilot Studio documentation hub | https://learn.microsoft.com/en-us/microsoft-copilot-studio/ | 3 Aug 2026 | Hub page only |
+| Select a primary AI model for your agent (Copilot Studio) | https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-select-agent-model | 18 Sep 2026 | Model list, General/Auto/Deep tags, South Africa availability, admin controls for preview and external models |
+| Copilot Studio billing rates and management | https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management | 3 Aug 2026 | Copilot Credit rates, reasoning-model premium meter, inclusion for Microsoft 365 Copilot licensed users |
 
 No organisation-supplied screenshots were provided, so official screenshots were the strongest visual reference, as the brief requires.
 

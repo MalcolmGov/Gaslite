@@ -440,3 +440,24 @@ button, input, textarea, select { font-family: inherit; }
 .lesson-num { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: #eef0f3; font-size: 12px; font-weight: 700; color: var(--text-2); }
 @media (max-width: 900px) { .welcome-hero { grid-template-columns: minmax(0, 1fr); } .preview-stack { display: none; } .welcome-hero h1 { font-size: 30px; } }
 @media (prefers-reduced-motion: reduce) { .prompt-card, .task-list-row, .mode-card { transition: none; } .prompt-card:hover, .task-list-row:hover, .mode-card:hover { transform: none; } }
+
+/* ───────── Model picker (simulated Copilot Studio) ───────── */
+.model-list { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.model-tier { display: flex; flex-direction: column; margin: 10px 0 4px; }
+.model-opt { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border: 1px solid var(--stroke); border-radius: 10px; cursor: pointer; background: #fff; }
+.model-opt + .model-opt { margin-top: 6px; }
+.model-opt:hover { border-color: var(--stroke-strong); }
+.model-opt.on { border-color: #8a5cf6; box-shadow: 0 0 0 2px rgba(138, 92, 246, .18); }
+.model-opt input { accent-color: #8a5cf6; }
+.model-opt .mo-main { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.model-opt .mo-tags { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.cost-inputs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 6px; }
+.cost-inputs label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--text-2); }
+.cost-out { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.cost-out > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+.cost-out b { font-size: 18px; }
+@media (max-width: 700px) {
+  .cost-inputs, .cost-out { grid-template-columns: 1fr; }
+  .model-opt { flex-wrap: wrap; }
+  .model-opt .mo-tags { justify-content: flex-start; }
+}

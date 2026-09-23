@@ -175,6 +175,16 @@ export function updateStarterPrompts(agentId: string, prompts: StarterPrompt[]) 
   });
 }
 
+/** Simulated Copilot Studio model choice. Doesn't change simulated answers. */
+export function setAgentModel(agentId: string, modelId: string | undefined) {
+  mutate((s) => {
+    const a = s.agents[agentId];
+    if (!a || a.model === modelId) return;
+    a.model = modelId;
+    logEvent(s, 'model_selected', { agentId, model: modelId ?? 'managed' });
+  });
+}
+
 // ───────────── knowledge ─────────────
 
 function prepare(agentId: string, docId: string) {

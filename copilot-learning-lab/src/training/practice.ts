@@ -1,4 +1,5 @@
 import type { PackId, ScenarioId, StarterPrompt } from '../engine/model';
+import { modelById } from '../engine/models';
 import type { LabState } from '../state/store';
 
 /**
@@ -11,7 +12,7 @@ export interface PracticeCheck {
   done: (s: LabState) => boolean;
 }
 
-export type PracticeId = 'meeting' | 'policy' | 'delivery' | 'procedures' | 'compliance' | 'onboarding' | 'actions' | 'status' | 'triage';
+export type PracticeId = 'meeting' | 'policy' | 'delivery' | 'procedures' | 'compliance' | 'onboarding' | 'actions' | 'status' | 'triage' | 'models';
 
 /** Template for a pre-built practice agent. */
 export interface PracticeAgent {
@@ -65,6 +66,22 @@ const coworkChecks = (scenario: ScenarioId, mainKey: string, mainLabel: string):
   { label: 'Checked a source from the output', done: (s) => s.events.some((e) => e.type === 'artifact_source_opened' && e.data?.scenario === scenario) },
   { label: 'Task completed', done: (s) => taskFor(s, scenario)?.status === 'completed' },
 ];
+
+const PROCEDURES_AGENT: PracticeAgent = {
+  packId: 'procedures',
+  name: 'Policy & Procedures Navigator',
+  description: 'Answers staff questions about expenses, spend approval limits and IT requests, with citations (training sample).',
+  instructions:
+    'You help staff follow the Staff Expenses and IT Requests Procedure. Answer only from the procedure and cite the section. If it does not cover a question, or the question is about an exception, say so and name who to ask. Never approve, interpret or make exceptions. Do not invent amounts or rules.',
+  docId: 'doc_procedures',
+  owner: 'usr_nomvula',
+  starterPrompts: [
+    { title: 'Claim deadline', message: 'How long do I have to submit an expense claim?' },
+    { title: 'Client dinner', message: 'What is the limit for a client dinner?' },
+    { title: 'AI tools', message: 'Can I install a free AI tool on my laptop?' },
+    { title: 'Gym membership', message: 'Can I claim my gym membership?' },
+  ],
+};
 
 export const practiceExercises: PracticeExercise[] = [
   {
@@ -171,21 +188,7 @@ export const practiceExercises: PracticeExercise[] = [
       '"My claim is late because I was on leave — is that OK?" → an exception; the agent routes it and does not approve it.',
     ],
     checks: agentChecks('procedures'),
-    agent: {
-      packId: 'procedures',
-      name: 'Policy & Procedures Navigator',
-      description: 'Answers staff questions about expenses, spend approval limits and IT requests, with citations (training sample).',
-      instructions:
-        'You help staff follow the Staff Expenses and IT Requests Procedure. Answer only from the procedure and cite the section. If it does not cover a question, or the question is about an exception, say so and name who to ask. Never approve, interpret or make exceptions. Do not invent amounts or rules.',
-      docId: 'doc_procedures',
-      owner: 'usr_nomvula',
-      starterPrompts: [
-        { title: 'Claim deadline', message: 'How long do I have to submit an expense claim?' },
-        { title: 'Client dinner', message: 'What is the limit for a client dinner?' },
-        { title: 'AI tools', message: 'Can I install a free AI tool on my laptop?' },
-        { title: 'Gym membership', message: 'Can I claim my gym membership?' },
-      ],
-    },
+    agent: PROCEDURES_AGENT,
     buildTip: 'Use your real policy library as knowledge, remove superseded versions first, and name an owner in Finance or HR who reviews wrong answers monthly.',
   },
   {
@@ -309,6 +312,35 @@ export const practiceExercises: PracticeExercise[] = [
     checks: coworkChecks('triage', 'triage', 'triage sheet'),
     scenario: 'triage',
     buildTip: 'Use masked exports, not raw customer records. Replies to customers still go out through your case system after a person checks them.',
+  },
+  {
+    id: 'models',
+    group: 'workplace',
+    title: 'Choose the right model',
+    surface: 'Agent',
+    minutes: 3,
+    objective: 'Pick a model that fits the job and the budget, and see what changes cost for licensed and unlicensed staff.',
+    brief:
+      'Open the Policy & Procedures Navigator and select the model button at the top. Agent Builder has no model picker, so this is the Copilot Studio step. Estimate the cost for staff without a Microsoft 365 Copilot licence, then choose a model for an FAQ-style agent.',
+    expected: [
+      'An FAQ agent that answers from documents needs a General model: GPT-5.5 Chat (the default) or GPT-4.1.',
+      'For licensed staff the agent is included in their licence, whichever model you choose.',
+      'For unlicensed staff each answer costs credits; organisation-wide search adds 10, and Deep models add about 15 more per answer.',
+      'Claude models need admin approval and are cross-geo for South Africa, so Compliance should review them first.',
+    ],
+    checks: [
+      { label: 'Opened the model picker', done: (s) => s.events.some((e) => e.type === 'model_picker_opened' && e.data?.agentId === agentFor(s, 'procedures')?.id) },
+      { label: 'Estimated the monthly cost', done: (s) => s.events.some((e) => e.type === 'cost_estimated' && e.data?.agentId === agentFor(s, 'procedures')?.id) },
+      {
+        label: 'Chose a generally available General model',
+        done: (s) => {
+          const m = modelById(agentFor(s, 'procedures')?.model);
+          return !!m && m.tier === 'General' && m.release !== 'Preview';
+        },
+      },
+    ],
+    agent: PROCEDURES_AGENT,
+    buildTip: 'Agent Builder agents use the model Microsoft manages. Move an agent to Copilot Studio only when you need to control its model or cap its spend, and set a monthly credit limit per agent in the Power Platform admin center.',
   },
 ];
 

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button, Spinner, Switch, Tooltip } from '@fluentui/react-components';
 import {
   AddRegular,
@@ -8,6 +9,7 @@ import {
   ErrorCircleRegular,
   InfoRegular,
   LockClosedRegular,
+  BrainCircuitRegular,
   WarningRegular,
 } from '@fluentui/react-icons';
 import type { Agent, KnowledgeRef } from '../../engine/model';
@@ -18,11 +20,14 @@ import { getDoc } from '../../scenario/registry';
 import { fmtDate, newId } from '../../lib/util';
 import { AgentIcon, FileIcon, StatusBadge } from '../common';
 import { HelpTip } from '../../training/HelpTip';
+import { ModelDialog, modelLabel } from './ModelDialog';
+import { logEvent, mutate } from '../../state/store';
 
 export function ConfigureTab({ agent }: { agent: Agent }) {
   const active = agent.knowledge.filter((k) => k.status !== 'removed');
   const removed = agent.knowledge.filter((k) => k.status === 'removed');
   const behaviour = readInstructions(agent.instructions);
+  const [modelOpen, setModelOpen] = useState(false);
 
   return (
     <div className="two-col">
@@ -42,6 +47,21 @@ export function ConfigureTab({ agent }: { agent: Agent }) {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="card" data-tour="model-card">
+          <div className="row-between" style={{ flexWrap: 'wrap', gap: 8 }}>
+            <h3 style={{ display: 'flex', gap: 8, alignItems: 'center' }}><BrainCircuitRegular aria-hidden /> Model</h3>
+            <Button onClick={() => { mutate((s) => logEvent(s, 'model_picker_opened', { agentId: agent.id })); setModelOpen(true); }}>
+              {agent.model ? 'Change model' : 'Choose a model in Copilot Studio'}
+            </Button>
+          </div>
+          <p className="small" style={{ margin: '4px 0 0' }}><strong>{modelLabel(agent)}</strong></p>
+          <p className="xsmall muted" style={{ margin: '2px 0 0' }}>
+            {agent.model
+              ? 'Chosen in Copilot Studio (simulated). Admins control which models are allowed.'
+              : "Agent Builder doesn't let you choose a model. Microsoft picks and updates it. To choose, for quality or cost, manage the agent in Copilot Studio."}
+          </p>
         </div>
 
         <div className="card" data-tour="instructions-field">
@@ -129,6 +149,7 @@ export function ConfigureTab({ agent }: { agent: Agent }) {
         </div>
       </div>
 
+      {modelOpen && <ModelDialog agent={agent} onClose={() => setModelOpen(false)} />}
       <aside className="side stack" aria-label="Learning Lab guidance">
         <div className="tcard">
           <div className="row-between" style={{ marginBottom: 6 }}>

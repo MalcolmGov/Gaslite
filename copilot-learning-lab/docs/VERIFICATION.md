@@ -43,6 +43,7 @@ Verified on 23 Sep 2026 with `npm run typecheck`, `npm test` (41 Vitest unit and
 | Certificate described as internal | ✅ | S results page; downloaded record labelled "not a Microsoft certification" |
 | Practice scenarios have their own data and expected results | ✅ | E project delivery (P-101/103/104 overdue, P-106 excluded); E policy; P meeting preparation (2 open decisions listed, dashboard item excluded with addendum citation, invitation created, Finish enabled) |
 | Workplace practice set: six agents and Cowork tasks for everyday staff work | ✅ | U 12 tests in `src/state/workplace.test.ts` (cited answers, routed gaps, reassigned action owner, lower-is-better KPI, stale and provisional figures, P1 triage, PIN never copied, no email when escalation declined); E practice hub groups, compliance gap, case triage |
+| Model choice and cost: Agent Builder shows no picker; simulated Copilot Studio picker with admin, preview and cross-geo warnings and a credit estimate | ✅ | U estimator rates (General, Auto range, Deep, no grounding, zero users), model exercise completes only for a GA General model and resets on restart; E choose a model, estimate 158,400 credits for 200 unlicensed users, Claude Opus admin warning, header shows the chosen model |
 
 ## Accessibility and presentation
 

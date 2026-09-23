@@ -53,6 +53,7 @@ If you rename a section id, search for `[[c:<old id>]]` and update it. The unit 
 | New Joiner Onboarding Buddy | Agent | `doc_onboarding` | First-week answers; pay and leave go to People & Culture |
 | Meeting to actions | Cowork | `doc_sync_transcript` | Comms plan reassigned from Sipho to Lerato mid-meeting; WhatsApp chatbot is parked, not an action |
 | Weekly status report | Cowork | `doc_kpi_scorecard` | Complaint resolution is lower-is-better; app rating data is stale (6 Sep); fraud losses are provisional |
+| Choose the right model | Agent | `doc_procedures` | Uses the Policy & Procedures Navigator with the simulated Copilot Studio model picker. Completes only for a generally available General model. Models and rates live in `src/engine/models.ts` |
 | Customer case triage | Cowork | `doc_case_queue` | P1s are C-2201, C-2204 (14 of 15 days) and C-2205; the PIN in C-2206 never appears in any output |
 
 Agent answers for this set come from rule tables in `src/engine/packs/workplace.ts`; Cowork outputs come from `src/engine/cowork/workplace.ts`, which reads the fixture tables, so editing a row changes the output.
