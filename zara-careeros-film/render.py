@@ -223,9 +223,88 @@ SCREEN_CY = 1240
 SCREEN_W = 2760
 
 
+# ---------- titles ----------
+TITLES = {
+    1: ("Meet Zara CareerOS.", (1.6, 2.4), (255, 255, 255)),
+    2: ("Discover your next move.", (0.3, 1.0), (255, 255, 255)),
+    3: ("Find talent. See the fit.", (0.3, 1.0), (255, 255, 255)),
+    4: ("Clarity at every step.", (0.3, 1.0), (14, 18, 40)),
+    5: ("Your brand. Your hiring experience.", (0.3, 1.0), (255, 255, 255)),
+}
+
+
+def title(c, n, t, color=None):
+    s, (a, b), col = TITLES[n]
+    text_c(c, s, TITLE_Y, 150, ramp(t, a, b), color=color or col, rise=24 * (1 - ramp(t, a, b)) if n == 1 else 0.0)
+
+
+# ---------- AI plates ----------
+# Optional assets/plate_s{n}.jpg: a generated cinematic shot that opens scene n full-bleed
+# (slow push-in), then softens into a blurred, toned backdrop as the real screen arrives.
+# Plates carry no text or UI; the product itself is only ever shown via real screenshots.
+PLATE_IN = (1.2, 1.9)  # full-bleed -> backdrop crossfade, scene-local seconds
+STAGE = {"bg": None}
+
+
+def _cover(im, w, h):
+    s = max(w / im.width, h / im.height)
+    im = im.resize((int(im.width * s + 0.5), int(im.height * s + 0.5)), Image.LANCZOS)
+    x, y = (im.width - w) // 2, (im.height - h) // 2
+    return im.crop((x, y, x + w, y + h))
+
+
+def _plate(n):
+    path = optional(f"plate_s{n}.jpg") or optional(f"plate_s{n}.png")
+    if not path:
+        return None
+    src = Image.open(A(path)).convert("RGB")
+    ow, oh = int(W * 1.12), int(H * 1.12)  # headroom for the push-in
+    sharp = _cover(src, ow, oh)
+    soft = sharp.filter(ImageFilter.GaussianBlur(max(2, int(28 * K))))
+    tone = PEARL if n == 4 else NAVY
+    soft = Image.blend(soft, Image.new("RGB", soft.size, tone), 0.55 if n == 4 else 0.5)
+    return sharp.convert("RGBA"), soft.convert("RGBA")
+
+
+PLATES = {n: _plate(n) for n in range(1, 6)}
+
+
+def plate_frame(n, t, soft):
+    sharp_im, soft_im = PLATES[n]
+    im = soft_im if soft else sharp_im
+    z = 1.12 - 0.10 * ease(t / 5.0)  # slow push-in across the scene
+    w, h = int(W * z), int(H * z)
+    x, y = (im.width - w) // 2, (im.height - h) // 2
+    return im.crop((x, y, x + w, y + h)).resize((W, H), Image.BILINEAR)
+
+
+def stage(default):
+    return STAGE["bg"].copy() if STAGE["bg"] is not None else default.convert("RGBA")
+
+
+def with_plate(n, fn, t):
+    if PLATES.get(n) is None:
+        return fn(t)
+    mix = ramp(t, *PLATE_IN)
+    STAGE["bg"] = plate_frame(n, t, soft=True)
+    try:
+        comp = fn(t) if mix > 0 else None
+    finally:
+        STAGE["bg"] = None
+    if mix >= 1:
+        return comp
+    full = plate_frame(n, t, soft=False)
+    light = n == 4  # pearl scene: light plate, dark title
+    shade = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(shade).rectangle([0, 0, W, int(420 * K)], fill=(255, 255, 255, 90) if light else (0, 0, 0, 70))
+    full.alpha_composite(shade.filter(ImageFilter.GaussianBlur(int(120 * K) + 1)))  # title legibility
+    title(full, n, t)
+    return full if comp is None else Image.blend(full, comp, ease(mix))
+
+
 # ---------- scenes ----------
 def s1_reveal(t):  # 0-5
-    c = BG_STUDIO.convert("RGBA")
+    c = stage(BG_STUDIO)
     sw = ramp(t, 0.0, 2.2)
     light_sweep(c, sw, 0.55 * (1 - ramp(t, 2.0, 3.2)) + 0.05, width_px=260)
     k = 1 - ramp(t, 0.3, 3.6)
@@ -234,7 +313,7 @@ def s1_reveal(t):  # 0-5
     place(c, screen("cand.png"), W / 2 + 120 * K * k, SCREEN_CY * K, w * K, alpha=a, persp=0.9 * k,
           glow=(VIOLET, 0.35), reflect=True)
     screen_add_sheen(c, ramp(t, 1.0, 3.2), 0.10 * (1 - ramp(t, 3.0, 3.4)))
-    text_c(c, "Meet Zara CareerOS.", TITLE_Y, 150, ramp(t, 1.6, 2.4), rise=24 * (1 - ramp(t, 1.6, 2.4)))
+    title(c, 1, t)
     return c
 
 
@@ -243,7 +322,7 @@ CARD_BOX = (917 / 2850, 853 / 1608, 1817 / 2850, 1095 / 1608)
 
 
 def s2_opportunities(t):  # 5-10, t local 0-5
-    c = BG_STUDIO.convert("RGBA")
+    c = stage(BG_STUDIO)
     src = screen("cand.png")
     z = ease(min(t / 3.2, 1))
     # interpolate from full frame to a crop centred on the job card
@@ -267,12 +346,12 @@ def s2_opportunities(t):  # 5-10, t local 0-5
         place(c, screen("card.png"), W / 2, SCREEN_CY * K, 2700 * K * grow, alpha=card_a,
               glow=(CYAN, 0.55), shadow=0.7)
         screen_add_sheen(c, ramp(t, 3.2, 4.6), 0.08)
-    text_c(c, "Discover your next move.", TITLE_Y, 150, ramp(t, 0.3, 1.0))
+    title(c, 2, t)
     return c
 
 
 def s3_sourcing(t):  # 10-15
-    c = BG_STUDIO.convert("RGBA")
+    c = stage(BG_STUDIO)
     rec, src2 = screen("rec.png"), optional("search.png")
     if src2:
         # lateral move: cockpit slides left, search slides in from the right
@@ -286,12 +365,12 @@ def s3_sourcing(t):  # 10-15
         drift = ramp(t, 0, 5)
         place(c, rec, W / 2 + 60 * K * (1 - drift), SCREEN_CY * K, SCREEN_W * K * (1 + 0.05 * drift),
               glow=(VIOLET, 0.3), reflect=True)
-    text_c(c, "Find talent. See the fit.", TITLE_Y, 150, ramp(t, 0.3, 1.0))
+    title(c, 3, t)
     return c
 
 
 def s4_client(t):  # 15-20
-    c = BG_PEARL.convert("RGBA")
+    c = stage(BG_PEARL)
     name = optional("client.png")
     if name:
         src = screen(name)
@@ -323,12 +402,12 @@ def s4_client(t):  # 15-20
         d.text((60, 400), "PLACEHOLDER - client submission screen (awaiting asset)",
                font=ImageFont.truetype(F_SEMI, 44), fill=(150, 150, 170))
         place(c, ph, W / 2, SCREEN_CY * K, SCREEN_W * K * 0.9, shadow=0.18)
-    text_c(c, "Clarity at every step.", TITLE_Y, 150, ramp(t, 0.3, 1.0), color=(14, 18, 40))
+    title(c, 4, t)
     return c
 
 
 def s5_whitelabel(t):  # 20-25
-    c = BG_STUDIO.convert("RGBA")
+    c = stage(BG_STUDIO)
     a = ramp(t, 0.0, 0.5)
     sw = 1780
     drift = ramp(t, 0, 5)
@@ -337,12 +416,12 @@ def s5_whitelabel(t):  # 20-25
     place(c, screen("rec.png"), W / 2 + 945 * K, 1260 * K, sw * K * (1 + 0.03 * drift), alpha=a,
           glow=(CYAN, 0.22), reflect=True)
     light_sweep(c, ramp(t, 0.8, 3.6), 0.22, width_px=200)
-    text_c(c, "Your brand. Your hiring experience.", TITLE_Y, 150, ramp(t, 0.3, 1.0))
+    title(c, 5, t)
     return c
 
 
 def s6_invitation(t):  # 25-30
-    c = BG_STUDIO.convert("RGBA")
+    c = stage(BG_STUDIO)
     r = ramp(t, 0.0, 1.8)
     if r < 1:
         sw = 1780 * (1 - 0.35 * r)
@@ -414,9 +493,9 @@ XF = 0.3  # short dissolve between scenes (s1->s2 is a match cut: identical fram
 def frame(t):
     for i, (a, b, fn) in enumerate(SCENES):
         if a <= t < b or (i == len(SCENES) - 1 and t >= a):
-            img = fn(t - a)
-            if i > 0 and t - a < XF and i != 1:
-                prev = SCENES[i - 1][2](t - SCENES[i - 1][0])
+            img = with_plate(i + 1, fn, t - a)
+            if i > 0 and t - a < XF and (i != 1 or PLATES.get(2) is not None):
+                prev = with_plate(i, SCENES[i - 1][2], t - SCENES[i - 1][0])
                 img = Image.blend(prev, img, ease((t - a) / XF))
             return img.convert("RGB")
 

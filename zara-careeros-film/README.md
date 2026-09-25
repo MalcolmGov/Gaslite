@@ -37,6 +37,21 @@ Voice: ElevenLabs **Jessica** (voice_id `cgSgspJ2msm6clMCkdW9`, bright/upbeat fe
 The six lines are joined with 1s gaps into `out/vo/jessica_take.wav`; the pauses inside line 6 are tightened to ~0.24s.
 Music: `music.py` generates an upbeat 144 BPM placeholder (3 bars per scene, so each cut lands on a downbeat).
 
+## AI plates (optional)
+
+Drop `plate_s1.jpg` … `plate_s5.jpg` into `assets/` (16:9, ≥1920px wide) and each scene opens on that shot full-bleed with a
+slow push-in; from 1.2–1.9s it softens into a blurred, toned backdrop as the real screen glides in. Plates are
+cinematic mood shots only: no text, UI, logos or people presented as real customers. The product is only ever shown through
+the real screenshots. Planned shots:
+
+| Plate | Shot |
+|---|---|
+| s1 | dark glass atrium, violet/cyan volumetric beams, a floating glowing glass panel |
+| s2 | young professional in a modern Johannesburg office at golden hour, violet rim light, looking out at the city |
+| s3 | constellation of glowing profile nodes linking into a shortlist |
+| s4 | pearl-white glass tiles, soft light, calm and precise (light plate) |
+| s5 | glass prism splitting light into brand colours |
+
 ## Still needed (drop into `assets/`)
 
 - `search.png` — recruiter "Agency Talent Pool & Rediscovery" screen (Scene 3). Crop the app window only.
