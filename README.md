@@ -4,3 +4,4 @@
 - `zara_careeros_30s_4k_share.mp4` — 3840×2160, 30 fps, smaller for sharing (~25 MB)
 
 Built from `zara-careeros-film/` on `claude/pensive-fermi-4384x0`.
+- `zara_careeros_30s_1080p_whatsapp.mp4` — 1920×1080, ~12.7 MB, tuned for WhatsApp (send with HD on, or as a Document)
