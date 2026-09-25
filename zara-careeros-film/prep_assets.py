@@ -12,6 +12,9 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CROPS = {
+    "cand.png": ("03_candidate_career_workspace.png", (495, 270, 3345, 1878)),
+    "card.png": ("04_candidate_job_opportunity_focus.png", (756, 790, 3089, 1449)),
+    "rec.png": ("05_recruiter_workspace_cockpit.png", (495, 270, 3345, 1878)),
     "search.png": ("06_recruiter_candidate_sourcing_flow.png", (495, 270, 3345, 1857)),
     "client.png": ("07_client_submission_portal_pearl.png", (1419, 321, 2419, 1754)),
     "evidence.png": ("08_client_submission_evidence_detail.png", (1252, 315, 2589, 1738)),

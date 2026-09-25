@@ -43,7 +43,7 @@ Music: `music.py` generates an upbeat 144 BPM placeholder (3 bars per scene, so 
 - `client.png` — client submission portal (Scene 4). Until supplied, Scene 4 renders a labelled placeholder.
 - `evidence.png` — evidence close-up (Scene 4, from ~17.4s). Optional; without it Scene 4 holds on the portal push.
 - `logo.png` — official Zara CareerOS logo, transparent PNG (Scene 6).
-- Ideally native 2× captures of all screens: current sources are ~1500px wide and are upscaled 2.4× for 4K.
+- All screens now come from the native 4K key frames (`prep_assets.py`); no upscaling.
 
 Crop screenshots to the app window, excluding the baked-in marketing titles/captions (they contain claims such
 as "0% hallucination" that the brief excludes). The white-label generator screen is intentionally not used: its

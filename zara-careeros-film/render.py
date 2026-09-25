@@ -239,7 +239,7 @@ def s1_reveal(t):  # 0-5
 
 
 # Job card location inside cand.png (fraction of its size), measured from the crop
-CARD_BOX = (487 / 1500, 452 / 857, 950 / 1500, 572 / 857)
+CARD_BOX = (917 / 2850, 853 / 1608, 1817 / 2850, 1095 / 1608)
 
 
 def s2_opportunities(t):  # 5-10, t local 0-5
