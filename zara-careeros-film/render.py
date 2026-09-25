@@ -43,7 +43,7 @@ def ramp(t, a, b):
 # ---------- assets ----------
 def load_screen(name, upscale):
     im = Image.open(A(name)).convert("RGB")
-    if not PREVIEW:
+    if not PREVIEW and im.width < 2000:  # native 4K captures are used as-is
         im = im.resize((int(im.width * upscale), int(im.height * upscale)), Image.LANCZOS)
         im = im.filter(ImageFilter.UnsharpMask(radius=2, percent=60, threshold=2))
     return im
@@ -296,13 +296,14 @@ def s4_client(t):  # 15-20
     if name:
         src = screen(name)
         z = ramp(t, 0.2, 5.0)
-        zoom = 1 + 0.35 * z
-        vw, vh = src.width / zoom, src.height / zoom
+        # fit a window of the portal inside the stage box, then push in and drift down the page
+        box_w, box_h = (1430, 1640) if src.height > src.width else (SCREEN_W, 1640)
+        zoom = 1 + 0.18 * z
+        vw = src.width / zoom
+        vh = min(src.height, vw * box_h / box_w)
         x0 = (src.width - vw) / 2
-        y0 = (src.height - vh) * (0.35 + 0.3 * z)
-        tall = src.height > src.width
-        dw = (1500 if tall else SCREEN_W) * K
-        place(c, src, W / 2, SCREEN_CY * K, dw, crop=(int(x0), int(y0), int(x0 + vw), int(y0 + vh)),
+        y0 = (src.height - vh) * 0.5 * z
+        place(c, src, W / 2, (SCREEN_CY + 50) * K, box_w * K, crop=(int(x0), int(y0), int(x0 + vw), int(y0 + vh)),
               shadow=0.18, glow=(VIOLET, 0.12))
         ev = optional("evidence.png")
         if ev:
@@ -311,8 +312,8 @@ def s4_client(t):  # 15-20
             if ea > 0:
                 c.alpha_composite(Image.new("RGBA", (W, H), PEARL + (int(170 * ea),)))
                 esrc = screen(ev)
-                ew = min(2500, 1500 * esrc.width / max(1, esrc.height)) * K
-                place(c, esrc, W / 2, SCREEN_CY * K, ew * (1 + 0.03 * ramp(t, 2.8, 5.0)), alpha=ea,
+                ew = min(2600, 1640 * esrc.width / esrc.height) * K
+                place(c, esrc, W / 2, (SCREEN_CY + 50) * K, ew * (1 + 0.03 * ramp(t, 2.8, 5.0)), alpha=ea,
                       shadow=0.25, glow=(VIOLET, 0.18))
     else:
         # placeholder frame until the supplied client submission screen is added
@@ -352,18 +353,24 @@ def s6_invitation(t):  # 25-30
               alpha=a, glow=(CYAN, 0.22 * a))
     # closing lockup: fully settled by 27.0s and held still to 30.0s
     la = ramp(t, 1.2, 2.0)
-    logo = Image.open(A("logo.png")).convert("RGBA") if os.path.exists(A("logo.png")) else None
-    if logo is not None:
-        lw = int(1500 * K)
-        lg = logo.resize((lw, int(lw * logo.height / logo.width)), Image.LANCZOS)
+    if LOGO is not None:
+        # official emblem above the typeset wordmark; settles with a small rise
+        lh = int(460 * K)
+        lg = LOGO.resize((int(lh * LOGO.width / LOGO.height), lh), Image.LANCZOS)
         lg.putalpha(lg.getchannel("A").point(lambda v: int(v * la)))
-        c.alpha_composite(lg, (int((W - lw) / 2), int(820 * K - lg.height / 2)))
+        rise = int(30 * K * (1 - la))
+        c.alpha_composite(lg, (int((W - lg.width) / 2), int(430 * K - lh / 2) + rise))
+        wordmark(c, 870, la)
     else:
         wordmark(c, 820, la)
-    text_c(c, "From possibility to placement.", 1060, 92, ramp(t, 1.5, 2.0), color=(214, 218, 240), fpath=F_REG)
+    dy = 50 if LOGO is not None else 0
+    text_c(c, "From possibility to placement.", 1060 + dy, 92, ramp(t, 1.5, 2.0), color=(214, 218, 240), fpath=F_REG)
     cta_a = ramp(t, 1.7, 2.0)
-    pill(c, "Book a private demo.", 1330, cta_a)
+    pill(c, "Book a private demo.", 1330 + dy, cta_a)
     return c
+
+
+LOGO = Image.open(A("logo.png")).convert("RGBA") if os.path.exists(A("logo.png")) else None
 
 
 def wordmark(c, y, a):
