@@ -304,6 +304,16 @@ def s4_client(t):  # 15-20
         dw = (1500 if tall else SCREEN_W) * K
         place(c, src, W / 2, SCREEN_CY * K, dw, crop=(int(x0), int(y0), int(x0 + vw), int(y0 + vh)),
               shadow=0.18, glow=(VIOLET, 0.12))
+        ev = optional("evidence.png")
+        if ev:
+            # push resolves onto the evidence close-up, lifted forward on the pearl stage
+            ea = ramp(t, 2.4, 3.1)
+            if ea > 0:
+                c.alpha_composite(Image.new("RGBA", (W, H), PEARL + (int(170 * ea),)))
+                esrc = screen(ev)
+                ew = min(2500, 1500 * esrc.width / max(1, esrc.height)) * K
+                place(c, esrc, W / 2, SCREEN_CY * K, ew * (1 + 0.03 * ramp(t, 2.8, 5.0)), alpha=ea,
+                      shadow=0.25, glow=(VIOLET, 0.18))
     else:
         # placeholder frame until the supplied client submission screen is added
         ph = Image.new("RGB", (1500, 857), (255, 255, 255))
