@@ -296,7 +296,7 @@ def with_plate(n, fn, t):
     full = plate_frame(n, t, soft=False)
     light = n == 4  # pearl scene: light plate, dark title
     shade = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(shade).rectangle([0, 0, W, int(420 * K)], fill=(255, 255, 255, 90) if light else (0, 0, 0, 70))
+    ImageDraw.Draw(shade).rectangle([0, 0, W, int(420 * K)], fill=(255, 255, 255, 90) if light else (0, 0, 0, 115))
     full.alpha_composite(shade.filter(ImageFilter.GaussianBlur(int(120 * K) + 1)))  # title legibility
     title(full, n, t)
     return full if comp is None else Image.blend(full, comp, ease(mix))
