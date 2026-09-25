@@ -16,9 +16,9 @@ STILLS=1,7,12 python3 render.py --preview   # spot-check frames
 ```
 
 `mix.py` takes the Helena VO as one continuous take and splits it at its five longest pauses. It places each line
-at its scene start (+0.35s; line 1 at 0.6s, line 6 at 25.6s so the name lands with the lockup) and speeds up any line
+at its scene start (+0.35s; line 1 at 0.6s, line 6 at 25.3s as the screens recede into the lockup) and speeds up any line
 that overruns its slot, by at most 8%. If a line needs more than that, it stops with an error rather than let the
-line run into the next scene. Music ducks 9 dB under speech, and the mix is normalised to -14 LUFS / -1 dBTP.
+line run into the next scene. Music ducks 9 dB under speech, the voice is levelled to sit 9 dB above it, and the mix is normalised to -14 LUFS / -1 dBTP.
 It also writes `out/vo_timed.wav` (VO only) for review.
 
 ## Timeline
@@ -32,7 +32,10 @@ It also writes `out/vo_timed.wav` (VO only) for review.
 | 20–25 | Candidate + recruiter side by side | `cand.png` + `rec.png` | Your brand. Your hiring experience. | All in an experience built around your brand. |
 | 25–30 | Recede to lockup, hold 27–30 | `logo.png` (or typeset wordmark) | Zara CareerOS / From possibility to placement. / Book a private demo. | Zara CareerOS. From possibility to placement. Book your demo. |
 
-Voice: Higgsfield preset **Helena** (voice_id `3c2b83c0-2e0a-5ae8-998a-a5fe71b7eccd`), one continuous take, ~130–140 wpm.
+Voice: ElevenLabs **Jessica** (voice_id `cgSgspJ2msm6clMCkdW9`, bright/upbeat female), generated per line through the Zara app's
+`POST /api/v1/ai/voice-tts` (server-side key; check the `X-Voice-Engine` header is ElevenLabs, not the OpenAI fallback).
+The six lines are joined with 1s gaps into `out/vo/jessica_take.wav`; the pauses inside line 6 are tightened to ~0.24s.
+Music: `music.py` generates an upbeat 144 BPM placeholder (3 bars per scene, so each cut lands on a downbeat).
 
 ## Still needed (drop into `assets/`)
 

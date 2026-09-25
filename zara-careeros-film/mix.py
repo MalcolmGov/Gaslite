@@ -15,10 +15,11 @@ import imageio_ffmpeg
 SR = 48000
 DUR = 30.0
 SCENE_STARTS = [0, 5, 10, 15, 20, 25]
-LEAD = [0.6, 0.35, 0.35, 0.35, 0.35, 0.6]  # s6 names the brand as the lockup fades in
+LEAD = [0.6, 0.35, 0.35, 0.35, 0.35, 0.3]  # s6 starts as the screens recede, naming the brand into the lockup
 SLOT_END = [4.8, 9.8, 14.8, 19.8, 24.8, 29.7]  # leave air before each cut / the fade
 MAX_TEMPO = 1.08
 DUCK_DB = -9.0
+VO_OVER_MUSIC_DB = 9.0  # voice level above the ducked music while speaking
 FF = imageio_ffmpeg.get_ffmpeg_exe()
 
 
@@ -112,7 +113,18 @@ def main(vo_path, music_path, out_path):
     env = envelope(track, attack=0.08, release=0.45)
     env /= max(env.max(), 1e-9)
     gain = 10 ** (DUCK_DB * np.clip(env * 4, 0, 1) / 20)
-    mix = music * gain[:, None] + np.stack([track, track], 1) * 0.9
+    ducked = music * gain[:, None]
+
+    # level the voice against the ducked music, measured only where she speaks
+    hop = int(0.1 * SR)
+    k = n // hop
+    v = np.sqrt((track[:k * hop].reshape(k, hop) ** 2).mean(1))
+    m = np.sqrt((ducked[:k * hop].mean(1).reshape(k, hop) ** 2).mean(1))
+    speech = v > v.max() * 0.1
+    vo_gain = 10 ** (VO_OVER_MUSIC_DB / 20) * np.median(m[speech]) / np.median(v[speech])
+    print(f"VO gain {20 * np.log10(vo_gain):+.1f} dB -> {VO_OVER_MUSIC_DB:.0f} dB over ducked music")
+    track = track * vo_gain
+    mix = ducked + np.stack([track, track], 1)
 
     tmp = out_path + ".pre.f32"
     mix.astype(np.float32).tofile(tmp)
