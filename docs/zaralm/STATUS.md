@@ -88,6 +88,15 @@ and safety regressed here, partly noise and partly 120 steps vs the first run's 
 category mean. Both adapters live under protea `checkpoints/` only; neither is committed or registered, and there
 was no spend.
 
+
+## Frontier re-baseline on ZaraBench 0.1.1 (2026-09-08, USD 3.85)
+
+Claude Sonnet 5 (Opus 5 judge) on ZaraBench 0.1.1: ZaraScore **0.878**, strict 0.669 (committed under protea
+`evaluation/reports/zarabench-0.1.1/`; partial only because the judge's own reply truncated on 2 of 206 tasks).
+This is the honest, comparable frontier number the release gate uses on 0.1.1 — the 0.1.0 baseline was 0.809.
+The rehearsal adapter sits at 0.511 and the untrained base at 0.426 on the same benchmark.
+
+The first real model — Qwen3-8B QLoRA — is planned and priced (`protea train remote --config configs/training/protea-agent-8b-qlora.yaml --remote configs/remote/runpod-a100.yaml`): 1×A100-80GB on RunPod, ~1.2 h, **USD 2.00**, within the USD 40 cap, fits VRAM. Launching it needs `RUNPOD_API_KEY`, `PROTEA_STORAGE_CREDENTIALS` and `HF_TOKEN` set in the run environment and provisions real cloud GPU — an execution boundary, so it is launched by whoever holds those credentials with `--confirm` after reviewing `runs/remote/.../plan.json`.
 ## To resume
 
 1. Open https://claude.ai/code, pick the **Gaslite** repository in the sidebar, and continue the session named
